@@ -1,4 +1,4 @@
-#include <QApplication>
+#include <qapplication.h>
 #include <QSplashScreen>
 #include "dragwidget.h"
 #include "nermainwindow.h"
@@ -22,7 +22,7 @@ int main(int argc, char *argv[])
     splash->showMessage(QObject::tr("Loading Application..."),
                         topRight, Qt::white);
 
-    Sleeper::sleep(5000);
+    Sleeper::sleep(2000);
 
 #if defined(Q_OS_SYMBIAN)
     mainWin.showMaximized();

@@ -7,7 +7,7 @@ DragLabel::DragLabel(const QString &text, QWidget *parent)
     QFontMetrics metric(font());
     QSize size = metric.size(Qt::TextSingleLine, text);
 
-    QImage image(size.width() + 6, size.height() + 6,
+    QImage image(size.width() + 5, size.height() + 5,
                  QImage::Format_ARGB32_Premultiplied);
     image.fill(qRgba(0, 0, 0, 0));
 

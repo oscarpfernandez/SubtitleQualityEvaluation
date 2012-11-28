@@ -2,5 +2,12 @@
     <qresource prefix="/">
         <file>resources/pics/splash.png</file>
         <file>resources/pics/icon.png</file>
+        <file>resources/pics/new.png</file>
+        <file>resources/pics/open.png</file>
+        <file>resources/pics/save.png</file>
+        <file>resources/pics/about.png</file>
+        <file>resources/pics/close.png</file>
+        <file>resources/pics/closeApp.png</file>
+        <file>resources/pics/qt-logo.png</file>
     </qresource>
 </RCC>

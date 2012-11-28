@@ -13,12 +13,16 @@ TEMPLATE = app
 SOURCES += main.cpp\
         nermainwindow.cpp \
     dragwidget.cpp \
-    draglabel.cpp
+    draglabel.cpp \
+    about.cpp \
+    difftablewidget.cpp
 
 HEADERS  += nermainwindow.h \
     dragwidget.h \
     draglabel.h \
-    sleeper.h
+    sleeper.h \
+    about.h \
+    difftablewidget.h
 
 RC_FILE = app.rc
 
