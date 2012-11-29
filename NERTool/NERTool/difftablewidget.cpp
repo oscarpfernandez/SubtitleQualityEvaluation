@@ -16,18 +16,20 @@ DiffTableWidget::DiffTableWidget(QWidget *parent) : QTableWidget(parent)
     setSelectionBehavior(QAbstractItemView::SelectRows);
     //setFont(QFont("Courier New", 10, QFont::Normal));
 	setSortingEnabled(false);
-    setColumnCount(2);
+    setColumnCount(3);
     setRowCount(2);
 
-	setColumnWidth(0,200);
-    setColumnWidth(1,200);
+	setColumnWidth(0,TIMESTAMP_COLUMN_WIDTH);
+	setColumnWidth(1,TRANSCRIPTION_COLUMN_WIDTH);
+	setColumnWidth(2,SUBTITLES_COLUMN_WIDTH);
 
 	QStringList headers;
-    headers << "Original Transcription"
+    headers << "Timestamp"
+			<< "Original Transcription"
             << "Subtitles";
     setHorizontalHeaderLabels(headers);
-
-	insertTextBlockOnTableEntry(QString("This is a test!"));
+	int l=1, c=1; 
+	insertTextBlockOnTableEntry(QString("This is a test to test the lenght of the string!"), l, c);
 
 }
 
@@ -38,7 +40,7 @@ void DiffTableWidget::insertNewTableLine()
 
 }
 
-void DiffTableWidget::insertTextBlockOnTableEntry(QString &text)
+void DiffTableWidget::insertTextBlockOnTableEntry(QString &text, int &line, int &column)
 {
 	if(text == 0 || text.count() == 0 ){ return; }
 
@@ -46,7 +48,7 @@ void DiffTableWidget::insertTextBlockOnTableEntry(QString &text)
 	QTableWidgetItem *item = new QTableWidgetItem();
 	
 	setItem(1, 0, item);
-	setCellWidget(1, 0, wordBox);
+	setCellWidget(1, 1, wordBox);
 	setRowCount(rowCount()+1);
 
 

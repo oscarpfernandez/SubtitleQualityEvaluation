@@ -16,8 +16,8 @@ DragLabel::DragLabel(const QString &text, QWidget *parent)
 
     QLinearGradient gradient(0, 0, 0, image.height()-1);
     gradient.setColorAt(0.0, Qt::white);
-    gradient.setColorAt(0.2, QColor(200, 200, 255));
-    gradient.setColorAt(0.8, QColor(200, 200, 255));
+    gradient.setColorAt(0.2, QColor(150, 200, 255));
+    gradient.setColorAt(0.8, QColor(150, 200, 255));
     gradient.setColorAt(1.0, QColor(127, 127, 200));
 
     QPainter painter;

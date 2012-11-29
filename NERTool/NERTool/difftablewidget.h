@@ -7,6 +7,10 @@
 #include <qmdisubwindow.h>
 #include <QHBoxLayout>
 
+const int TIMESTAMP_COLUMN_WIDTH = 100;
+const int TRANSCRIPTION_COLUMN_WIDTH = 400;
+const int SUBTITLES_COLUMN_WIDTH = 400;
+
 class DiffTableWidget : public QTableWidget
 {
 
@@ -16,7 +20,7 @@ public:
 	DiffTableWidget(QWidget *parent = 0);
 	~DiffTableWidget();
 	void insertNewTableLine();
-	void insertTextBlockOnTableEntry(QString &text);
+	void insertTextBlockOnTableEntry(QString &text, int &line, int &column);
 
 
 	
