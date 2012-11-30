@@ -89,6 +89,9 @@
     <ClCompile Include="GeneratedFiles\Release\moc_difftablewidget.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
+    <ClCompile Include="xmlhandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="draglabel.h">
@@ -101,6 +104,9 @@
       <Filter>Header Files</Filter>
     </CustomBuild>
     <ClInclude Include="sleeper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="xmlhandler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

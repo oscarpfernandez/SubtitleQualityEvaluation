@@ -6,8 +6,11 @@
 #include <qlabel.h>
 #include <qmenu.h>
 #include <qmdiarea.h>
+#include <qfiledialog.h>
+#include <qdir.h>
 #include "about.h"
 #include "difftablewidget.h"
+#include "xmlhandler.h"
 
 class NERMainWindow : public QMainWindow
 {
@@ -37,6 +40,9 @@ private:
 	QAction *closeAppAction;
 	QAction *aboutQTAction;
 	QAction *aboutAction;
+    QAction *viewPropertiesTree;
+    QAction *loadTransXmlFile;
+    QAction *loadSubtsXmlFile;
 
     QLabel  *statusBarLeftLabel;
     QLabel  *statusBarMiddleLabel;
@@ -45,8 +51,12 @@ private:
     QToolBar *fileToolbar;
     QToolBar *toolsToolbar;
     QMenu *fileMenu;
+    QMenu *viewMenu;
+    QMenu *toolsMenu;
 	QMenu *windowMenu;
     QMenu *helpMenu;
+
+    XMLHandler *xmlHandler;
 
 private slots:
     void newProjectSlot();
@@ -54,8 +64,11 @@ private slots:
     void openProjectSlot();
     void closeProjectSlot();
 	void closeApplicationSlot();
+    void viewProjectPropertiesSlot();
 	void aboutQTSlot();
 	void aboutSlot();
+    void loadTranscriptionFileSlot();
+    void loadSubtitlesFileSlot();
 
 
 };

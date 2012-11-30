@@ -15,6 +15,8 @@ NERMainWindow::NERMainWindow(QWidget *parent) : QMainWindow(parent)
 
 	initializeMDIWindows();
 
+    xmlHandler = new XMLHandler();
+
 }
 
 NERMainWindow::~NERMainWindow()
@@ -27,7 +29,7 @@ void NERMainWindow::createGuiElements()
 	mainMdiArea = new QMdiArea(this);
 	diffTableWid = new DiffTableWidget(this);
 	subWindowDiffTable = mainMdiArea->addSubWindow(diffTableWid);
-	subWindowDiffTable->setWindowTitle("Evaluation");
+    subWindowDiffTable->setWindowTitle("Trancription Data");
 	subWindowDiffTable->setMinimumSize(400,400);
     //subWindowDiffTable->setWindowIcon();
 
@@ -54,13 +56,13 @@ void NERMainWindow::createActions()
     connect(saveProjectAction, SIGNAL(triggered()), this, SLOT(saveProjectSlot()));
 
 	closeProjectAction = new QAction(tr("&Close Project"), this);
-	closeProjectAction->setShortcut(QKeySequence::Close);
+    closeProjectAction->setShortcut(QKeySequence("Ctrl+Q"));
 	closeProjectAction->setIcon(QIcon(":/resources/pics/close.png"));
 	closeProjectAction->setStatusTip("Closes Current Project");
 	connect(closeProjectAction, SIGNAL(triggered()), this, SLOT(closeProjectSlot()));
 
 	aboutAction = new QAction(tr("&About"), this);
-	aboutAction->setShortcut(QKeySequence("Ctrl+A"));
+    aboutAction->setShortcut(QKeySequence("Ctrl+A"));
 	aboutAction->setIcon(QIcon(":/resources/pics/about.png"));
 	aboutAction->setStatusTip("About this application");
 	connect(aboutAction, SIGNAL(triggered()), this, SLOT(aboutSlot()));
@@ -72,10 +74,26 @@ void NERMainWindow::createActions()
 	connect(aboutQTAction, SIGNAL(triggered()), this, SLOT(aboutQTSlot()));
 
 	closeAppAction = new QAction(tr("&Exit"), this);
-	closeAppAction->setShortcut(QKeySequence("Ctrl+A"));
+    closeAppAction->setShortcut(QKeySequence("Alt+F4"));
 	closeAppAction->setIcon(QIcon(":/resources/pics/closeApp.png"));
 	closeAppAction->setStatusTip("About this application");
 	connect(closeAppAction, SIGNAL(triggered()), this, SLOT(closeApplicationSlot()));
+
+    viewPropertiesTree = new QAction(tr("&Project Properties"),this);
+    viewPropertiesTree->setShortcut(QKeySequence("Ctrl+P"));
+    viewPropertiesTree->setIcon(QIcon(":/resources/pics/properties.png"));
+    viewPropertiesTree->setStatusTip("Project Properties");
+    connect(viewPropertiesTree, SIGNAL(triggered()), this, SLOT(viewProjectPropertiesSlot()));
+
+    loadTransXmlFile = new QAction(tr("Load Transcription"), this);
+    loadTransXmlFile->setShortcut(QKeySequence("Ctrl+T"));
+    loadTransXmlFile->setStatusTip("Load transcription file...");
+    connect(loadTransXmlFile, SIGNAL(triggered()), this, SLOT(loadTranscriptionFileSlot()));
+
+    loadSubtsXmlFile = new QAction(tr("Load Subtitles"), this);
+    loadSubtsXmlFile->setShortcut(QKeySequence("Ctrl+U"));
+    loadSubtsXmlFile->setStatusTip("Load subtitles file...");
+    connect(loadSubtsXmlFile, SIGNAL(triggered()), this, SLOT(loadSubtitlesFileSlot()));
 
 }
 
@@ -87,9 +105,15 @@ void NERMainWindow::createMenus(){
     fileMenu->addAction(closeProjectAction);
 	fileMenu->addAction(closeAppAction);
 
+    viewMenu = menuBar()->addMenu(tr("&View"));
+    viewMenu->addAction(viewPropertiesTree);
+
+    toolsMenu = menuBar()->addMenu(tr("&Tools"));
+    toolsMenu->addAction(loadTransXmlFile);
+    toolsMenu->addAction(loadSubtsXmlFile);
+
 	windowMenu = menuBar()->addMenu(tr("&Window"));
 	
-
 	helpMenu = menuBar()->addMenu(tr("Help"));
 	helpMenu->addAction(aboutQTAction);
 	helpMenu->addAction(aboutAction);
@@ -115,8 +139,7 @@ void NERMainWindow::createStatusBar(){
 	statusBarMiddleLabel->setText("Ready!");
 
 	statusBar()->addWidget(statusBarLeftLabel);
-	statusBar()->addWidget(statusBarMiddleLabel, 1);
-
+    statusBar()->addWidget(statusBarMiddleLabel, 1);
 }
 
 void NERMainWindow::newProjectSlot()
@@ -162,6 +185,27 @@ void NERMainWindow::aboutSlot()
     About *aboutDialog = new About(this);
 	aboutDialog->setAttribute(Qt::WA_DeleteOnClose);
 	aboutDialog->show();
+}
+
+void NERMainWindow::viewProjectPropertiesSlot()
+{
+
+}
+
+void NERMainWindow::loadTranscriptionFileSlot()
+{
+
+    QString fileName = QFileDialog::getOpenFileName(
+            this,
+            tr("Open SRT File"),
+            QDir::currentPath(),
+            tr("STR file (*.trs)") );
+
+    xmlHandler->readTranscriptionXML(fileName, diffTableWid);
+}
+
+void NERMainWindow::loadSubtitlesFileSlot(){
+
 }
 
 

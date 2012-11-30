@@ -9,16 +9,23 @@ class QDragMoveEvent;
 class QFrame;
 QT_END_NAMESPACE
 
-//! [0]
 class DragLabel : public QLabel
 {
 public:
+    enum EditionTypeEnum {
+        NotDefinedYet=0,
+        CorrectEdition=1,
+        EditionError=2,
+        RecognitionError=3
+    };
     DragLabel(const QString &text, QWidget *parent);
     QString labelText() const;
+    void setupLabelType(DragLabel::EditionTypeEnum ete);
 
 private:
     QString m_labelText;
+    QSize size;
+
 };
-//! [0]
 
 #endif
