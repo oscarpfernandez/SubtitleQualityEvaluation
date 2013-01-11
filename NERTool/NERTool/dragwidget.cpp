@@ -38,7 +38,7 @@ DragWidget::DragWidget(QWidget *parent, QString &textBlock, int maxWidth)  : QWi
     newPalette.setColor(QPalette::Window, Qt::white);
     setPalette(newPalette);
 
-    setMinimumSize(400, qMax(200, y));
+    //setMinimumSize(400, qMax(200, y));
 
     //setAcceptDrops(true);
 }

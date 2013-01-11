@@ -27,7 +27,7 @@ NERMainWindow::~NERMainWindow()
 void NERMainWindow::createGuiElements()
 {
 	mainMdiArea = new QMdiArea(this);
-	diffTableWid = new DiffTableWidget(this);
+    diffTableWid = new NERTableWidget(this);
 	subWindowDiffTable = mainMdiArea->addSubWindow(diffTableWid);
     subWindowDiffTable->setWindowTitle("Trancription Data");
 	subWindowDiffTable->setMinimumSize(400,400);
@@ -201,7 +201,11 @@ void NERMainWindow::loadTranscriptionFileSlot()
             QDir::currentPath(),
             tr("STR file (*.trs)") );
 
-    xmlHandler->readTranscriptionXML(fileName, diffTableWid);
+    QList<BlockTRS> *trsList = new QList<BlockTRS>();
+    xmlHandler->readTranscriberXML(fileName, trsList);
+    diffTableWid->loadXMLData(trsList);
+    delete trsList;
+    trsList = NULL;
 }
 
 void NERMainWindow::loadSubtitlesFileSlot(){

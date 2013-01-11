@@ -9,8 +9,15 @@
 #include <qfiledialog.h>
 #include <qdir.h>
 #include "about.h"
-#include "difftablewidget.h"
 #include "xmlhandler.h"
+#include "nertablewidget.h"
+
+
+//QT_BEGIN_NAMESPACE
+//class NERTableWidget;
+//class XMLHandler;
+//QT_END_NAMESPACE
+
 
 class NERMainWindow : public QMainWindow
 {
@@ -31,7 +38,7 @@ private:
 	QMdiArea *mainMdiArea;
 	QMdiSubWindow *subWindowDiffTable;
 
-	DiffTableWidget *diffTableWid;
+    NERTableWidget *diffTableWid;
 
     QAction *newProjectAction;
     QAction *saveProjectAction;

@@ -4,7 +4,7 @@
 #include <qfile.h>
 #include <qtablewidget.h>
 #include <qxmlstream.h>
-#include "difftablewidget.h"
+#include "nercommon.h"
 
 const QString STR_SPEAKERS = "Speakers";
 const QString STR_SPEAKER = "Speaker";
@@ -19,43 +19,18 @@ const QString STR_TURN = "Turn";
 const QString STR_SYNC = "Sync";
 const QString STR_SYNC_TIME = "time";
 
-/*
- * Struct to hold each line contained on the TRS XML file.
- */
-struct BlockTRS
-{
-private:
-    QString speaker;
-    QString syncTime;
-    QString text;
-public:
-    BlockTRS& setSpeaker(QString s){speaker=s; return *this;}
-    BlockTRS& setSyncTime(QString t){syncTime=t; return *this;}
-    BlockTRS& setText(QString txt){text=txt; return *this;}
-    QString getSpeaker(){return speaker;}
-    QString getSyncTime(){return syncTime;}
-    QString getText(){return text;}
-    QString toString(){
-        return QString("\tBlock -> ")
-                .append(speaker).append("\n")
-                .append(syncTime).append("\n")
-                .append(text.trimmed());
-    }
-};
 
 class XMLHandler {
 
 public:
     XMLHandler();
 	~XMLHandler();
-    bool readTranscriptionXML(QString &xmlFileName, DiffTableWidget *table);
-    bool readSubtitleXML(QString &xmlFileName, DiffTableWidget *table);
-    //bool writeExportXML(QString &xmlFileName, )
+    bool readTranscriberXML(QString &xmlFileName, QList<BlockTRS> *trsBlocks);
+    //bool writeProjectExportXML(QString &xmlFileName, )
 
 
 private:
-    bool loadTranscriptionXML(QFile *xmlFile, DiffTableWidget *table);
-    bool loadSubtitleXML(QFile *xmlFile, DiffTableWidget *table);
+    bool loadTranscriberXML(QFile *xmlFile, QList<BlockTRS> *trsBlocks);
 };
 
 #endif

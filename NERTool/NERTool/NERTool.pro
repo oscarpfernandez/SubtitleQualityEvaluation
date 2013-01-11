@@ -15,26 +15,27 @@ SOURCES += main.cpp\
     dragwidget.cpp \
     draglabel.cpp \
     about.cpp \
-    difftablewidget.cpp \
     xmlhandler.cpp \
     propertiestreewidget.cpp \
     treemodel.cpp \
     treeitem.cpp \
     waveform.cpp \
-    utils.cpp
+    utils.cpp \
+    nertablewidget.cpp
 
 HEADERS  += nermainwindow.h \
     dragwidget.h \
     draglabel.h \
     sleeper.h \
     about.h \
-    difftablewidget.h \
     xmlhandler.h \
     propertiestreewidget.h \
     treemodel.h \
     treeitem.h \
     waveform.h \
-    utils.h
+    utils.h \
+    nertablewidget.h \
+    nercommon.h
 
 RC_FILE = app.rc
 

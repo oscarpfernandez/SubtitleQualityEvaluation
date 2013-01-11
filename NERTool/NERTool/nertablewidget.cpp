@@ -1,9 +1,10 @@
-#include "difftablewidget.h"
+#include "nertablewidget.h"
 #include <qwidget.h>
 #include <qtablewidget.h>
 #include <qheaderview.h>
 #include "dragwidget.h"
 #include "draglabel.h"
+#include "xmlhandler.h"
 
 /******************************************************************************
  * DiffTableWidget manages the table difference betwwen the original transcribded
@@ -11,7 +12,7 @@
  * of the data to an XML stream.
  ******************************************************************************/
 
-DiffTableWidget::DiffTableWidget(QWidget *parent) : QTableWidget(parent)
+NERTableWidget::NERTableWidget(QWidget *parent) : QTableWidget(parent)
 {
 	setSelectionMode(QAbstractItemView::SingleSelection);
     setSelectionBehavior(QAbstractItemView::SelectRows);
@@ -19,10 +20,6 @@ DiffTableWidget::DiffTableWidget(QWidget *parent) : QTableWidget(parent)
 	setSortingEnabled(false);
     setColumnCount(3);
     setRowCount(0);
-
-//    setColumnWidth(0,SPEAKER_ID_COLUMN_WIDTH);
-//    setColumnWidth(1,TIMESTAMP_COLUMN_WIDTH);
-//	setColumnWidth(2,SUBTITLES_COLUMN_WIDTH);
 
 	QStringList headers;
     headers << "Speaker ID"
@@ -38,11 +35,21 @@ DiffTableWidget::DiffTableWidget(QWidget *parent) : QTableWidget(parent)
     setColumnWidth(1,TIMESTAMP_COLUMN_WIDTH);
     setColumnWidth(2,TRANSCRIPTION_COLUMN_WIDTH);
 
-
-
-
     connect(headerView, SIGNAL(sectionResized(int,int,int)), this, SLOT(columnTableResized(int,int,int)));
 
+}
+
+void NERTableWidget::loadXMLData(QList<BlockTRS> *trsBlocks){
+    if(trsBlocks==0 || trsBlocks->count()==0){
+        //Nothing to do...
+        return;
+    }
+
+    //Fill the table with the entries...
+    for(int i=0; i<trsBlocks->count(); i++){
+        BlockTRS btr = trsBlocks->at(i);
+        insertNewTableEntry(btr.getSpeaker(), btr.getSyncTime(), btr.getText());
+    }
 }
 
 /*
@@ -50,7 +57,7 @@ DiffTableWidget::DiffTableWidget(QWidget *parent) : QTableWidget(parent)
  * of the dragwidget. This slot then passes the event to the table
  *
  */
-void DiffTableWidget::columnTableResized(int column, int oldWidth, int newWidth){
+void NERTableWidget::columnTableResized(int column, int oldWidth, int newWidth){
     QString d = QString::number(column).append("-").append(QString::number(oldWidth)).append("-").append(QString::number(newWidth));
     qDebug("Column Resized!!!");
     qDebug(d.toAscii());
@@ -58,14 +65,7 @@ void DiffTableWidget::columnTableResized(int column, int oldWidth, int newWidth)
     columnResized(column, oldWidth, newWidth);
 }
 
-void DiffTableWidget::insertNewTableLine()
-{
-	QTableWidgetItem *newItem = new QTableWidgetItem();
-	newItem->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
-
-}
-
-void DiffTableWidget::insertNewTableEntry(QString &speaker, QString &timeStamp, QString &text)
+void NERTableWidget::insertNewTableEntry(QString &speaker, QString &timeStamp, QString &text)
 {
     if(text == 0 || text.count() == 0 ){ return; }
 
@@ -88,10 +88,55 @@ void DiffTableWidget::insertNewTableEntry(QString &speaker, QString &timeStamp, 
 
 }
 
-DiffTableWidget::~DiffTableWidget()
+NERTableWidget::~NERTableWidget()
+{
+    delete headerView;
+    headerView = NULL;
+}
+
+/*******************************************************************************
+ *******************************************************************************
+ * NERSubTableWidget class defines the structure if each subtable entry that
+ * will hold the subtitle information data. This nested structure is required
+ * since the relation between transcription and subtitles is 1 to N.
+ ******************************************************************************/
+NERSubTableWidget::NERSubTableWidget(QWidget *parent): QTableWidget(parent)
+{
+    setSelectionMode(QAbstractItemView::SingleSelection);
+    setSelectionBehavior(QAbstractItemView::SelectRows);
+    setSortingEnabled(false);
+    setColumnCount(2);
+    setRowCount(0);
+    //note: we don't want to display the line and column headers of each subtable
+    verticalHeader()->setVisible(false);
+    horizontalHeader()->setVisible(false);
+}
+
+void NERSubTableWidget::insertNewTableEntry(QString &timeStamp, QString &text)
+{
+    int line = rowCount();
+    insertRow(line);
+
+    //Set timestamp
+    QTableWidgetItem *tsItem = new QTableWidgetItem();
+    tsItem->setText(timeStamp);
+    setItem(line, TIMESTAMP_COLUMN_INDEX, tsItem);
+
+    //Insert the chopped text block with the widget...
+    DragWidget *wordBox = new DragWidget(this, text, SUBTITLES_COLUMN_WIDTH);
+    setRowHeight(line, wordBox->getBlockSize().height());
+    setCellWidget(line, TRANSCRIPTION_COLUMN_INDEX, wordBox);
+
+}
+
+void NERSubTableWidget::getXMLNode()
 {
 
 }
 
+NERSubTableWidget::~NERSubTableWidget()
+{
+
+}
 
 
