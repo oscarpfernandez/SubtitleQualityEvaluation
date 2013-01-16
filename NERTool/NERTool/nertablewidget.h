@@ -16,8 +16,16 @@ const int TIMESTAMP_COLUMN_WIDTH = 70;
 const int TIMESTAMP_COLUMN_INDEX = 1;
 const int TRANSCRIPTION_COLUMN_WIDTH = 500;
 const int TRANSCRIPTION_COLUMN_INDEX = 2;
+const int SUB_TIMESTAMP_COLUMN_WIDTH = 70;
+const int SUB_SUBTITLES_COLUMN_WIDTH = 430;
+const int SUBTITLES_COLUMN_WIDTH = SUB_TIMESTAMP_COLUMN_WIDTH + SUB_SUBTITLES_COLUMN_WIDTH+10;
+const int SUBTITLES_COLUMN_INDEX = 3;
 
-const int SUBTITLES_COLUMN_WIDTH = 400;
+const int SUB_TIMESTAMP_COLUMN_INDEX = 0;
+const int SUB_SUBTITLES_COLUMN_INDEX = 1;
+
+
+
 
 class NERTableWidget : public QTableWidget
 {
@@ -29,6 +37,8 @@ public:
     ~NERTableWidget();
     void insertNewTableEntry(QString &speaker, QString &TimeStamp, QString &text);
     void loadXMLData(QList<BlockTRS> *trsBlocks);
+    void loadSubtitlesXMLData(QList<BlockTRS> *trsBlocks);
+    void deleteTablesContents();
 
 private:
     QHeaderView *headerView;

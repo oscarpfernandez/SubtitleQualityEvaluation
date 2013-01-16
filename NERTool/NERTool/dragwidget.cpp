@@ -6,7 +6,7 @@ DragWidget::DragWidget(QWidget *parent, QString &textBlock, int maxWidth)  : QWi
     m_labelsPointerList = new QList<DragLabel *>();
     int x = 5;
     int y = 2;
-    m_maxWidgetWidth = maxWidth-70;
+    m_maxWidgetWidth = maxWidth;
     m_counter = 0;
     m_numLines = 0;
 
@@ -23,7 +23,7 @@ DragWidget::DragWidget(QWidget *parent, QString &textBlock, int maxWidth)  : QWi
             wordLabel->setAttribute(Qt::WA_DeleteOnClose);
             m_labelsPointerList->insert(m_counter++, wordLabel);
 
-            x += wordLabel->width();
+            x += wordLabel->width()+1;
 
             if (x >= m_maxWidgetWidth && i-1<wordsList.count()) {
                 x = 5;
@@ -192,5 +192,5 @@ QSize DragWidget::getBlockSize()
         height = labelW->height();
     }
 
-    return QSize(m_maxWidgetWidth, (m_numLines+1)*height + 10);
+    return QSize(m_maxWidgetWidth+40, (m_numLines+1)*height + 10);
 }

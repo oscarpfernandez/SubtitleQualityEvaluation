@@ -4,6 +4,7 @@
 #include <qfile.h>
 #include <qtablewidget.h>
 #include <qxmlstream.h>
+
 #include "nercommon.h"
 
 const QString STR_SPEAKERS = "Speakers";

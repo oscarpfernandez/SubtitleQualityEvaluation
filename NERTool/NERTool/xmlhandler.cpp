@@ -94,7 +94,9 @@ bool XMLHandler::loadTranscriberXML(QFile *xmlFile, QList<BlockTRS> *trsBlocks){
             qDebug("\tisCharacters from Sync...");
             if(!xmlReader->text().toString().trimmed().isEmpty()){
                 BlockTRS btr;
-                btr.setSpeaker(speaker).setSyncTime(syncTime).setText(xmlReader->text().toString().trimmed());
+                QString textFinal = xmlReader->text().toString().trimmed();
+                textFinal.replace(",",", ");
+                btr.setSpeaker(speaker).setSyncTime(syncTime).setText(textFinal);
                 trsBlocks->append(btr);
                 qDebug(btr.toString().toAscii());
             }
@@ -168,6 +170,6 @@ bool XMLHandler::loadTranscriberXML(QFile *xmlFile, QList<BlockTRS> *trsBlocks){
 //        table->insertNewTableEntry(btr.getSpeaker(), btr.getSyncTime(), btr.getText());
 //    }
 
-    return false;
+    return true;
 
 }

@@ -16,11 +16,14 @@ NERMainWindow::NERMainWindow(QWidget *parent) : QMainWindow(parent)
 	initializeMDIWindows();
 
     xmlHandler = new XMLHandler();
+    transcriptionList = new QList<BlockTRS>();
 
 }
 
 NERMainWindow::~NERMainWindow()
 {
+    delete transcriptionList;
+    delete xmlHandler;
 
 }
 
@@ -192,25 +195,45 @@ void NERMainWindow::viewProjectPropertiesSlot()
 
 }
 
+void NERMainWindow::enableActionsTransLoaded(){
+
+}
+
 void NERMainWindow::loadTranscriptionFileSlot()
 {
 
     QString fileName = QFileDialog::getOpenFileName(
             this,
-            tr("Open SRT File"),
+            tr("Open TRS File"),
             QDir::currentPath(),
-            tr("STR file (*.trs)") );
+            tr("TRS file (*.trs)") );
 
-    QList<BlockTRS> *trsList = new QList<BlockTRS>();
-    xmlHandler->readTranscriberXML(fileName, trsList);
-    diffTableWid->loadXMLData(trsList);
+    transcriptionList->clear();
+
+    isTranscriptionLoaded = xmlHandler->readTranscriberXML(fileName, trsList);
+
+    if(isTranscriptionLoaded){
+        diffTableWid->deleteTablesContents();
+        diffTableWid->loadXMLData(trsList);
+    }
     delete trsList;
     trsList = NULL;
 }
 
 void NERMainWindow::loadSubtitlesFileSlot(){
+    QString fileName = QFileDialog::getOpenFileName(
+            this,
+            tr("Open TRS File"),
+            QDir::currentPath(),
+            tr("TRS file (*.trs)") );
+    QList<BlockTRS> *trsList = new QList<BlockTRS>();
+    xmlHandler->readTranscriberXML(fileName, trsList);
+    diffTableWid->loadSubtitlesXMLData(trsList);
+    delete trsList;
+    trsList = NULL;
 
 }
+
 
 
 

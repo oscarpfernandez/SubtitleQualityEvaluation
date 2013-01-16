@@ -18,22 +18,24 @@ NERTableWidget::NERTableWidget(QWidget *parent) : QTableWidget(parent)
     setSelectionBehavior(QAbstractItemView::SelectRows);
     //setFont(QFont("Courier New", 10, QFont::Normal));
 	setSortingEnabled(false);
-    setColumnCount(3);
+    setColumnCount(4);
     setRowCount(0);
 
 	QStringList headers;
     headers << "Speaker ID"
             << "Timestamp"
-            << "Transcription";
+            << "Transcription"
+            << "Subtitles";
     setHorizontalHeaderLabels(headers);
 
 
     headerView = new QHeaderView(Qt::Horizontal);
-    headerView->setResizeMode(QHeaderView::Fixed);
+    //headerView->setResizeMode(QHeaderView::Fixed);
     setHorizontalHeader(headerView);
     setColumnWidth(0,SPEAKER_ID_COLUMN_WIDTH);
     setColumnWidth(1,TIMESTAMP_COLUMN_WIDTH);
     setColumnWidth(2,TRANSCRIPTION_COLUMN_WIDTH);
+    setColumnWidth(3, SUBTITLES_COLUMN_WIDTH);
 
     connect(headerView, SIGNAL(sectionResized(int,int,int)), this, SLOT(columnTableResized(int,int,int)));
 
@@ -50,6 +52,21 @@ void NERTableWidget::loadXMLData(QList<BlockTRS> *trsBlocks){
         BlockTRS btr = trsBlocks->at(i);
         insertNewTableEntry(btr.getSpeaker(), btr.getSyncTime(), btr.getText());
     }
+}
+
+void NERTableWidget::loadSubtitlesXMLData(QList<BlockTRS> *trsBlocks){
+    if(trsBlocks==0 || trsBlocks->count()==0){
+        //Nothing to do...
+        return;
+    }
+
+    NERSubTableWidget *subTable = new NERSubTableWidget(this);
+    BlockTRS btr = trsBlocks->at(0);
+    subTable->insertNewTableEntry(btr.getSyncTime(),btr.getText());
+    BlockTRS btr2 = trsBlocks->at(1);
+    subTable->insertNewTableEntry(btr2.getSyncTime(),btr2.getText());
+    setCellWidget(0, SUBTITLES_COLUMN_INDEX, subTable);
+
 }
 
 /*
@@ -84,8 +101,17 @@ void NERTableWidget::insertNewTableEntry(QString &speaker, QString &timeStamp, Q
     //Insert the chopped text block with the widget...
     DragWidget *wordBox = new DragWidget(this, text, TRANSCRIPTION_COLUMN_WIDTH);
     setRowHeight(line, wordBox->getBlockSize().height());
+    setColumnWidth(2,wordBox->getBlockSize().width());
     setCellWidget(line, TRANSCRIPTION_COLUMN_INDEX, wordBox);
 
+}
+
+void NERTableWidget::deleteTablesContents(){
+    clearContents();
+    for(int i=0; i< rowCount(); i++){
+        removeRow(i);
+    }
+    setRowCount(0);
 }
 
 NERTableWidget::~NERTableWidget()
@@ -106,6 +132,8 @@ NERSubTableWidget::NERSubTableWidget(QWidget *parent): QTableWidget(parent)
     setSelectionBehavior(QAbstractItemView::SelectRows);
     setSortingEnabled(false);
     setColumnCount(2);
+    setColumnWidth(SUB_TIMESTAMP_COLUMN_INDEX, SUB_TIMESTAMP_COLUMN_WIDTH);
+    setColumnWidth(SUB_SUBTITLES_COLUMN_INDEX, SUB_SUBTITLES_COLUMN_WIDTH);
     setRowCount(0);
     //note: we don't want to display the line and column headers of each subtable
     verticalHeader()->setVisible(false);
@@ -120,12 +148,13 @@ void NERSubTableWidget::insertNewTableEntry(QString &timeStamp, QString &text)
     //Set timestamp
     QTableWidgetItem *tsItem = new QTableWidgetItem();
     tsItem->setText(timeStamp);
-    setItem(line, TIMESTAMP_COLUMN_INDEX, tsItem);
+    setItem(line, SUB_TIMESTAMP_COLUMN_INDEX, tsItem);
 
     //Insert the chopped text block with the widget...
     DragWidget *wordBox = new DragWidget(this, text, SUBTITLES_COLUMN_WIDTH);
     setRowHeight(line, wordBox->getBlockSize().height());
-    setCellWidget(line, TRANSCRIPTION_COLUMN_INDEX, wordBox);
+    setColumnWidth(1,wordBox->getBlockSize().width());
+    setCellWidget(line, SUB_SUBTITLES_COLUMN_INDEX, wordBox);
 
 }
 

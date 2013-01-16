@@ -34,6 +34,7 @@ private:
     void createToolBars();
     void createStatusBar();
 	void initializeMDIWindows();
+    void enableActionsTransLoaded();
 
 	QMdiArea *mainMdiArea;
 	QMdiSubWindow *subWindowDiffTable;
@@ -64,6 +65,9 @@ private:
     QMenu *helpMenu;
 
     XMLHandler *xmlHandler;
+    QList<BlockTRS> *trsList;
+    bool isTranscriptionLoaded;
+
 
 private slots:
     void newProjectSlot();
@@ -76,6 +80,8 @@ private slots:
 	void aboutSlot();
     void loadTranscriptionFileSlot();
     void loadSubtitlesFileSlot();
+
+
 
 
 };
