@@ -54,19 +54,44 @@ void NERTableWidget::loadXMLData(QList<BlockTRS> *trsBlocks){
     }
 }
 
-void NERTableWidget::loadSubtitlesXMLData(QList<BlockTRS> *trsBlocks){
-    if(trsBlocks==0 || trsBlocks->count()==0){
+void NERTableWidget::loadSubtitlesXMLData(QList<BlockTRS> *transcription, QList<BlockTRS> *subsTrsBlocks){
+    if(subsTrsBlocks==0 || subsTrsBlocks->count()==0 || transcription==0 || transcription->count()==0){
         //Nothing to do...
         return;
     }
 
-    NERSubTableWidget *subTable = new NERSubTableWidget(this);
-    BlockTRS btr = trsBlocks->at(0);
-    subTable->insertNewTableEntry(btr.getSyncTime(),btr.getText());
-    BlockTRS btr2 = trsBlocks->at(1);
-    subTable->insertNewTableEntry(btr2.getSyncTime(),btr2.getText());
-    setCellWidget(0, SUBTITLES_COLUMN_INDEX, subTable);
+    //Merge the translation with the subtitles...
+    int i=0;
+    int line=0;
+    for(int j=0; j<transcription->count()-1; j++){
+        NERSubTableWidget *subTable = new NERSubTableWidget(this);
 
+        for( ; i< subsTrsBlocks->count(); i++){
+            BlockTRS subBtr = subsTrsBlocks->at(i);
+            BlockTRS transBtr = transcription->at(j);
+            BlockTRS transBtrNext = transcription->at(j+1);
+
+            qDebug("TRS");
+            qDebug(subBtr.toString().toAscii());
+            qDebug(transBtr.toString().toAscii());
+            qDebug(transBtrNext.toString().toAscii());
+
+
+            if(transBtr.getSyncTime().toDouble() <= subBtr.getSyncTime().toDouble()
+                    && subBtr.getSyncTime().toDouble() < transBtrNext.getSyncTime().toDouble() )
+            {
+                qDebug("New entry...");
+                subTable->insertNewTableEntry(subBtr.getSyncTime(),subBtr.getText());
+            }
+
+            if(subBtr.getSyncTime().toDouble() > transBtrNext.getSyncTime().toDouble()){
+                //skip to the new transcription line...
+                qDebug("Set cell widget...");
+                setCellWidget(line++, SUBTITLES_COLUMN_INDEX, subTable);
+                break;
+            }
+        }
+    }
 }
 
 /*
@@ -140,7 +165,7 @@ NERSubTableWidget::NERSubTableWidget(QWidget *parent): QTableWidget(parent)
     horizontalHeader()->setVisible(false);
 }
 
-void NERSubTableWidget::insertNewTableEntry(QString &timeStamp, QString &text)
+int NERSubTableWidget::insertNewTableEntry(QString &timeStamp, QString &text)
 {
     int line = rowCount();
     insertRow(line);
@@ -156,6 +181,7 @@ void NERSubTableWidget::insertNewTableEntry(QString &timeStamp, QString &text)
     setColumnWidth(1,wordBox->getBlockSize().width());
     setCellWidget(line, SUB_SUBTITLES_COLUMN_INDEX, wordBox);
 
+    return line+1;
 }
 
 void NERSubTableWidget::getXMLNode()

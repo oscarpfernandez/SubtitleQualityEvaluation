@@ -65,7 +65,7 @@ private:
     QMenu *helpMenu;
 
     XMLHandler *xmlHandler;
-    QList<BlockTRS> *trsList;
+    QList<BlockTRS> *transcriptionList;
     bool isTranscriptionLoaded;
 
 

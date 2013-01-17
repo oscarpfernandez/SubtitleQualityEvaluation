@@ -210,14 +210,12 @@ void NERMainWindow::loadTranscriptionFileSlot()
 
     transcriptionList->clear();
 
-    isTranscriptionLoaded = xmlHandler->readTranscriberXML(fileName, trsList);
+    isTranscriptionLoaded = xmlHandler->readTranscriberXML(fileName, transcriptionList);
 
     if(isTranscriptionLoaded){
         diffTableWid->deleteTablesContents();
-        diffTableWid->loadXMLData(trsList);
+        diffTableWid->loadXMLData(transcriptionList);
     }
-    delete trsList;
-    trsList = NULL;
 }
 
 void NERMainWindow::loadSubtitlesFileSlot(){
@@ -228,10 +226,9 @@ void NERMainWindow::loadSubtitlesFileSlot(){
             tr("TRS file (*.trs)") );
     QList<BlockTRS> *trsList = new QList<BlockTRS>();
     xmlHandler->readTranscriberXML(fileName, trsList);
-    diffTableWid->loadSubtitlesXMLData(trsList);
+    diffTableWid->loadSubtitlesXMLData(transcriptionList, trsList);
     delete trsList;
     trsList = NULL;
-
 }
 
 

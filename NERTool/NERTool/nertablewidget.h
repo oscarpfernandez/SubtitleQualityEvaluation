@@ -37,7 +37,7 @@ public:
     ~NERTableWidget();
     void insertNewTableEntry(QString &speaker, QString &TimeStamp, QString &text);
     void loadXMLData(QList<BlockTRS> *trsBlocks);
-    void loadSubtitlesXMLData(QList<BlockTRS> *trsBlocks);
+    void loadSubtitlesXMLData(QList<BlockTRS> *transcription, QList<BlockTRS> *trsBlocks);
     void deleteTablesContents();
 
 private:
@@ -54,7 +54,7 @@ class NERSubTableWidget : public QTableWidget
 public:
     NERSubTableWidget(QWidget *parent=0);
     ~NERSubTableWidget();
-    void insertNewTableEntry(QString &timeStamp, QString &text);
+    int insertNewTableEntry(QString &timeStamp, QString &text);
     void getXMLNode();
 
 };
