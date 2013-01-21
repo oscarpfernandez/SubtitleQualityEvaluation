@@ -8,9 +8,11 @@
 #include <qmdiarea.h>
 #include <qfiledialog.h>
 #include <qdir.h>
+#include <qdockwidget.h>
 #include "about.h"
 #include "xmlhandler.h"
 #include "nertablewidget.h"
+#include "propertiestreewidget.h"
 
 
 //QT_BEGIN_NAMESPACE
@@ -33,6 +35,7 @@ private:
     void createMenus();
     void createToolBars();
     void createStatusBar();
+    void createDockableWidgets();
 	void initializeMDIWindows();
     void enableActionsTransLoaded();
 
@@ -40,6 +43,9 @@ private:
 	QMdiSubWindow *subWindowDiffTable;
 
     NERTableWidget *diffTableWid;
+
+    PropertiesTreeWidget *propertiesTreeWidget;
+    QDockWidget *projectPropertiesDockWidget;
 
     QAction *newProjectAction;
     QAction *saveProjectAction;
@@ -51,6 +57,7 @@ private:
     QAction *viewPropertiesTree;
     QAction *loadTransXmlFile;
     QAction *loadSubtsXmlFile;
+    QAction *showComparisonTable;
 
     QLabel  *statusBarLeftLabel;
     QLabel  *statusBarMiddleLabel;
@@ -80,6 +87,7 @@ private slots:
 	void aboutSlot();
     void loadTranscriptionFileSlot();
     void loadSubtitlesFileSlot();
+    void showComparisonTableSlot();
 
 
 

@@ -4,12 +4,14 @@
 NERMainWindow::NERMainWindow(QWidget *parent) : QMainWindow(parent)
 {
 	resize(1024,768);
+    setWindowTitle(NER_APP_NAME);
 
 	createGuiElements();
 	createActions();
 	createMenus();
 	createToolBars();
 	createStatusBar();
+    createDockableWidgets();
 
 	setCentralWidget(mainMdiArea);
 
@@ -31,10 +33,12 @@ void NERMainWindow::createGuiElements()
 {
 	mainMdiArea = new QMdiArea(this);
     diffTableWid = new NERTableWidget(this);
-	subWindowDiffTable = mainMdiArea->addSubWindow(diffTableWid);
+    subWindowDiffTable = mainMdiArea->addSubWindow(diffTableWid, Qt::CustomizeWindowHint |Qt::WindowTitleHint| Qt::WindowMinMaxButtonsHint);
     subWindowDiffTable->setWindowTitle("Trancription Data");
-	subWindowDiffTable->setMinimumSize(400,400);
+    subWindowDiffTable->setMinimumSize(800,600);
     //subWindowDiffTable->setWindowIcon();
+
+    propertiesTreeWidget = new PropertiesTreeWidget(this);
 
 }
 
@@ -98,6 +102,10 @@ void NERMainWindow::createActions()
     loadSubtsXmlFile->setStatusTip("Load subtitles file...");
     connect(loadSubtsXmlFile, SIGNAL(triggered()), this, SLOT(loadSubtitlesFileSlot()));
 
+    showComparisonTable = new QAction(tr("Comparison Table"), this);
+    showComparisonTable->setStatusTip(tr("Comparison Table"));
+    connect(showComparisonTable, SIGNAL(triggered()), this, SLOT(showComparisonTableSlot()));
+
 }
 
 void NERMainWindow::createMenus(){
@@ -116,6 +124,7 @@ void NERMainWindow::createMenus(){
     toolsMenu->addAction(loadSubtsXmlFile);
 
 	windowMenu = menuBar()->addMenu(tr("&Window"));
+    windowMenu->addAction(showComparisonTable);
 	
 	helpMenu = menuBar()->addMenu(tr("Help"));
 	helpMenu->addAction(aboutQTAction);
@@ -145,6 +154,20 @@ void NERMainWindow::createStatusBar(){
     statusBar()->addWidget(statusBarMiddleLabel, 1);
 }
 
+void NERMainWindow::createDockableWidgets()
+{
+    projectPropertiesDockWidget = new QDockWidget(tr("Project Details"));
+    projectPropertiesDockWidget->setObjectName("projectTreeDockWidget");
+    projectPropertiesDockWidget->setWidget(propertiesTreeWidget);
+    projectPropertiesDockWidget->setAllowedAreas(Qt::LeftDockWidgetArea
+                                                 | Qt::RightDockWidgetArea);
+    projectPropertiesDockWidget->setToolTip(tr("Project Details"));
+    projectPropertiesDockWidget->setMinimumWidth(150);
+    projectPropertiesDockWidget->setMaximumWidth(850);
+
+    addDockWidget(Qt::RightDockWidgetArea, projectPropertiesDockWidget);
+}
+
 void NERMainWindow::newProjectSlot()
 {
 
@@ -167,8 +190,6 @@ void NERMainWindow::closeProjectSlot()
 
 void NERMainWindow::initializeMDIWindows()
 {
-
-	
 	subWindowDiffTable->showNormal();
 
 }
@@ -229,6 +250,18 @@ void NERMainWindow::loadSubtitlesFileSlot(){
     diffTableWid->loadSubtitlesXMLData(transcriptionList, trsList);
     delete trsList;
     trsList = NULL;
+}
+
+void NERMainWindow::showComparisonTableSlot(){
+
+    int n = mainMdiArea->subWindowList().count();
+    qDebug(QString::number(n).toAscii());
+
+    if(diffTableWid!=0){
+        diffTableWid->show();
+        mainMdiArea->addSubWindow(diffTableWid)->showNormal();
+    }
+
 }
 
 

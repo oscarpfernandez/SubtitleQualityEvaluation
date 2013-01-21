@@ -1,6 +1,10 @@
 #ifndef NERCOMMON_H
 #define NERCOMMON_H
 
+#include <qstring.h>
+
+const QString NER_APP_NAME = "NER Tool";
+
 /*
  * Struct to hold each line contained on the TRS XML file.
  */
