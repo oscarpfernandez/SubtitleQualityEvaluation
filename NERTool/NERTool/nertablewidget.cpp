@@ -53,7 +53,10 @@ void NERTableWidget::loadXMLData(QList<BlockTRS> *trsBlocks){
     //Fill the table with the entries...
     for(int i=0; i<trsBlocks->count(); i++){
         BlockTRS btr = trsBlocks->at(i);
-        insertNewTableEntry(btr.getSpeaker(), btr.getSyncTime(), btr.getText());
+        QString speaker = btr.getSpeaker();
+        QString sync = btr.getSyncTime();
+        QString text = btr.getText();
+        insertNewTableEntry(speaker, sync, text);
     }
 }
 
@@ -90,7 +93,10 @@ void NERTableWidget::loadSubtitlesXMLData(QList<BlockTRS> *transcription, QList<
                     && subBtr.getSyncTime().toDouble() < transBtrNext.getSyncTime().toDouble() )
             {
                 qDebug("New entry...");
-                subTable->insertNewTableEntry(subBtr.getSyncTime(),subBtr.getText());
+                QString speaker = subBtr.getSpeaker();
+                QString sync = subBtr.getSyncTime();
+                QString text = subBtr.getText();
+                subTable->insertNewTableEntry(sync, text);
             }
 
             if(subBtr.getSyncTime().toDouble() > transBtrNext.getSyncTime().toDouble()){

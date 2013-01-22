@@ -254,14 +254,6 @@ void NERMainWindow::loadSubtitlesFileSlot(){
 
 void NERMainWindow::showComparisonTableSlot(){
 
-    int n = mainMdiArea->subWindowList().count();
-    qDebug(QString::number(n).toAscii());
-
-    if(diffTableWid!=0){
-        diffTableWid->show();
-        mainMdiArea->addSubWindow(diffTableWid)->showNormal();
-    }
-
 }
 
 

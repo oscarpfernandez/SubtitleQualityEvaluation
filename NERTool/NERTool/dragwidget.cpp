@@ -3,6 +3,11 @@
 
 DragWidget::DragWidget(QWidget *parent, QString &textBlock, int maxWidth)  : QWidget(parent)
 {
+    editionComment = new QString();
+    dwcomment = new DragWidgetComment(parent);
+
+    connect(dwcomment, SIGNAL(saveComment(QString&)), this, SLOT(setEditCommentSlot(QString&)));
+
     m_labelsPointerList = new QList<DragLabel *>();
     int x = 5;
     int y = 2;
@@ -43,9 +48,11 @@ DragWidget::DragWidget(QWidget *parent, QString &textBlock, int maxWidth)  : QWi
     //setAcceptDrops(true);
 }
 
-void redrawWidgetSizeChangedSlot(int &cellWidth){
-
+DragWidget::~DragWidget()
+{
+    delete editionComment;
 }
+
 
 //void DragWidget::dragEnterEvent(QDragEnterEvent *event)
 //{
@@ -143,6 +150,8 @@ void DragWidget::mousePressEvent(QMouseEvent *event)
     myMenu.addAction(CORRECT_EDITION_STR);
     myMenu.addAction(EDITION_ERROR);
     myMenu.addAction(RECOG_ERROR_STR);
+    myMenu.addSeparator();
+    myMenu.addAction(EDITION_COMMENT);
     // ...
 
     QAction* selectedItem = myMenu.exec(globalPos);
@@ -158,6 +167,11 @@ void DragWidget::mousePressEvent(QMouseEvent *event)
         else if(selectedItem->text() == RECOG_ERROR_STR)
         {
             child->setupLabelType(DragLabel::RecognitionError);
+        }
+        else if(selectedItem->text() == EDITION_COMMENT){
+            //Modify comment used in the report...
+            dwcomment->setEditComment(*editionComment);
+            dwcomment->show();
         }
     }
 
@@ -181,6 +195,28 @@ void DragWidget::mousePressEvent(QMouseEvent *event)
 //        child->close();
 //    else
 //        child->show();
+}
+
+void DragWidget::showCommentEditor()
+{
+
+
+}
+
+void DragWidget::setComment(QString &newComment)
+{
+    editionComment->clear();
+    editionComment->append(newComment);
+}
+
+QString DragWidget::getComment()
+{
+    return *editionComment;
+}
+
+void DragWidget::setEditCommentSlot(QString &comment)
+{
+    *editionComment = comment;
 }
 
 QSize DragWidget::getBlockSize()

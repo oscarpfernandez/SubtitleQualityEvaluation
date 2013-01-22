@@ -4,6 +4,7 @@
 #include <QWidget>
 #include <QMap>
 #include "draglabel.h"
+#include "dragwidgetcomment.h"
 
 QT_BEGIN_NAMESPACE
 class QDragEnterEvent;
@@ -13,13 +14,16 @@ QT_END_NAMESPACE
 const QString CORRECT_EDITION_STR = "Correct";
 const QString RECOG_ERROR_STR = "RecognitionError";
 const QString EDITION_ERROR = "EditionError";
+const QString EDITION_COMMENT = "Edit Comnment";
 
 //! [0]
 class DragWidget : public QWidget
 {
 public:
     DragWidget(QWidget *parent, QString &textBlock, int maxWidth);
+    ~DragWidget();
     QSize getBlockSize();
+    void showCommentEditor();
 
 protected:
     //void dragEnterEvent(QDragEnterEvent *event);
@@ -34,10 +38,13 @@ private:
     int m_labelSize;
     int m_counter;
     int m_numLines;
+    QString *editionComment;
+    DragWidgetComment *dwcomment;
+    void setComment(QString &newComment);
+    QString getComment();
 
 public slots:
-    void redrawWidgetSizeChangedSlot(int);
+    void setEditCommentSlot(QString &comment);
 };
-//! [0]
 
 #endif
