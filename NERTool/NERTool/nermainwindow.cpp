@@ -164,6 +164,7 @@ void NERMainWindow::createDockableWidgets()
     projectPropertiesDockWidget->setToolTip(tr("Project Details"));
     projectPropertiesDockWidget->setMinimumWidth(150);
     projectPropertiesDockWidget->setMaximumWidth(850);
+    projectPropertiesDockWidget->setWindowIcon(QIcon(":/resources/pics/docs.png"));
 
     addDockWidget(Qt::RightDockWidgetArea, projectPropertiesDockWidget);
 }

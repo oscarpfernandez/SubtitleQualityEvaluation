@@ -6,8 +6,6 @@ DragWidget::DragWidget(QWidget *parent, QString &textBlock, int maxWidth)  : QWi
     editionComment = new QString();
     dwcomment = new DragWidgetComment(parent);
 
-    connect(dwcomment, SIGNAL(saveComment(QString&)), this, SLOT(setEditCommentSlot(QString&)));
-
     m_labelsPointerList = new QList<DragLabel *>();
     int x = 5;
     int y = 2;
@@ -170,7 +168,7 @@ void DragWidget::mousePressEvent(QMouseEvent *event)
         }
         else if(selectedItem->text() == EDITION_COMMENT){
             //Modify comment used in the report...
-            dwcomment->setEditComment(*editionComment);
+            dwcomment->setEditComment(getComment());
             dwcomment->show();
         }
     }
@@ -211,12 +209,13 @@ void DragWidget::setComment(QString &newComment)
 
 QString DragWidget::getComment()
 {
-    return *editionComment;
+    return dwcomment->getEditComment();
 }
 
 void DragWidget::setEditCommentSlot(QString &comment)
 {
-    *editionComment = comment;
+    editionComment->clear();
+    editionComment->append(comment);
 }
 
 QSize DragWidget::getBlockSize()

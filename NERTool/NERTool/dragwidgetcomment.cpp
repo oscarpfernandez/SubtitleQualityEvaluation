@@ -6,12 +6,12 @@
  ******************************************************************************/
 DragWidgetComment::DragWidgetComment(QWidget *parent) : QDialog(parent)
 {
-    setAttribute(Qt::WA_DeleteOnClose);
     label = new QLabel(this);
     label->setText("Comment");
     editText = new QTextEdit(this);
     saveButton = new QPushButton(this);
     saveButton->setText(QString("Save"));
+    saveButton->resize(50,saveButton->sizeHint().height());
     saveButton->setBaseSize(QSize(50, saveButton->sizeHint().height()));
     mainVBoxLay = new QVBoxLayout(this);
 
@@ -24,6 +24,8 @@ DragWidgetComment::DragWidgetComment(QWidget *parent) : QDialog(parent)
     setLayout(mainVBoxLay);
     setWindowModality(Qt::WindowModal);
 
+    resize(400, 200);
+
     connect(saveButton, SIGNAL(clicked()), this, SLOT(saveCommentSlot()));
 }
 
@@ -34,16 +36,18 @@ DragWidgetComment::~DragWidgetComment()
 
 void DragWidgetComment::setEditComment(QString &text)
 {
+    editText->setText(text);
 
 }
 
-QString DragWidgetComment::getComment()
+QString DragWidgetComment::getEditComment()
 {
     return editText->toPlainText();
 }
 
+
 void DragWidgetComment::saveCommentSlot(){
     QString et = editText->toPlainText();
-    emit saveComment(et);
-    this->close();
+    setEditComment(et);
+    close();
 }

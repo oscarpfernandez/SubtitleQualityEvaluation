@@ -9,5 +9,8 @@
         <file>resources/pics/close.png</file>
         <file>resources/pics/closeApp.png</file>
         <file>resources/pics/qt-logo.png</file>
+        <file>resources/pics/docs.png</file>
+        <file>resources/pics/doc_subs.png</file>
+        <file>resources/pics/doc_trans.png</file>
     </qresource>
 </RCC>

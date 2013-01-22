@@ -19,6 +19,7 @@ const QString EDITION_COMMENT = "Edit Comnment";
 //! [0]
 class DragWidget : public QWidget
 {
+    Q_OBJECT
 public:
     DragWidget(QWidget *parent, QString &textBlock, int maxWidth);
     ~DragWidget();
@@ -42,6 +43,7 @@ private:
     DragWidgetComment *dwcomment;
     void setComment(QString &newComment);
     QString getComment();
+
 
 public slots:
     void setEditCommentSlot(QString &comment);

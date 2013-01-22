@@ -21,7 +21,8 @@ SOURCES += main.cpp\
     treeitem.cpp \
     waveform.cpp \
     utils.cpp \
-    nertablewidget.cpp
+    nertablewidget.cpp \
+    dragwidgetcomment.cpp
 
 HEADERS  += nermainwindow.h \
     dragwidget.h \
@@ -35,7 +36,8 @@ HEADERS  += nermainwindow.h \
     waveform.h \
     utils.h \
     nertablewidget.h \
-    nercommon.h
+    nercommon.h \
+    dragwidgetcomment.h
 
 RC_FILE = app.rc
 

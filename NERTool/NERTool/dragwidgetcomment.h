@@ -6,6 +6,7 @@
 #include <QTextEdit>
 #include <QDialog>
 #include <QLabel>
+#include <QEvent>
 
 class DragWidgetComment : public QDialog
 {
@@ -14,7 +15,7 @@ public:
     DragWidgetComment(QWidget *parent);
     ~DragWidgetComment();
     void setEditComment(QString &text);
-    QString getComment();
+    QString getEditComment();
 
 private:
     QVBoxLayout *mainVBoxLay;
@@ -24,9 +25,6 @@ private:
 
 public slots:
     void saveCommentSlot();
-
-signals:
-    void saveComment(QString& text);
 
 };
 
