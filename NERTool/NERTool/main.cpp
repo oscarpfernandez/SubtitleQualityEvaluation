@@ -1,6 +1,5 @@
 #include <qapplication.h>
 #include <QSplashScreen>
-#include "dragwidget.h"
 #include "nermainwindow.h"
 #include "sleeper.h"
 

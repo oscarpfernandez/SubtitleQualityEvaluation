@@ -23,7 +23,8 @@ XMLHandler::~XMLHandler()
  * Args:
  *
  ******************************************************************************/
-bool XMLHandler::readTranscriberXML(QString &xmlFilePath, QList<BlockTRS> *trsBlocks)
+bool XMLHandler::readTranscriberXML(QString &xmlFilePath,
+                                    QList<BlockTRS> *trsBlocks)
 {
 	if(QFile::exists(xmlFilePath)){
         QFile *xmlFile = new QFile(xmlFilePath);

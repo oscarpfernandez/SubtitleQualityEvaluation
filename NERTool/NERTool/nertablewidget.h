@@ -10,6 +10,7 @@
 
 
 
+
 const int SPEAKER_ID_COLUMN_WIDTH = 100;
 const int SPEAKER_ID_COLUMN_INDEX = 0;
 const int TIMESTAMP_COLUMN_WIDTH = 70;

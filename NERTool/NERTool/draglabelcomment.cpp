@@ -1,16 +1,16 @@
-#include "dragwidgetcomment.h"
+#include "draglabelcomment.h"
 
 /*******************************************************************************
  * Comment Dialog class editor...
  * A "nested" class for comment editing of each dragwidget...
  ******************************************************************************/
-DragWidgetComment::DragWidgetComment(QWidget *parent) : QDialog(parent)
+DragLabelComment::DragLabelComment(QWidget *parent) : QDialog(parent)
 {
     label = new QLabel(this);
     label->setText("Comment");
     editText = new QTextEdit(this);
     saveButton = new QPushButton(this);
-    saveButton->setText(QString("Save"));
+    saveButton->setText(QString("Ok"));
     saveButton->resize(50,saveButton->sizeHint().height());
     saveButton->setBaseSize(QSize(50, saveButton->sizeHint().height()));
     mainVBoxLay = new QVBoxLayout(this);
@@ -25,29 +25,29 @@ DragWidgetComment::DragWidgetComment(QWidget *parent) : QDialog(parent)
     setWindowModality(Qt::WindowModal);
 
     resize(400, 200);
+    const QRect screen = QApplication::desktop()->screenGeometry();
+    this->move( screen.center() - this->rect().center() );
 
     connect(saveButton, SIGNAL(clicked()), this, SLOT(saveCommentSlot()));
 }
 
-DragWidgetComment::~DragWidgetComment()
+DragLabelComment::~DragLabelComment()
 {
 
 }
 
-void DragWidgetComment::setEditComment(QString &text)
+void DragLabelComment::setEditComment(QString &text)
 {
     editText->setText(text);
 
 }
 
-QString DragWidgetComment::getEditComment()
+QString DragLabelComment::getEditComment()
 {
     return editText->toPlainText();
 }
 
 
-void DragWidgetComment::saveCommentSlot(){
-    QString et = editText->toPlainText();
-    setEditComment(et);
+void DragLabelComment::saveCommentSlot(){
     close();
 }

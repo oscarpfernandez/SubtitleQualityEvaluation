@@ -32,4 +32,22 @@ public:
 };
 #endif
 
+#ifndef SPEAKER
+#define SPEAKER
+struct Speaker
+{
+private:
+    QString sId;
+    QString sName;
+    QString sType;
+public:
+    Speaker& setId(QString &id){sId = id; return *this;}
+    Speaker& setName(QString &name){ sName=name; return *this;}
+    Speaker& setType(QString &type){ sType=type; return *this;}
+    QString getId(){return sId;}
+    QString getName(){return sName;}
+    QString getType(){return sType;}
+};
+#endif
+
 #endif // NERCOMMON_H

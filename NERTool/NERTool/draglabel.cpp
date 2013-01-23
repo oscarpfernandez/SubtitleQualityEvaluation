@@ -10,6 +10,8 @@ DragLabel::DragLabel(const QString &text, QWidget *parent)
     : QLabel(parent)
 {
     m_labelText = text;
+    editionComment = new QString();
+    dwcomment = new DragLabelComment(parent);
 }
 
 /*******************************************************************************
@@ -109,4 +111,20 @@ void DragLabel::setupLabelType(DragLabel::EditionTypeEnum ete)
     setPixmap(QPixmap::fromImage(image));
 }
 
-//EOF
+void DragLabel::setComment(QString &newComment)
+{
+    editionComment->clear();
+    editionComment->append(newComment);
+}
+
+QString DragLabel::getComment()
+{
+    return dwcomment->getEditComment();
+}
+
+void DragLabel::showCommentEditor()
+{
+    dwcomment->setEditComment(getComment());
+    dwcomment->show();
+}
+

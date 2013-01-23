@@ -2,6 +2,7 @@
 #define DRAGLABEL_H
 
 #include <QLabel>
+#include "draglabelcomment.h"
 
 QT_BEGIN_NAMESPACE
 class QDragEnterEvent;
@@ -21,10 +22,18 @@ public:
     DragLabel(const QString &text, QWidget *parent);
     QString labelText() const;
     void setupLabelType(DragLabel::EditionTypeEnum ete);
+    void setComment(QString &newComment);
+    QString getComment();
+    void showCommentEditor();
 
 private:
     QString m_labelText;
     QSize size;
+    QString *editionComment;
+    DragLabelComment *dwcomment;
+
+public slots:
+    void setEditCommentSlot(QString &comment);
 
 };
 

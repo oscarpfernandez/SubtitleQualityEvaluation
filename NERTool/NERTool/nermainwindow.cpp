@@ -17,8 +17,8 @@ NERMainWindow::NERMainWindow(QWidget *parent) : QMainWindow(parent)
 
 	initializeMDIWindows();
 
-    xmlHandler = new XMLHandler();
-    transcriptionList = new QList<BlockTRS>();
+//    xmlHandler = new XMLHandler();
+//    transcriptionList = new QList<BlockTRS>();
 
 }
 
@@ -197,7 +197,7 @@ void NERMainWindow::initializeMDIWindows()
 
 void NERMainWindow::closeApplicationSlot()
 {
-	QApplication::quit();
+    QApplication::exit(0);
 }
 
 void NERMainWindow::aboutQTSlot()
@@ -247,6 +247,7 @@ void NERMainWindow::loadSubtitlesFileSlot(){
             QDir::currentPath(),
             tr("TRS file (*.trs)") );
     QList<BlockTRS> *trsList = new QList<BlockTRS>();
+    QList<Speaker> *speakerList = new QList<Speaker>();
     xmlHandler->readTranscriberXML(fileName, trsList);
     diffTableWid->loadSubtitlesXMLData(transcriptionList, trsList);
     delete trsList;

@@ -9,10 +9,13 @@
 #include <qfiledialog.h>
 #include <qdir.h>
 #include <qdockwidget.h>
+#include <QMap>
 #include "about.h"
 #include "xmlhandler.h"
 #include "nertablewidget.h"
 #include "propertiestreewidget.h"
+#include "nercommon.h"
+
 
 
 //QT_BEGIN_NAMESPACE

@@ -7,13 +7,15 @@
 #include <QDialog>
 #include <QLabel>
 #include <QEvent>
+#include <QApplication>
+#include <QDesktopWidget>
 
-class DragWidgetComment : public QDialog
+class DragLabelComment : public QDialog
 {
     Q_OBJECT
 public:
-    DragWidgetComment(QWidget *parent);
-    ~DragWidgetComment();
+    DragLabelComment(QWidget *parent);
+    ~DragLabelComment();
     void setEditComment(QString &text);
     QString getEditComment();
 

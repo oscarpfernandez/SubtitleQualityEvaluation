@@ -8,6 +8,8 @@
 #include <QGroupBox>
 #include <QSplitter>
 #include <QMenu>
+#include <QEvent>
+#include <QMouseEvent>
 
 class PropertiesTreeWidget : public QWidget
 {
@@ -33,10 +35,12 @@ private:
     QAction *editSubPropertiesAction;
     void initTrees();
     void initContextMenuAction();
-//    bool eventFilter(QObject *obj, QEvent *event);
+
+protected:
+    bool eventFilter(QObject *obj, QEvent *event);
 
 private slots:
-    void onTreeWidgetItemDoubleClicked(QTreeWidgetItem * item, int column);
+    //void onTreeWidgetItemDoubleClicked(QTreeWidgetItem * item, int column);
     void openSubDocumentNodeSlot();
     void editSubPropertiesNode();
     void removeSubNodeSlot();

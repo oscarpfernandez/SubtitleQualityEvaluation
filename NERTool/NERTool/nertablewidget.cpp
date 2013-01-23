@@ -93,7 +93,6 @@ void NERTableWidget::loadSubtitlesXMLData(QList<BlockTRS> *transcription, QList<
                     && subBtr.getSyncTime().toDouble() < transBtrNext.getSyncTime().toDouble() )
             {
                 qDebug("New entry...");
-                QString speaker = subBtr.getSpeaker();
                 QString sync = subBtr.getSyncTime();
                 QString text = subBtr.getText();
                 subTable->insertNewTableEntry(sync, text);
@@ -136,11 +135,13 @@ void NERTableWidget::insertNewTableEntry(QString &speaker, QString &timeStamp, Q
     //Set Speaker
     QTableWidgetItem *speakerItem = new QTableWidgetItem();
     speakerItem->setText(speaker);
+    speakerItem->setFlags(speakerItem->flags() ^ Qt::ItemIsEditable);
     setItem(line, SPEAKER_ID_COLUMN_INDEX, speakerItem);
 
     //Set timestamp
     QTableWidgetItem *tsItem = new QTableWidgetItem();
     tsItem->setText(timeStamp);
+    tsItem->setFlags(tsItem->flags() ^ Qt::ItemIsEditable);
     setItem(line, TIMESTAMP_COLUMN_INDEX, tsItem);
 
     //Insert the chopped text block with the widget...

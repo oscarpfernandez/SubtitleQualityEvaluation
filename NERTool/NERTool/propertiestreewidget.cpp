@@ -2,14 +2,18 @@
 
 PropertiesTreeWidget::PropertiesTreeWidget(QWidget *parent) : QWidget(parent)
 {
-    mainVLayout = new QVBoxLayout(parent);
+    mainVLayout = new QVBoxLayout();
     mainTreeWidget = new QTreeWidget(parent);
+    mainTreeWidget->setSelectionMode(QAbstractItemView::SingleSelection);
+    mainTreeWidget->setContextMenuPolicy(Qt::DefaultContextMenu);
+    mainTreeWidget->installEventFilter(this);
 
     //REview!!
-    connect(mainTreeWidget, SIGNAL(itemDoubleClicked(QTreeWidgetItem*,int)), this, SLOT(onTreeWidgetItemDoubleClicked(QTreeWidgetItem*,int)));
+//    connect(mainTreeWidget, SIGNAL(itemDoubleClicked(QTreeWidgetItem*,int)),
+//            this, SLOT(onTreeWidgetItemDoubleClicked(QTreeWidgetItem*,int)));
 
     mainItemTrans = new QTreeWidgetItem();
-    mainItemTrans->setText(0, QString("Translation"));
+    mainItemTrans->setText(0, QString("Transcription"));
     mainItemTrans->setIcon(0, QIcon(":/resources/pics/docs.png"));
     mainItemSubs = new QTreeWidgetItem();
     mainItemSubs->setIcon(0, QIcon(":/resources/pics/docs.png"));
@@ -19,9 +23,9 @@ PropertiesTreeWidget::PropertiesTreeWidget(QWidget *parent) : QWidget(parent)
     splitter = new QSplitter(Qt::Vertical, parent);
 
     mainTreeGroupBox = new QGroupBox(QString("Loaded Files"), this);
-    mainTreeGroupBoxLayout = new QVBoxLayout(this);
+    mainTreeGroupBoxLayout = new QVBoxLayout();
     nerPropsGroupBox = new QGroupBox(QString("NER Properties"), this);
-    nerPropsGroupBoxLayout = new QVBoxLayout(this);
+    nerPropsGroupBoxLayout = new QVBoxLayout();
 
     //Set tree header
     QTreeWidgetItem* headerItem = new QTreeWidgetItem();
@@ -49,6 +53,7 @@ PropertiesTreeWidget::PropertiesTreeWidget(QWidget *parent) : QWidget(parent)
     setLayout(mainVLayout);
     setWindowIcon(QIcon(":/resources/pics/docs.png"));
 
+
     initContextMenuAction();
     initTrees();
 
@@ -56,14 +61,14 @@ PropertiesTreeWidget::PropertiesTreeWidget(QWidget *parent) : QWidget(parent)
 
 }
 
-void PropertiesTreeWidget::onTreeWidgetItemDoubleClicked(QTreeWidgetItem * item, int column)
-{
-    if (column != 0) {
-        //Allow editiong all expect the filename...
-        qDebug("Item Edited");
-        mainTreeWidget->editItem(item, column);
-    }
-}
+//void PropertiesTreeWidget::onTreeWidgetItemDoubleClicked(QTreeWidgetItem * item, int column)
+//{
+//    if (column != 0) {
+//        //Allow editiong all expect the filename...
+//        qDebug("Item Edited");
+//        mainTreeWidget->editItem(item, column);
+//    }
+//}
 
 /*******************************************************************************
  * Initializes the root nodes of the properties tree.
@@ -83,25 +88,6 @@ void PropertiesTreeWidget::initContextMenuAction()
 
     editSubPropertiesAction = new QAction(QIcon(), QString("Remove..."), this);
     connect(editSubPropertiesAction, SIGNAL(triggered()), this, SLOT(editSubPropertiesNode()));
-
-    //Set the tree context menu
-    mainTreeWidget->setContextMenuPolicy(Qt::CustomContextMenu);
-    mainTreeWidget->addAction(openSubAction);
-    mainTreeWidget->addAction(editSubPropertiesAction);
-    mainTreeWidget->addAction(removeSubAction);
-
-}
-
-void PropertiesTreeWidget::openSubDocumentNodeSlot()
-{
-
-}
-
-void PropertiesTreeWidget::editSubPropertiesNode(){
-
-}
-
-void PropertiesTreeWidget::removeSubNodeSlot(){
 
 }
 
@@ -134,21 +120,45 @@ void PropertiesTreeWidget::insertNewSpeaker(QString &speaker)
 /*******************************************************************************
  * Event filter to customize action ,like context menu, etc...
  ******************************************************************************/
-//bool PropertiesTreeWidget::eventFilter(QObject *obj, QEvent *event)
-//{
-//    if(event->type() == QEvent::ContextMenu)
-//    {
-//        QMouseEvent *mouseEvent = static_cast<QMouseEvent*> (event);
-//        QMenu *menu = new QMenu(this);
+bool PropertiesTreeWidget::eventFilter(QObject *obj, QEvent *event)
+{
+    if(event->type() == QEvent::ContextMenu)
+    {
+        QList<QTreeWidgetItem*> itemList = mainTreeWidget->selectedItems();
+        QTreeWidgetItem* item = itemList.at(0);
+        if(item->parent()==NULL){
+            //If the node is top level (==NULL), don't enable context menu
+            return true;
+        }
 
-//        menu->addAction(new QAction("Open",this));
-//        menu->addAction(new QAction("Edit...",this));
-//        menu->addSeparator();
-//        menu->addAction(new QAction("Delete",this));
-//        menu->exec(mouseEvent->globalPos());
+        QMouseEvent *mouseEvent = static_cast<QMouseEvent*> (event);
+        QMenu *menu = new QMenu(this);
 
-//        return false;
-//    }
-//    else
-//        return QListWidget::eventFilter(obj, event);
-//}
+        menu->addAction(new QAction("Open content",this));
+        menu->addAction(new QAction("Edit properties...",this));
+        menu->addSeparator();
+        menu->addAction(new QAction("Remove",this));
+        menu->exec(mouseEvent->globalPos());
+
+        return false;
+    }
+    else {
+        return QWidget::eventFilter(obj, event);
+    }
+}
+
+/*******************************************************************************
+ * Context Menu actions for the tree items.
+ ******************************************************************************/
+void PropertiesTreeWidget::openSubDocumentNodeSlot()
+{
+
+}
+
+void PropertiesTreeWidget::editSubPropertiesNode(){
+
+}
+
+void PropertiesTreeWidget::removeSubNodeSlot(){
+
+}

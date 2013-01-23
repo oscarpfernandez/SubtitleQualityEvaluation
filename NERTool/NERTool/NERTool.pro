@@ -17,12 +17,12 @@ SOURCES += main.cpp\
     about.cpp \
     xmlhandler.cpp \
     propertiestreewidget.cpp \
-    treemodel.cpp \
-    treeitem.cpp \
     waveform.cpp \
     utils.cpp \
     nertablewidget.cpp \
-    dragwidgetcomment.cpp
+    nertabletabswidget.cpp \
+    draglabelcomment.cpp \
+    contentmanager.cpp
 
 HEADERS  += nermainwindow.h \
     dragwidget.h \
@@ -31,13 +31,13 @@ HEADERS  += nermainwindow.h \
     about.h \
     xmlhandler.h \
     propertiestreewidget.h \
-    treemodel.h \
-    treeitem.h \
     waveform.h \
     utils.h \
     nertablewidget.h \
     nercommon.h \
-    dragwidgetcomment.h
+    nertabletabswidget.h \
+    draglabelcomment.h \
+    contentmanager.h
 
 RC_FILE = app.rc
 
