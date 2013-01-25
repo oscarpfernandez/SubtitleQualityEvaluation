@@ -124,7 +124,8 @@ QString DragLabel::getComment()
 
 void DragLabel::showCommentEditor()
 {
-    dwcomment->setEditComment(getComment());
+    QString c = getComment();
+    dwcomment->setEditComment(c);
     dwcomment->show();
 }
 

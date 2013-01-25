@@ -24,15 +24,31 @@ XMLHandler::~XMLHandler()
  *
  ******************************************************************************/
 bool XMLHandler::readTranscriberXML(QString &xmlFilePath,
-                                    QList<BlockTRS> *trsBlocks)
+                                    QList<BlockTRS> *trsBlocks,
+                                    QList<Speaker> *speakerList)
 {
 	if(QFile::exists(xmlFilePath)){
         QFile *xmlFile = new QFile(xmlFilePath);
         if(xmlFile->open(QIODevice::ReadOnly | QIODevice::Text))
         {
-            return loadTranscriberXML(xmlFile, trsBlocks);
+            return loadTranscriberXML(xmlFile, trsBlocks, speakerList);
         }
 	}
+
+    return false;
+
+}
+
+bool XMLHandler::readSubtitleXML(QString &xmlFilePath,
+                                    QList<BlockTRS> *trsBlocks)
+{
+    if(QFile::exists(xmlFilePath)){
+        QFile *xmlFile = new QFile(xmlFilePath);
+        if(xmlFile->open(QIODevice::ReadOnly | QIODevice::Text))
+        {
+            return loadSubtitleXML(xmlFile, trsBlocks);
+        }
+    }
 
     return false;
 
@@ -70,7 +86,9 @@ bool XMLHandler::readTranscriberXML(QString &xmlFilePath,
     </Trans>
  *
  ******************************************************************************/
-bool XMLHandler::loadTranscriberXML(QFile *xmlFile, QList<BlockTRS> *trsBlocks){
+bool XMLHandler::loadTranscriberXML(QFile *xmlFile,
+                                    QList<BlockTRS> *trsBlocks,
+                                    QList<Speaker> *speakerList){
 
     bool isSyncBlock = false;
     QString syncTime;
@@ -117,10 +135,10 @@ bool XMLHandler::loadTranscriberXML(QFile *xmlFile, QList<BlockTRS> *trsBlocks){
 				QXmlStreamAttributes attrs = xmlReader->attributes();
 				const QString id = attrs.value(STR_SPEAKER_ID).toString();
 				const QString name = attrs.value(STR_SPEAKER_NAME).toString();
-				QString d("\tspeaker -> ");
-				d.append(id).append(" :: ").append(name);
-				d.toAscii();
-				qDebug(d.toAscii());
+                const QString type = attrs.value(STR_SPEAKER_TYPE).toString();
+                Speaker sp;
+                sp.setId(id).setName(name).setType(type);
+                speakerList->append(sp);
 				continue;
 			}
 
@@ -129,14 +147,12 @@ bool XMLHandler::loadTranscriberXML(QFile *xmlFile, QList<BlockTRS> *trsBlocks){
                 qDebug("\tReading transcritption block...");
                 continue;
             }
-            else if(xmlReader->name() == STR_EPISODE) {
+            if(xmlReader->name() == STR_EPISODE) {
                 qDebug("\tReading episode block...");
-
+                continue;
 				
             }
 			if(xmlReader->name() == STR_SECTION){
-                attrs = xmlReader->attributes();
-
 				continue;
 			}
 			if(xmlReader->name() == STR_TURN){
@@ -165,12 +181,86 @@ bool XMLHandler::loadTranscriberXML(QFile *xmlFile, QList<BlockTRS> *trsBlocks){
         }
 	}
 
-//    //Fill the table with the entries...
-//    for(int i=0; i<trsBlocks->count(); i++){
-//        BlockTRS btr = trsBlocks->at(i);
-//        table->insertNewTableEntry(btr.getSpeaker(), btr.getSyncTime(), btr.getText());
-//    }
+    return true;
+}
+
+
+bool XMLHandler::loadSubtitleXML(QFile *xmlFile, QList<BlockTRS> *trsBlocks)
+{
+    QString syncTime;
+    QString speaker;
+
+    QXmlStreamReader *xmlReader = new QXmlStreamReader(xmlFile);
+    QXmlStreamAttributes attrs;
+
+    while(!xmlReader->atEnd() && !xmlReader->hasError()) {
+
+        /* Read next element.*/
+        xmlReader->readNext();
+
+
+        /* If token is just StartDocument, we'll go to next.*/
+        if(xmlReader->isStartDocument() ) {
+            qDebug("\tisStartDocument...");
+            continue;
+        }
+
+        if(xmlReader->isCharacters() ) {
+            qDebug("\tisCharacters from Sync...");
+            if(!xmlReader->text().toString().trimmed().isEmpty()){
+                BlockTRS btr;
+                QString textFinal = xmlReader->text().toString().trimmed();
+                textFinal.replace(",",", ");
+                btr.setSpeaker(speaker).setSyncTime(syncTime).setText(textFinal);
+                trsBlocks->append(btr);
+                qDebug(btr.toString().toAscii());
+            }
+            continue;
+        }
+
+        /* If token is StartElement, we'll see if we can read it.*/
+        if(xmlReader->isStartElement()) {
+            if(xmlReader->name() == STR_SPEAKERS){
+                continue;
+            }
+
+            if(xmlReader->name() == STR_SPEAKER){
+                continue;
+            }
+
+            if(xmlReader->name() == STR_TRANS) {
+                continue;
+            }
+            else if(xmlReader->name() == STR_EPISODE) {
+                continue;
+            }
+            if(xmlReader->name() == STR_SECTION){
+                continue;
+            }
+            if(xmlReader->name() == STR_TURN){
+                attrs = xmlReader->attributes();
+                speaker = attrs.value(STR_TURN_SPEAKER).toString();
+                continue;
+            }
+            else if(xmlReader->name() == STR_SYNC){
+                qDebug("\tReading Sync block...");
+                attrs = xmlReader->attributes();
+                syncTime = attrs.value(STR_SYNC_TIME).toString();
+                continue;
+            }
+
+        }
+
+        //Closing tags.....
+        if(xmlReader->isEndElement()) {
+            qDebug("\tClosing block...");
+            continue;
+        }
+        if(xmlReader->isEndDocument()) {
+            qDebug("\tEnd document block...");
+            continue;
+        }
+    }
 
     return true;
-
 }

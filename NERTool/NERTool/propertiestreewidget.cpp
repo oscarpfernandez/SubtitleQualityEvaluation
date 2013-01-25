@@ -57,7 +57,10 @@ PropertiesTreeWidget::PropertiesTreeWidget(QWidget *parent) : QWidget(parent)
     initContextMenuAction();
     initTrees();
 
-    insertNewSubtitle(QString("Filename"), QString("REposnsible"), QString("Description"));
+    QString f = QString("Filename");
+    QString n = QString("REposnsible");
+    QString d = QString("Description");
+    insertNewSubtitle(f, n, d);
 
 }
 

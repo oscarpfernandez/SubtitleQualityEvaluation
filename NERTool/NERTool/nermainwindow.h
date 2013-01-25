@@ -76,6 +76,7 @@ private:
 
     XMLHandler *xmlHandler;
     QList<BlockTRS> *transcriptionList;
+    QList<Speaker> *speakerList;
     bool isTranscriptionLoaded;
 
 

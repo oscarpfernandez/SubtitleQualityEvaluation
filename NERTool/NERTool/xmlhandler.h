@@ -11,6 +11,7 @@ const QString STR_SPEAKERS = "Speakers";
 const QString STR_SPEAKER = "Speaker";
 const QString STR_SPEAKER_ID = "id";
 const QString STR_SPEAKER_NAME = "name";
+const QString STR_SPEAKER_TYPE = "type";
 const QString STR_TURN_SPEAKER = "speaker";
 
 const QString STR_TRANS = "Trans";
@@ -26,12 +27,21 @@ class XMLHandler {
 public:
     XMLHandler();
 	~XMLHandler();
-    bool readTranscriberXML(QString &xmlFileName, QList<BlockTRS> *trsBlocks);
+    bool readTranscriberXML(QString &xmlFileName,
+                            QList<BlockTRS> *trsBlocks,
+                            QList<Speaker> *speakerList);
+    bool readSubtitleXML(QString &xmlFileName,
+                            QList<BlockTRS> *trsBlocks);
     //bool writeProjectExportXML(QString &xmlFileName, )
 
 
 private:
-    bool loadTranscriberXML(QFile *xmlFile, QList<BlockTRS> *trsBlocks);
+    bool loadTranscriberXML(QFile *xmlFile,
+                            QList<BlockTRS> *trsBlocks,
+                            QList<Speaker> *speakerList);
+
+    bool loadSubtitleXML(QFile *xmlFile,
+                            QList<BlockTRS> *trsBlocks);
 };
 
 #endif

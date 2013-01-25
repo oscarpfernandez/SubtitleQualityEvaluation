@@ -41,9 +41,9 @@ private:
     QString sName;
     QString sType;
 public:
-    Speaker& setId(QString &id){sId = id; return *this;}
-    Speaker& setName(QString &name){ sName=name; return *this;}
-    Speaker& setType(QString &type){ sType=type; return *this;}
+    Speaker& setId(const QString &id){sId = id; return *this;}
+    Speaker& setName(const QString &name){ sName=name; return *this;}
+    Speaker& setType(const QString &type){ sType=type; return *this;}
     QString getId(){return sId;}
     QString getName(){return sName;}
     QString getType(){return sType;}
