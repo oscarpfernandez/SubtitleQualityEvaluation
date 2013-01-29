@@ -19,18 +19,21 @@ public:
         EditionError=2,
         RecognitionError=3
     };
+
     DragLabel(const QString &text, QWidget *parent);
     QString labelText() const;
     void setupLabelType(DragLabel::EditionTypeEnum ete);
     void setComment(QString &newComment);
     QString getComment();
     void showCommentEditor();
+    EditionTypeEnum getError();
 
 private:
     QString m_labelText;
     QSize size;
     QString *editionComment;
     DragLabelComment *dwcomment;
+    DragLabel::EditionTypeEnum errorType;
 
 public slots:
     void setEditCommentSlot(QString &comment);

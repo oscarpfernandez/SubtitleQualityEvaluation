@@ -42,12 +42,17 @@ private:
 	void initializeMDIWindows();
     void enableActionsTransLoaded();
 
+    void addNewTableAndTreeNode();
+
 	QMdiArea *mainMdiArea;
 	QMdiSubWindow *subWindowDiffTable;
 
+    QList<NERTableWidget *> *nerTablesList;
     NERTableWidget *diffTableWid;
-
     PropertiesTreeWidget *propertiesTreeWidget;
+
+    QMap<QTreeWidgetItem*, NERTableWidget*> mapTableContentTree;
+
     QDockWidget *projectPropertiesDockWidget;
 
     QAction *newProjectAction;
@@ -61,6 +66,8 @@ private:
     QAction *loadTransXmlFile;
     QAction *loadSubtsXmlFile;
     QAction *showComparisonTable;
+    QAction *cascadeSubWindowsAction;
+    QAction *tileSubWindowsAction;
 
     QLabel  *statusBarLeftLabel;
     QLabel  *statusBarMiddleLabel;
@@ -92,6 +99,8 @@ private slots:
     void loadTranscriptionFileSlot();
     void loadSubtitlesFileSlot();
     void showComparisonTableSlot();
+    void cascadeWindowsSlot();
+    void tileWindowsSlot();
 
 
 

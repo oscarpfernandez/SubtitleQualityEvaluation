@@ -33,7 +33,6 @@ NERTableWidget::NERTableWidget(QWidget *parent) : QTableWidget(parent)
 
 
     headerView = new QHeaderView(Qt::Horizontal);
-    //headerView->setResizeMode(QHeaderView::Fixed);
     setHorizontalHeader(headerView);
     setColumnWidth(0,SPEAKER_ID_COLUMN_WIDTH);
     setColumnWidth(1,TIMESTAMP_COLUMN_WIDTH);
@@ -83,10 +82,10 @@ void NERTableWidget::loadSubtitlesXMLData(QList<BlockTRS> *transcription, QList<
             BlockTRS transBtr = transcription->at(j);
             BlockTRS transBtrNext = transcription->at(j+1);
 
-            qDebug("TRS");
-            qDebug(subBtr.toString().toAscii());
-            qDebug(transBtr.toString().toAscii());
-            qDebug(transBtrNext.toString().toAscii());
+//            qDebug("TRS");
+//            qDebug(subBtr.toString().toAscii());
+//            qDebug(transBtr.toString().toAscii());
+//            qDebug(transBtrNext.toString().toAscii());
 
 
             if(transBtr.getSyncTime().toDouble() <= subBtr.getSyncTime().toDouble()

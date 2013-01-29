@@ -24,6 +24,9 @@ public:
     ~DragWidget();
     QSize getBlockSize();
     void showCommentEditor();
+    int countWords();
+    DragLabel* getWordAt(int pos);
+    QString getText();
 
 protected:
     //void dragEnterEvent(QDragEnterEvent *event);
@@ -36,7 +39,6 @@ private:
     int m_maxWidgetWidth;
     int m_numberOfLines;
     int m_labelSize;
-    int m_counter;
     int m_numLines;
 
 };

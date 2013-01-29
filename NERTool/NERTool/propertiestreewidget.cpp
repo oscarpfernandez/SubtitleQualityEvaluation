@@ -57,10 +57,10 @@ PropertiesTreeWidget::PropertiesTreeWidget(QWidget *parent) : QWidget(parent)
     initContextMenuAction();
     initTrees();
 
-    QString f = QString("Filename");
-    QString n = QString("REposnsible");
-    QString d = QString("Description");
-    insertNewSubtitle(f, n, d);
+//    QString f = QString("Filename");
+//    QString n = QString("REposnsible");
+//    QString d = QString("Description");
+//    insertNewSubtitle(f, n, d);
 
 }
 
@@ -112,7 +112,29 @@ void PropertiesTreeWidget::insertNewSubtitle(QString &fileName,
     item->setText(2,description);
     item->setIcon(0,QIcon(":/resources/pics/doc_subs.png"));
 
+    mainItemSubs->addChild(item);
+}
+
+void PropertiesTreeWidget::insertNewTranslation(QString &fileName,
+                                                QString &responsible,
+                                                QString &description)
+{
+    if(mainItemTrans->childCount()!=0){
+        mainItemTrans->removeChild(mainItemTrans->child(0));
+    }
+
+    QTreeWidgetItem* item = new QTreeWidgetItem();
+    item->setFlags(item->flags()
+                   | Qt::ItemIsSelectable
+                   | Qt::ItemIsEnabled
+                   | Qt::ItemIsEditable);
+    item->setText(0, fileName);
+    item->setText(1, responsible);
+    item->setText(2, description);
+    item->setIcon(0, QIcon(":/resources/pics/doc_subs.png"));
+
     mainItemTrans->addChild(item);
+
 }
 
 void PropertiesTreeWidget::insertNewSpeaker(QString &speaker)

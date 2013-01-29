@@ -184,7 +184,9 @@ bool XMLHandler::loadTranscriberXML(QFile *xmlFile,
     return true;
 }
 
-
+/*******************************************************************************
+ * Loads the subtitles represented in the transcriber format.
+ ******************************************************************************/
 bool XMLHandler::loadSubtitleXML(QFile *xmlFile, QList<BlockTRS> *trsBlocks)
 {
     QString syncTime;
@@ -264,3 +266,133 @@ bool XMLHandler::loadSubtitleXML(QFile *xmlFile, QList<BlockTRS> *trsBlocks)
 
     return true;
 }
+
+
+/*******************************************************************************
+ * Writes the projects XML export content
+ ******************************************************************************/
+bool XMLHandler::writeProjectExportXML(QString &xmlFileName,
+                                       QList<Speaker> *speakerList,
+                                       QList<BlockTRS> *transcription,
+                                       QList<NERTableWidget *> *nerTablesList)
+{
+
+    QFile *file = new QFile(xmlFileName);
+
+    if (!file->open(QIODevice::WriteOnly | QIODevice::Text)) {
+        return false;
+    }
+
+
+    QXmlStreamWriter *xmlWriter = new QXmlStreamWriter();
+    xmlWriter->setDevice(file);
+
+    xmlWriter->setAutoFormatting(true);
+    xmlWriter->writeStartDocument();
+
+    xmlWriter->writeStartElement(STR_NER_PROJECT);
+    xmlWriter->writeAttribute(STR_NER_PROJECT_PROP_SAVEDATE,
+                              QDateTime::currentDateTime().toString());
+
+
+    xmlWriter->writeStartElement(STR_TRANSC_TAG);
+    xmlWriter->writeStartElement(STR_SPEAKERS_TAG);
+
+    for(int i=0; i<speakerList->count(); i++)
+    {
+        Speaker sp = speakerList->at(i);
+
+        xmlWriter->writeStartElement(STR_SPEAKER_TAG);
+        xmlWriter->writeAttribute(STR_SPEAKER_PROP_ID, sp.getId());
+        xmlWriter->writeAttribute(STR_SPEAKER_PROP_NAME, sp.getName());
+        xmlWriter->writeAttribute(STR_SPEAKER_PROP_TYPE, sp.getType());
+        xmlWriter->writeEndElement();
+    }
+    xmlWriter->writeEndElement();//end Speaker tag
+
+    for(int i=0; i<transcription->count(); i++)
+    {
+        BlockTRS btr = transcription->at(i);
+
+        xmlWriter->writeStartElement(STR_TRANSC_LINE_TAG);
+        xmlWriter->writeAttribute(STR_TRANSC_LINE_PROP_SPEAKER, btr.getSpeaker());
+        xmlWriter->writeAttribute(STR_TRANSC_LINE_PROP_TIMESTAMP, btr.getSyncTime());
+        xmlWriter->writeAttribute(STR_TRANSC_LINE_PROP_TEXT, btr.getText());
+        xmlWriter->writeEndElement();//end TranscLine tag
+
+    }
+    xmlWriter->writeEndElement();//end Transcription block...
+
+
+    /*********************************************
+     * Export all the included subtitle tables...
+     *********************************************/
+    xmlWriter->writeStartElement(STR_TABLES_TAG);
+    for(int row=0; row < nerTablesList->count(); row++)
+    {
+        xmlWriter->writeStartElement(STR_TABLE_TAG);
+        NERTableWidget *tableWidget = nerTablesList->at(row);
+
+
+        for(int i=0; i<tableWidget->rowCount(); i++)
+        {
+            xmlWriter->writeStartElement(STR_TABLELINE_TAG);
+
+            QString speakerS = tableWidget->item(row, TIMESTAMP_COLUMN_INDEX)->text();
+            xmlWriter->writeAttribute(STR_TABLELINE_PROP_SID, speakerS);
+            QString timeS = tableWidget->item(row, SPEAKER_ID_COLUMN_INDEX)->text();
+            xmlWriter->writeAttribute(STR_TABLELINE_PROP_TIMESTAMP, timeS);
+            DragWidget* transWidget = static_cast<DragWidget*>(tableWidget->cellWidget(row, TRANSCRIPTION_COLUMN_INDEX));
+            xmlWriter->writeAttribute(STR_TABLELINE_PROP_TRANSCRIP, transWidget->getText());
+
+
+            DragWidget* widget = static_cast<DragWidget*>(tableWidget->cellWidget(row, SUBTITLES_COLUMN_INDEX));
+            for(int w=0; w < widget->countWords(); w++)
+            {
+                xmlWriter->writeStartElement(STR_WORD_TAG);
+                DragLabel* label = widget->getWordAt(i);
+                xmlWriter->writeAttribute(STR_WORD_PROP_NAME, label->labelText());
+                xmlWriter->writeAttribute(STR_WORD_PROP_ERROR, QString::number(label->getError()));
+                xmlWriter->writeAttribute(STR_WORD_PROP_ERROR, label->getComment());
+            }
+
+            xmlWriter->writeEndElement();//STR_TABLELINE_TAG
+
+        }
+
+        xmlWriter->writeEndElement();//STR_TABLE_TAG
+    }
+
+    xmlWriter->writeEndElement();//STR_TABLES_TAG
+
+    xmlWriter->writeEndElement();//end NerProject
+    xmlWriter->writeEndDocument();
+
+    //Close file descriptor
+    file->close();
+    if (file->error()) {
+        QMessageBox warningMessage;
+        warningMessage.setText("There was an error closing the save file.");
+        warningMessage.setWindowTitle("Warning");
+        warningMessage.setIcon(QMessageBox::Warning);
+        warningMessage.exec();
+        return false;
+    }
+
+    delete xmlWriter;//free mem
+    return true;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,6 +1,10 @@
 #include "nermainwindow.h"
 #include "ui_nermainwindow.h"
 
+
+/*******************************************************************************
+ * NER Main Application Window
+ ******************************************************************************/
 NERMainWindow::NERMainWindow(QWidget *parent) : QMainWindow(parent)
 {
 	resize(1024,768);
@@ -17,10 +21,6 @@ NERMainWindow::NERMainWindow(QWidget *parent) : QMainWindow(parent)
 
 	initializeMDIWindows();
 
-    xmlHandler = new XMLHandler();
-    transcriptionList = new QList<BlockTRS>();
-    speakerList = new QList<Speaker>();
-
 }
 
 NERMainWindow::~NERMainWindow()
@@ -30,86 +30,131 @@ NERMainWindow::~NERMainWindow()
 
 }
 
+
+/*******************************************************************************
+ * Creates and initializes main application widgets.
+ ******************************************************************************/
 void NERMainWindow::createGuiElements()
 {
+    xmlHandler = new XMLHandler();
+    transcriptionList = new QList<BlockTRS>();
+    speakerList = new QList<Speaker>();
+    nerTablesList = new QList<NERTableWidget*>();
+
 	mainMdiArea = new QMdiArea(this);
     diffTableWid = new NERTableWidget(this);
-    subWindowDiffTable = mainMdiArea->addSubWindow(diffTableWid, Qt::CustomizeWindowHint |Qt::WindowTitleHint| Qt::WindowMinMaxButtonsHint);
-    subWindowDiffTable->setWindowTitle("Trancription Data");
-    subWindowDiffTable->setMinimumSize(800,600);
-    //subWindowDiffTable->setWindowIcon();
+
+    //mapTableContentTree = new QMap<QTreeWidgetItem*, NERTableWidget*>();
+
+//    subWindowDiffTable = mainMdiArea->addSubWindow(diffTableWid,
+//                                                   Qt::CustomizeWindowHint
+//                                                   | Qt::WindowTitleHint
+//                                                   | Qt::WindowMinMaxButtonsHint);
+
+//    subWindowDiffTable->setWindowTitle("Trancription Data");
+//    subWindowDiffTable->setMinimumSize(800,600);
 
     propertiesTreeWidget = new PropertiesTreeWidget(this);
-
 }
 
+/*******************************************************************************
+ * Initiatlizes associated widget actions, connecting them to the management
+ * slots.
+ ******************************************************************************/
 void NERMainWindow::createActions()
 {
     newProjectAction = new QAction(tr("&New Project..."), this);
     newProjectAction->setShortcut(QKeySequence::New);
     newProjectAction->setIcon(QIcon(":/resources/pics/new.png"));
     newProjectAction->setStatusTip("Creates a new project");
-    connect(newProjectAction, SIGNAL(triggered()), this, SLOT(newProjectSlot()));
+    connect(newProjectAction, SIGNAL(triggered()),
+            this, SLOT(newProjectSlot()));
 
     openProjectAction = new QAction(tr("&Open Project..."), this);
     openProjectAction->setShortcut(QKeySequence::Open);
     openProjectAction->setIcon(QIcon(":/resources/pics/open.png"));
     openProjectAction->setStatusTip("Opens an existing project");
-    connect(openProjectAction, SIGNAL(triggered()), this, SLOT(openProjectSlot()));
+    connect(openProjectAction, SIGNAL(triggered()),
+            this, SLOT(openProjectSlot()));
 
     saveProjectAction = new QAction(tr("&Save Project..."), this);
 	saveProjectAction->setShortcut(QKeySequence::Save);
     saveProjectAction->setIcon(QIcon(":/resources/pics/save.png"));
     saveProjectAction->setStatusTip("Saves the current project");
-    connect(saveProjectAction, SIGNAL(triggered()), this, SLOT(saveProjectSlot()));
+    connect(saveProjectAction, SIGNAL(triggered()),
+            this, SLOT(saveProjectSlot()));
 
 	closeProjectAction = new QAction(tr("&Close Project"), this);
     closeProjectAction->setShortcut(QKeySequence("Ctrl+Q"));
 	closeProjectAction->setIcon(QIcon(":/resources/pics/close.png"));
 	closeProjectAction->setStatusTip("Closes Current Project");
-	connect(closeProjectAction, SIGNAL(triggered()), this, SLOT(closeProjectSlot()));
+    connect(closeProjectAction, SIGNAL(triggered()),
+            this, SLOT(closeProjectSlot()));
 
 	aboutAction = new QAction(tr("&About"), this);
     aboutAction->setShortcut(QKeySequence("Ctrl+A"));
 	aboutAction->setIcon(QIcon(":/resources/pics/about.png"));
 	aboutAction->setStatusTip("About this application");
-	connect(aboutAction, SIGNAL(triggered()), this, SLOT(aboutSlot()));
+    connect(aboutAction, SIGNAL(triggered()),
+            this, SLOT(aboutSlot()));
 
     aboutQTAction = new QAction(tr("&About QT"), this);
 	aboutQTAction->setShortcut(QKeySequence("Ctrl+I"));
 	aboutQTAction->setIcon(QIcon(":/resources/pics/qt-logo.png"));
 	aboutQTAction->setStatusTip("About QT Framework");
-	connect(aboutQTAction, SIGNAL(triggered()), this, SLOT(aboutQTSlot()));
+    connect(aboutQTAction, SIGNAL(triggered()),
+            this, SLOT(aboutQTSlot()));
 
 	closeAppAction = new QAction(tr("&Exit"), this);
     closeAppAction->setShortcut(QKeySequence("Alt+F4"));
 	closeAppAction->setIcon(QIcon(":/resources/pics/closeApp.png"));
 	closeAppAction->setStatusTip("About this application");
-	connect(closeAppAction, SIGNAL(triggered()), this, SLOT(closeApplicationSlot()));
+    connect(closeAppAction, SIGNAL(triggered()),
+            this, SLOT(closeApplicationSlot()));
 
     viewPropertiesTree = new QAction(tr("&Project Properties"),this);
     viewPropertiesTree->setShortcut(QKeySequence("Ctrl+P"));
     viewPropertiesTree->setIcon(QIcon(":/resources/pics/properties.png"));
     viewPropertiesTree->setStatusTip("Project Properties");
-    connect(viewPropertiesTree, SIGNAL(triggered()), this, SLOT(viewProjectPropertiesSlot()));
+    connect(viewPropertiesTree, SIGNAL(triggered()),
+            this, SLOT(viewProjectPropertiesSlot()));
 
     loadTransXmlFile = new QAction(tr("Load Transcription"), this);
     loadTransXmlFile->setShortcut(QKeySequence("Ctrl+T"));
     loadTransXmlFile->setStatusTip("Load transcription file...");
-    connect(loadTransXmlFile, SIGNAL(triggered()), this, SLOT(loadTranscriptionFileSlot()));
+    connect(loadTransXmlFile, SIGNAL(triggered()),
+            this, SLOT(loadTranscriptionFileSlot()));
 
     loadSubtsXmlFile = new QAction(tr("Load Subtitles"), this);
     loadSubtsXmlFile->setShortcut(QKeySequence("Ctrl+U"));
     loadSubtsXmlFile->setStatusTip("Load subtitles file...");
-    connect(loadSubtsXmlFile, SIGNAL(triggered()), this, SLOT(loadSubtitlesFileSlot()));
+    loadSubtsXmlFile->setEnabled(false);
+    connect(loadSubtsXmlFile, SIGNAL(triggered()),
+            this, SLOT(loadSubtitlesFileSlot()));
+
+    cascadeSubWindowsAction = new QAction(tr("C&ascade windows"),this);
+    cascadeSubWindowsAction->setStatusTip(tr("Cascade all windows"));
+    cascadeSubWindowsAction->setEnabled(true);
+    connect(cascadeSubWindowsAction, SIGNAL(triggered()), this, SLOT(cascadeWindowsSlot()));
+
+    tileSubWindowsAction = new QAction(tr("&Tile windows"), this);
+    tileSubWindowsAction->setStatusTip(tr("Tile all windows"));
+    tileSubWindowsAction->setEnabled(true);
+    connect(tileSubWindowsAction, SIGNAL(triggered()), this, SLOT(tileWindowsSlot()));
 
     showComparisonTable = new QAction(tr("Comparison Table"), this);
     showComparisonTable->setStatusTip(tr("Comparison Table"));
-    connect(showComparisonTable, SIGNAL(triggered()), this, SLOT(showComparisonTableSlot()));
+    connect(showComparisonTable, SIGNAL(triggered()),
+            this, SLOT(showComparisonTableSlot()));
 
 }
 
-void NERMainWindow::createMenus(){
+
+/*******************************************************************************
+ * Manages application top menu handlers
+ ******************************************************************************/
+void NERMainWindow::createMenus()
+{
     fileMenu = menuBar()->addMenu(tr("&File"));
     fileMenu->addAction(newProjectAction);
     fileMenu->addAction(openProjectAction);
@@ -126,13 +171,19 @@ void NERMainWindow::createMenus(){
 
 	windowMenu = menuBar()->addMenu(tr("&Window"));
     windowMenu->addAction(showComparisonTable);
+    windowMenu->addAction(cascadeSubWindowsAction);
+    windowMenu->addAction(tileSubWindowsAction);
 	
 	helpMenu = menuBar()->addMenu(tr("Help"));
 	helpMenu->addAction(aboutQTAction);
 	helpMenu->addAction(aboutAction);
 }
 
-void NERMainWindow::createToolBars(){
+/*******************************************************************************
+ * Manages application top menu toolbar icons.
+ ******************************************************************************/
+void NERMainWindow::createToolBars()
+{
     fileToolbar = addToolBar(tr("&File"));
     fileToolbar->addAction(newProjectAction);
     fileToolbar->addAction(openProjectAction);
@@ -141,7 +192,11 @@ void NERMainWindow::createToolBars(){
 	fileToolbar->addAction(aboutAction);
 }
 
-void NERMainWindow::createStatusBar(){
+/*******************************************************************************
+ * Manages application bottom status bar for displying actions hints.
+ ******************************************************************************/
+void NERMainWindow::createStatusBar()
+{
     statusBarLeftLabel = new QLabel(this);
     statusBarLeftLabel->setAlignment(Qt::AlignCenter);
     statusBarLeftLabel->setMinimumSize(statusBarLeftLabel->sizeHint());
@@ -155,6 +210,10 @@ void NERMainWindow::createStatusBar(){
     statusBar()->addWidget(statusBarMiddleLabel, 1);
 }
 
+
+/*******************************************************************************
+ * Creates and initializes the dockable widgets of the main application.
+ ******************************************************************************/
 void NERMainWindow::createDockableWidgets()
 {
     projectPropertiesDockWidget = new QDockWidget(tr("Project Details"));
@@ -170,47 +229,83 @@ void NERMainWindow::createDockableWidgets()
     addDockWidget(Qt::RightDockWidgetArea, projectPropertiesDockWidget);
 }
 
+
+/*******************************************************************************
+ * Creates and initializes a new NER project, and closing a current open one.
+ ******************************************************************************/
 void NERMainWindow::newProjectSlot()
 {
 
 }
 
+/*******************************************************************************
+ * Save current project, and export XML file.
+ ******************************************************************************/
 void NERMainWindow::saveProjectSlot()
 {
+    QString xmlFileName = QFileDialog::getSaveFileName(
+            this,
+            tr("Save NER Project"),
+            QDir::currentPath(),
+            tr("NER Files (*.xner)"));
+
+    if(xmlFileName.isEmpty()){
+        return; //Nothing to do.
+    }
+
+    xmlHandler->writeProjectExportXML(xmlFileName,
+                                      speakerList,
+                                      transcriptionList,
+                                      nerTablesList);
 
 }
 
+/*******************************************************************************
+ * Opens an existing NER project file.
+ ******************************************************************************/
 void NERMainWindow::openProjectSlot()
 {
 
 }
 
+/*******************************************************************************
+ * Closest the current open project and all the associated widgets.
+ ******************************************************************************/
 void NERMainWindow::closeProjectSlot()
 {
 
 }
 
-void NERMainWindow::initializeMDIWindows()
-{
-	subWindowDiffTable->showNormal();
-
-}
-
+/*******************************************************************************
+ * Close the NER application.
+ ******************************************************************************/
 void NERMainWindow::closeApplicationSlot()
 {
     QApplication::exit(0);
 }
 
+/*******************************************************************************
+ * Show QT information slot.
+ ******************************************************************************/
 void NERMainWindow::aboutQTSlot()
 {
     QApplication::aboutQt();
 }
 
+/*******************************************************************************
+ * Show some Ner info.
+ ******************************************************************************/
 void NERMainWindow::aboutSlot()
 {
     About *aboutDialog = new About(this);
 	aboutDialog->setAttribute(Qt::WA_DeleteOnClose);
 	aboutDialog->show();
+}
+
+void NERMainWindow::initializeMDIWindows()
+{
+    //subWindowDiffTable->showNormal();
+
 }
 
 void NERMainWindow::viewProjectPropertiesSlot()
@@ -222,6 +317,9 @@ void NERMainWindow::enableActionsTransLoaded(){
 
 }
 
+/*******************************************************************************
+ * Loads a "transcriber" XML file importing it to NER table.
+ ******************************************************************************/
 void NERMainWindow::loadTranscriptionFileSlot()
 {
 
@@ -231,32 +329,113 @@ void NERMainWindow::loadTranscriptionFileSlot()
             QDir::currentPath(),
             tr("TRS file (*.trs)") );
 
+    if(fileName.isEmpty()){
+        return; //Nothing to do...
+    }
+
     transcriptionList->clear();
     speakerList->clear();
 
     isTranscriptionLoaded = xmlHandler->readTranscriberXML(fileName, transcriptionList, speakerList);
 
-    if(isTranscriptionLoaded){
-        diffTableWid->deleteTablesContents();
-        diffTableWid->loadXMLData(transcriptionList);
-    }
+    QString s;
+    QFileInfo info(fileName);
+    QString baseName = info.baseName();
+    propertiesTreeWidget->insertNewTranslation(baseName, s, s);
+    loadSubtsXmlFile->setEnabled(true);
+
 }
 
+void NERMainWindow::addNewTableAndTreeNode()
+{
+
+
+}
+
+/*******************************************************************************
+ * Loads a "transcriber" XML file containing "subtitle" content.
+ ******************************************************************************/
 void NERMainWindow::loadSubtitlesFileSlot(){
-    QString fileName = QFileDialog::getOpenFileName(
+    QStringList fileNames = QFileDialog::getOpenFileNames(
             this,
             tr("Open TRS File"),
             QDir::currentPath(),
             tr("TRS file (*.trs)") );
-    QList<BlockTRS> *trsList = new QList<BlockTRS>();
-    xmlHandler->readSubtitleXML(fileName, trsList);
-    diffTableWid->loadSubtitlesXMLData(transcriptionList, trsList);
-    delete trsList;
-    trsList = NULL;
+
+    if(fileNames.count()==0){
+        return; //Nothing to do...
+    }
+
+
+    //Multiple file loading...
+    for(int i=0; i<fileNames.count(); i++){
+
+        //Load XML
+        QList<BlockTRS> *trsList = new QList<BlockTRS>();
+        QString file = fileNames.at(i);
+
+        bool loaded = xmlHandler->readSubtitleXML(file, trsList);
+        if(!loaded){
+            //Check if XML file is OK.
+            QMessageBox box;
+            box.setWindowTitle("File loading failed!");
+            QString detail;
+            detail.append("Import of ")
+                    .append(file)
+                    .append(" XML failed. This file was ignored.");
+            box.setInformativeText(detail);
+            box.setIcon(QMessageBox::Warning);
+            box.setStandardButtons(QMessageBox::Ok);
+            box.exec();
+
+            continue; //proceed to next file...
+        }
+
+        NERTableWidget *table = new NERTableWidget(this);
+        table->deleteTablesContents();
+        table->loadXMLData(transcriptionList);
+        table->loadSubtitlesXMLData(transcriptionList, trsList);
+
+        //Append this loaded subtitles to the global list.
+        nerTablesList->append(table);
+
+        //Add a new subwindow
+        QMdiSubWindow *subWindow = mainMdiArea->addSubWindow(table,
+                                                             /*Qt::CustomizeWindowHint
+                                                                                                              |*/ Qt::WindowTitleHint
+                                                             | Qt::WindowMinMaxButtonsHint
+                                                             | Qt::WindowCloseButtonHint);
+        QString title;
+        QFileInfo info(file);
+        title.append(info.baseName());
+
+        //Display new subwindow
+        subWindow->setWindowTitle(title);
+        subWindow->setMinimumSize(800,600);
+        subWindow->showNormal();
+
+        QString s;
+
+        //Insert new item in the tree...
+        propertiesTreeWidget->insertNewSubtitle(title, s, s);
+
+        delete trsList;
+        trsList = NULL;
+    }
 }
 
 void NERMainWindow::showComparisonTableSlot(){
 
+}
+
+void NERMainWindow::cascadeWindowsSlot()
+{
+    mainMdiArea->cascadeSubWindows();
+}
+
+void NERMainWindow::tileWindowsSlot()
+{
+    mainMdiArea->tileSubWindows();
 }
 
 

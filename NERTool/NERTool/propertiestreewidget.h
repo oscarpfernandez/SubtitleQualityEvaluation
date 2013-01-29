@@ -16,7 +16,12 @@ class PropertiesTreeWidget : public QWidget
     Q_OBJECT
 public:
     explicit PropertiesTreeWidget(QWidget *parent = 0);
-    void insertNewSubtitle(QString &fileName, QString &responsible, QString &description);
+    void insertNewSubtitle(QString &fileName,
+                           QString &responsible,
+                           QString &description);
+    void insertNewTranslation(QString &fileName,
+                              QString &responsible,
+                              QString &description);
     void insertNewSpeaker(QString &speaker);
     
 private:

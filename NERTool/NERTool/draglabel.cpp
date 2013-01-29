@@ -31,6 +31,8 @@ QString DragLabel::labelText() const
  ******************************************************************************/
 void DragLabel::setupLabelType(DragLabel::EditionTypeEnum ete)
 {
+    errorType = ete;
+
     QFontMetrics metric(font());
     size = metric.size(Qt::TextSingleLine, m_labelText);
 
@@ -109,6 +111,11 @@ void DragLabel::setupLabelType(DragLabel::EditionTypeEnum ete)
 
     }
     setPixmap(QPixmap::fromImage(image));
+}
+
+DragLabel::EditionTypeEnum DragLabel::getError()
+{
+    return errorType;
 }
 
 void DragLabel::setComment(QString &newComment)

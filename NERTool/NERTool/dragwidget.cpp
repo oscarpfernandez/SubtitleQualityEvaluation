@@ -7,7 +7,6 @@ DragWidget::DragWidget(QWidget *parent, QString &textBlock, int maxWidth)  : QWi
     int x = 5;
     int y = 2;
     m_maxWidgetWidth = maxWidth;
-    m_counter = 0;
     m_numLines = 0;
 
 	QStringList wordsList = textBlock.split(" ");
@@ -21,7 +20,7 @@ DragWidget::DragWidget(QWidget *parent, QString &textBlock, int maxWidth)  : QWi
             wordLabel->move(x, y);
             wordLabel->show();
             wordLabel->setAttribute(Qt::WA_DeleteOnClose);
-            m_labelsPointerList->insert(m_counter++, wordLabel);
+            m_labelsPointerList->append(wordLabel);
 
             x += wordLabel->width()+1;
 
@@ -37,10 +36,6 @@ DragWidget::DragWidget(QWidget *parent, QString &textBlock, int maxWidth)  : QWi
     QPalette newPalette = palette();
     newPalette.setColor(QPalette::Window, Qt::white);
     setPalette(newPalette);
-
-    //setMinimumSize(400, qMax(200, y));
-
-    //setAcceptDrops(true);
 }
 
 DragWidget::~DragWidget()
@@ -48,6 +43,38 @@ DragWidget::~DragWidget()
 
 }
 
+int DragWidget::countWords()
+{
+    if(m_labelsPointerList->isEmpty()){
+        return 0;
+    }
+
+    int c =  m_labelsPointerList->count();
+    qDebug() << "Number of words -> "<< c;
+
+    return m_labelsPointerList->count();
+}
+
+DragLabel* DragWidget::getWordAt(int pos)
+{
+    if(pos >= countWords()){
+        return 0;
+    }
+
+    return m_labelsPointerList->at(pos);
+}
+
+QString DragWidget::getText()
+{
+    QString ret;
+    for(int i=0; i<m_labelsPointerList->count(); i++){
+        DragLabel *w = m_labelsPointerList->at(i);
+        ret.append(w->labelText()).append(" ");
+    }
+
+    return ret;
+
+}
 
 //void DragWidget::dragEnterEvent(QDragEnterEvent *event)
 //{
