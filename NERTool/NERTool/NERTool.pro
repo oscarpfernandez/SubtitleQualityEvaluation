@@ -20,7 +20,8 @@ SOURCES += main.cpp\
     waveform.cpp \
     utils.cpp \
     nertablewidget.cpp \
-    draglabelcomment.cpp
+    draglabelcomment.cpp \
+    mediamngwidget.cpp
 
 HEADERS  += nermainwindow.h \
     dragwidget.h \
@@ -33,7 +34,8 @@ HEADERS  += nermainwindow.h \
     utils.h \
     nertablewidget.h \
     nercommon.h \
-    draglabelcomment.h
+    draglabelcomment.h \
+    mediamngwidget.h
 
 RC_FILE = app.rc
 

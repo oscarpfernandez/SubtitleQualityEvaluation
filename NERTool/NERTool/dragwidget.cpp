@@ -1,8 +1,18 @@
 #include <QtGui>
 #include "dragwidget.h"
 
-DragWidget::DragWidget(QWidget *parent, QString &textBlock, int maxWidth)  : QWidget(parent)
+
+/*******************************************************************************
+ * This class manages the several words of a sentence, allowing to mark and
+ * individual text token with a specific error type, and associate with it with
+ * a comment.
+ ******************************************************************************/
+DragWidget::DragWidget(QWidget *parent,
+                       QString &textBlock,
+                       int maxWidth,
+                       bool isModifiable)  : QWidget(parent)
 {
+    m_isModifiable = isModifiable;
     m_labelsPointerList = new QList<DragLabel *>();
     int x = 5;
     int y = 2;
@@ -36,6 +46,9 @@ DragWidget::DragWidget(QWidget *parent, QString &textBlock, int maxWidth)  : QWi
     QPalette newPalette = palette();
     newPalette.setColor(QPalette::Window, Qt::white);
     setPalette(newPalette);
+
+    setContextMenuPolicy(Qt::DefaultContextMenu);
+    installEventFilter(this);
 }
 
 DragWidget::~DragWidget()
@@ -43,18 +56,25 @@ DragWidget::~DragWidget()
 
 }
 
+/*******************************************************************************
+ * Provides the number of words contained in the text block.
+ ******************************************************************************/
 int DragWidget::countWords()
 {
     if(m_labelsPointerList->isEmpty()){
         return 0;
     }
 
-    int c =  m_labelsPointerList->count();
-    qDebug() << "Number of words -> "<< c;
+//    int c =  m_labelsPointerList->count();
+//    qDebug() << "Number of words -> "<< c;
 
     return m_labelsPointerList->count();
 }
 
+/*******************************************************************************
+ * Provides a word at a specific position from the word set.
+ * If the index it out of bounds, NULL pointer is returned.
+ ******************************************************************************/
 DragLabel* DragWidget::getWordAt(int pos)
 {
     if(pos >= countWords()){
@@ -64,6 +84,9 @@ DragLabel* DragWidget::getWordAt(int pos)
     return m_labelsPointerList->at(pos);
 }
 
+/*******************************************************************************
+ * Provides the full text contained in the widget.
+ ******************************************************************************/
 QString DragWidget::getText()
 {
     QString ret;
@@ -152,53 +175,69 @@ QString DragWidget::getText()
 //    }
 //}
 
-void DragWidget::mousePressEvent(QMouseEvent *event)
+/*******************************************************************************
+ * QEvent filter for managing context menu call over the drag widget to change
+ * the error status.
+ ******************************************************************************/
+bool DragWidget::eventFilter(QObject *obj, QEvent *event)
 {
-
-    DragLabel *child = static_cast<DragLabel*>(childAt(event->pos()));
-    if (!child){
-        return;
+    if(!m_isModifiable){
+        //disable context menu...
+        return false;
     }
 
-    QPoint hotSpot = event->pos() - child->pos();
-    //QPoint hotSpot = event->pos();
+    QMouseEvent *mouseEvent = static_cast<QMouseEvent*> (event);
 
-    // for most widgets
-    QPoint globalPos = child->mapToGlobal(hotSpot);
-    // for QAbstractScrollArea and derived classes you would use:
-    //QPoint globalPos = this->viewport()->mapToGlobal(hotSpot);
+    if(mouseEvent->type() == QEvent::ContextMenu){
 
-    QMenu myMenu(this);
-    myMenu.addAction(CORRECT_EDITION_STR);
-    myMenu.addAction(EDITION_ERROR);
-    myMenu.addAction(RECOG_ERROR_STR);
-    myMenu.addSeparator();
-    myMenu.addAction(EDITION_COMMENT);
-    // ...
+        DragLabel *child = static_cast<DragLabel*>(childAt(mouseEvent->pos()));
+        if (!child){
+            return false;
+        }
 
-    QAction* selectedItem = myMenu.exec(globalPos);
-    if(selectedItem){
-        if (selectedItem->text() == CORRECT_EDITION_STR)
-        {
-            child->setupLabelType(DragLabel::CorrectEdition);
+        QPoint hotSpot = mouseEvent->pos() - child->pos();
+        //QPoint hotSpot = event->pos();
+
+        // for most widgets
+        QPoint globalPos = child->mapToGlobal(hotSpot);
+        // for QAbstractScrollArea and derived classes you would use:
+        //QPoint globalPos = this->viewport()->mapToGlobal(hotSpot);
+
+        QMenu myMenu(this);
+        myMenu.addAction(CORRECT_EDITION_STR);
+        myMenu.addAction(EDITION_ERROR);
+        myMenu.addAction(RECOG_ERROR_STR);
+        myMenu.addSeparator();
+        myMenu.addAction(EDITION_COMMENT);
+        // ...
+
+        QAction* selectedItem = myMenu.exec(globalPos);
+        if(selectedItem){
+            if (selectedItem->text() == CORRECT_EDITION_STR)
+            {
+                child->setupLabelType(DragLabel::CorrectEdition);
+            }
+            else if(selectedItem->text() == EDITION_ERROR)
+            {
+                child->setupLabelType(DragLabel::EditionError);
+            }
+            else if(selectedItem->text() == RECOG_ERROR_STR)
+            {
+                child->setupLabelType(DragLabel::RecognitionError);
+            }
+            else if(selectedItem->text() == EDITION_COMMENT){
+                //Modify comment used in the report...
+                QString comment = child->getComment();
+                child->setComment(comment);
+                child->showCommentEditor();
+            }
         }
-        else if(selectedItem->text() == EDITION_ERROR)
-        {
-            child->setupLabelType(DragLabel::EditionError);
-        }
-        else if(selectedItem->text() == RECOG_ERROR_STR)
-        {
-            child->setupLabelType(DragLabel::RecognitionError);
-        }
-        else if(selectedItem->text() == EDITION_COMMENT){
-            //Modify comment used in the report...
-            QString comment = child->getComment();
-            child->setComment(comment);
-            child->showCommentEditor();
-        }
+        return true;
     }
-
-
+    else {
+        return QWidget::eventFilter(obj, event);
+    }
+}
 //    QByteArray itemData;
 //    QDataStream dataStream(&itemData, QIODevice::WriteOnly);
 //    dataStream << child->labelText() << QPoint(hotSpot);
@@ -218,8 +257,10 @@ void DragWidget::mousePressEvent(QMouseEvent *event)
 //        child->close();
 //    else
 //        child->show();
-}
 
+/*******************************************************************************
+ * Returns the size of the widget.
+ ******************************************************************************/
 QSize DragWidget::getBlockSize()
 {
     int height = 0;

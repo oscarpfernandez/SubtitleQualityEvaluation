@@ -54,6 +54,7 @@ const QString STR_TABLELINE_TAG = "TableLine";
 const QString STR_TABLELINE_PROP_SID = "sID";
 const QString STR_TABLELINE_PROP_TIMESTAMP = "timestamp";
 const QString STR_TABLELINE_PROP_TRANSCRIP = "transcription";
+const QString STR_SUBTABLELINE_TAG = "SubTableLine";
 const QString STR_WORD_TAG = "SubtWord";
 const QString STR_WORD_PROP_NAME = "name";
 const QString STR_WORD_PROP_ERROR = "error";

@@ -20,7 +20,7 @@ class DragWidget : public QWidget
 {
     Q_OBJECT
 public:
-    DragWidget(QWidget *parent, QString &textBlock, int maxWidth);
+    DragWidget(QWidget *parent, QString &textBlock, int maxWidth, bool isModifiable);
     ~DragWidget();
     QSize getBlockSize();
     void showCommentEditor();
@@ -32,10 +32,12 @@ protected:
     //void dragEnterEvent(QDragEnterEvent *event);
     //void dragMoveEvent(QDragMoveEvent *event);
     //void dropEvent(QDropEvent *event);
-    void mousePressEvent(QMouseEvent *event);
+    //void mousePressEvent(QMouseEvent *event);
+    bool eventFilter(QObject *obj, QEvent *event);
 
 private:
     QList<DragLabel*> *m_labelsPointerList;
+    bool m_isModifiable;
     int m_maxWidgetWidth;
     int m_numberOfLines;
     int m_labelSize;

@@ -21,8 +21,15 @@ About::About(QWidget *parent) : QDialog(parent)
     createElements();
 
     setLayout(mainVBoxLayout);
-    setFixedSize(sizeHint().width(),550);
+    setFixedSize(sizeHint().width(),500);
+}
 
+About::~About()
+{
+    delete textEdit;
+    delete imageLabel;
+    delete buttonHBoxLayout;
+    delete mainVBoxLayout;
 }
 
 /******************************************************************************
@@ -37,8 +44,8 @@ void About::createElements()
     imageLabel->setPixmap(QPixmap(":/resources/pics/splash.png"));
 
     QPalette pal;
-    QColor bgColor("white");
-    QColor fgColor("blue");
+    QColor bgColor("black");
+    QColor fgColor("white");
     pal.setColor(QPalette::Base, bgColor);
     pal.setColor(QPalette::Text, fgColor);
 
@@ -50,23 +57,17 @@ void About::createElements()
     buttonHBoxLayout->addWidget(button);
 
     QString textToShow = QString();
-    textToShow.append("<DIV ALIGN=CENTER><p>Based on QT Framework version: ");
-    textToShow.append(QString(qVersion()));
+    textToShow.append("<p>NER Evaluation Tool</p>");
     textToShow.append("</p>");
-    textToShow.append("<p>Built on ");
-    textToShow.append(QDate::currentDate().toString());
-    textToShow.append(" at ");
-    textToShow.append(QTime::currentTime().toString());
+    textToShow.append("<p>Copyright 2013 - All rights reserved.</p>");
     textToShow.append("</p>");
-    textToShow.append("<p>Copyright 2011-2012 - All rights reserved.</p>");
-    textToShow.append("</p>");
-    textToShow.append("<p><a href=\"http://www.uab.cat/\">Universidad Autonoma de Barcelona</a></p></DIV>");
+    textToShow.append("<p>Universidad Autonoma de Barcelona</p></DIV>");
 
     textEdit = new QTextEdit(this);
     textEdit->setHtml(textToShow);
     textEdit->setReadOnly(true);
-    textEdit->setCurrentFont(QFont("Arial",14, QFont::Bold));
-    textEdit->setAlignment(Qt::AlignCenter);
+    textEdit->setCurrentFont(QFont("Verdana",10, QFont::Bold));
+    textEdit->setAlignment(Qt::AlignRight);
     textEdit->setPalette(pal);
     mainVBoxLayout->addWidget(imageLabel);
     mainVBoxLayout->addWidget(textEdit);

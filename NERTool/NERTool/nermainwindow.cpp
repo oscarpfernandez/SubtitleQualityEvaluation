@@ -55,6 +55,9 @@ void NERMainWindow::createGuiElements()
 //    subWindowDiffTable->setMinimumSize(800,600);
 
     propertiesTreeWidget = new PropertiesTreeWidget(this);
+
+    mediaMngWidget = new MediaMngWidget(this);
+
 }
 
 /*******************************************************************************
@@ -219,14 +222,21 @@ void NERMainWindow::createDockableWidgets()
     projectPropertiesDockWidget = new QDockWidget(tr("Project Details"));
     projectPropertiesDockWidget->setObjectName("projectTreeDockWidget");
     projectPropertiesDockWidget->setWidget(propertiesTreeWidget);
-    projectPropertiesDockWidget->setAllowedAreas(Qt::LeftDockWidgetArea
-                                                 | Qt::RightDockWidgetArea);
+    projectPropertiesDockWidget->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
     projectPropertiesDockWidget->setToolTip(tr("Project Details"));
     projectPropertiesDockWidget->setMinimumWidth(150);
     projectPropertiesDockWidget->setMaximumWidth(850);
     projectPropertiesDockWidget->setWindowIcon(QIcon(":/resources/pics/docs.png"));
 
     addDockWidget(Qt::RightDockWidgetArea, projectPropertiesDockWidget);
+
+    audioWaveFormDockWidget = new QDockWidget(tr("Media Player"));
+    audioWaveFormDockWidget->setObjectName("mediaControlDockWidget");
+    audioWaveFormDockWidget->setWidget(mediaMngWidget);
+    audioWaveFormDockWidget->setAllowedAreas(Qt::BottomDockWidgetArea | Qt::TopDockWidgetArea);
+    audioWaveFormDockWidget->setToolTip(tr("Media player for audio and video content..."));
+
+    addDockWidget(Qt::BottomDockWidgetArea, audioWaveFormDockWidget);
 }
 
 

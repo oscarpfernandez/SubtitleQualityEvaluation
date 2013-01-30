@@ -4,12 +4,18 @@
 #include <QResizeEvent>
 #include <QDebug>
 
+//#define PAINT_EVENT_TRACE
+#ifdef PAINT_EVENT_TRACE
+#   define WAVEFORM_PAINT_DEBUG qDebug()
+#else
+#   define WAVEFORM_PAINT_DEBUG nullDebug()
+#endif
 
-Waveform::Waveform(const QByteArray &buffer, QWidget *parent)
+Waveform::Waveform(QWidget *parent)
     :   QWidget(parent)
-    ,   m_buffer(buffer)
-    ,   m_dataLength(0)
-    ,   m_position(0)
+    ,   m_bufferPosition(0)
+    ,   m_bufferLength(0)
+    ,   m_audioPosition(0)
     ,   m_active(false)
     ,   m_tileLength(0)
     ,   m_tileArrayStart(0)
@@ -17,7 +23,7 @@ Waveform::Waveform(const QByteArray &buffer, QWidget *parent)
     ,   m_windowLength(0)
 {
     setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
-    setMinimumHeight(50);
+    setMinimumHeight(100);
 }
 
 Waveform::~Waveform()
@@ -32,25 +38,25 @@ void Waveform::paintEvent(QPaintEvent * /*event*/)
     painter.fillRect(rect(), Qt::black);
 
     if (m_active) {
-        WAVEFORM_DEBUG << "Waveform::paintEvent"
-                       << "windowPosition" << m_windowPosition
-                       << "windowLength" << m_windowLength;
+        WAVEFORM_PAINT_DEBUG << "Waveform::paintEvent"
+                             << "windowPosition" << m_windowPosition
+                             << "windowLength" << m_windowLength;
         qint64 pos = m_windowPosition;
         const qint64 windowEnd = m_windowPosition + m_windowLength;
         int destLeft = 0;
         int destRight = 0;
         while (pos < windowEnd) {
             const TilePoint point = tilePoint(pos);
-            WAVEFORM_DEBUG << "Waveform::paintEvent" << "pos" << pos
-                           << "tileIndex" << point.index
-                           << "positionOffset" << point.positionOffset
-                           << "pixelOffset" << point.pixelOffset;
+            WAVEFORM_PAINT_DEBUG << "Waveform::paintEvent" << "pos" << pos
+                                 << "tileIndex" << point.index
+                                 << "positionOffset" << point.positionOffset
+                                 << "pixelOffset" << point.pixelOffset;
 
             if (point.index != NullIndex) {
                 const Tile &tile = m_tiles[point.index];
                 if (tile.painted) {
                     const qint64 sectionLength = qMin((m_tileLength - point.positionOffset),
-                                                     (windowEnd - pos));
+                                                      (windowEnd - pos));
                     Q_ASSERT(sectionLength > 0);
 
                     const int sourceRight = tilePixelOffset(point.positionOffset + sectionLength);
@@ -64,9 +70,9 @@ void Waveform::paintEvent(QPaintEvent * /*event*/)
                     sourceRect.setLeft(point.pixelOffset);
                     sourceRect.setRight(sourceRight);
 
-                    WAVEFORM_DEBUG << "Waveform::paintEvent" << "tileIndex" << point.index
-                                   << "source" << point.pixelOffset << sourceRight
-                                   << "dest" << destLeft << destRight;
+                    WAVEFORM_PAINT_DEBUG << "Waveform::paintEvent" << "tileIndex" << point.index
+                                         << "source" << point.pixelOffset << sourceRight
+                                         << "dest" << destLeft << destRight;
 
                     painter.drawPixmap(destRect, *tile.pixmap, sourceRect);
 
@@ -74,25 +80,25 @@ void Waveform::paintEvent(QPaintEvent * /*event*/)
 
                     if (point.index < m_tiles.count()) {
                         pos = tilePosition(point.index + 1);
-                        WAVEFORM_DEBUG << "Waveform::paintEvent" << "pos ->" << pos;
+                        WAVEFORM_PAINT_DEBUG << "Waveform::paintEvent" << "pos ->" << pos;
                     } else {
                         // Reached end of tile array
-                        WAVEFORM_DEBUG << "Waveform::paintEvent" << "reached end of tile array";
+                        WAVEFORM_PAINT_DEBUG << "Waveform::paintEvent" << "reached end of tile array";
                         break;
                     }
                 } else {
                     // Passed last tile which is painted
-                    WAVEFORM_DEBUG << "Waveform::paintEvent" << "tile" << point.index << "not painted";
+                    WAVEFORM_PAINT_DEBUG << "Waveform::paintEvent" << "tile" << point.index << "not painted";
                     break;
                 }
             } else {
                 // pos is past end of tile array
-                WAVEFORM_DEBUG << "Waveform::paintEvent" << "pos" << pos << "past end of tile array";
+                WAVEFORM_PAINT_DEBUG << "Waveform::paintEvent" << "pos" << pos << "past end of tile array";
                 break;
             }
         }
 
-        WAVEFORM_DEBUG << "Waveform::paintEvent" << "final pos" << pos << "final x" << destRight;
+        WAVEFORM_PAINT_DEBUG << "Waveform::paintEvent" << "final pos" << pos << "final x" << destRight;
     }
 }
 
@@ -106,7 +112,6 @@ void Waveform::initialize(const QAudioFormat &format, qint64 audioBufferSize, qi
 {
     WAVEFORM_DEBUG << "Waveform::initialize"
                    << "audioBufferSize" << audioBufferSize
-                   << "m_buffer.size()" << m_buffer.size()
                    << "windowDurationUs" << windowDurationUs;
 
     reset();
@@ -146,8 +151,9 @@ void Waveform::reset()
 {
     WAVEFORM_DEBUG << "Waveform::reset";
 
-    m_dataLength = 0;
-    m_position = 0;
+    m_bufferPosition = 0;
+    m_buffer = QByteArray();
+    m_audioPosition = 0;
     m_format = QAudioFormat();
     m_active = false;
     deletePixmaps();
@@ -158,30 +164,31 @@ void Waveform::reset()
     m_windowLength = 0;
 }
 
-void Waveform::dataLengthChanged(qint64 length)
+void Waveform::bufferChanged(qint64 position, qint64 length, const QByteArray &buffer)
 {
-    WAVEFORM_DEBUG << "Waveform::dataLengthChanged" << length;
-    const qint64 oldLength = m_dataLength;
-    m_dataLength = length;
-
-    if (m_active) {
-        if (m_dataLength < oldLength)
-            positionChanged(m_dataLength);
-        else
-            paintTiles();
-    }
+    WAVEFORM_DEBUG << "Waveform::bufferChanged"
+                   << "audioPosition" << m_audioPosition
+                   << "bufferPosition" << position
+                   << "bufferLength" << length;
+    m_bufferPosition = position;
+    m_bufferLength = length;
+    m_buffer = buffer;
+    paintTiles();
 }
 
-void Waveform::positionChanged(qint64 position)
+void Waveform::audioPositionChanged(qint64 position)
 {
-    WAVEFORM_DEBUG << "Waveform::positionChanged" << position;
+    WAVEFORM_DEBUG << "Waveform::audioPositionChanged"
+                   << "audioPosition" << position
+                   << "bufferPosition" << m_bufferPosition
+                   << "bufferLength" << m_bufferLength;
 
-    if (position + m_windowLength > m_dataLength)
-        position = m_dataLength - m_windowLength;
-
-    m_position = position;
-
-    setWindowPosition(position);
+    if (position >= m_bufferPosition) {
+        if (position + m_windowLength > m_bufferPosition + m_bufferLength)
+            position = qMax(qint64(0), m_bufferPosition + m_bufferLength - m_windowLength);
+        m_audioPosition = position;
+        setWindowPosition(position);
+    }
 }
 
 void Waveform::deletePixmaps()
@@ -215,8 +222,6 @@ void Waveform::createPixmaps(const QSize &widgetSize)
         m_tiles[i].pixmap = m_pixmaps[i];
         m_tiles[i].painted = false;
     }
-
-    paintTiles();
 }
 
 void Waveform::setWindowPosition(qint64 position)
@@ -229,7 +234,7 @@ void Waveform::setWindowPosition(qint64 position)
     m_windowPosition = position;
 
     if((m_windowPosition >= oldPosition) &&
-        (m_windowPosition - m_tileArrayStart < (m_tiles.count() * m_tileLength))) {
+            (m_windowPosition - m_tileArrayStart < (m_tiles.count() * m_tileLength))) {
         // Work out how many tiles need to be shuffled
         const qint64 offset = m_windowPosition - m_tileArrayStart;
         const int nTiles = offset / m_tileLength;
@@ -287,8 +292,9 @@ bool Waveform::paintTiles()
     for (int i=0; i<m_tiles.count(); ++i) {
         const Tile &tile = m_tiles[i];
         if (!tile.painted) {
-            const qint64 tileEnd = m_tileArrayStart + (i + 1) * m_tileLength;
-            if (m_dataLength >= tileEnd) {
+            const qint64 tileStart = m_tileArrayStart + i * m_tileLength;
+            const qint64 tileEnd = tileStart + m_tileLength;
+            if (m_bufferPosition <= tileStart && m_bufferPosition + m_bufferLength >= tileEnd) {
                 paintTile(i);
                 updateRequired = true;
             }
@@ -303,16 +309,23 @@ bool Waveform::paintTiles()
 
 void Waveform::paintTile(int index)
 {
-    WAVEFORM_DEBUG << "Waveform::paintTile" << "index" << index;
-
     const qint64 tileStart = m_tileArrayStart + index * m_tileLength;
-    Q_ASSERT(m_dataLength >= tileStart + m_tileLength);
+
+    WAVEFORM_DEBUG << "Waveform::paintTile"
+                   << "index" << index
+                   << "bufferPosition" << m_bufferPosition
+                   << "bufferLength" << m_bufferLength
+                   << "start" << tileStart
+                   << "end" << tileStart + m_tileLength;
+
+    Q_ASSERT(m_bufferPosition <= tileStart);
+    Q_ASSERT(m_bufferPosition + m_bufferLength >= tileStart + m_tileLength);
 
     Tile &tile = m_tiles[index];
     Q_ASSERT(!tile.painted);
 
     const qint16* base = reinterpret_cast<const qint16*>(m_buffer.constData());
-    const qint16* buffer = base + (tileStart / 2);
+    const qint16* buffer = base + ((tileStart - m_bufferPosition) / 2);
     const int numSamples = m_tileLength / (2 * m_format.channels());
 
     QPainter painter(tile.pixmap);
@@ -336,6 +349,11 @@ void Waveform::paintTile(int index)
 
     for (int i=0; i<numSamples; ++i) {
         const qint16* ptr = buffer + i * m_format.channels();
+
+        const int offset = reinterpret_cast<const char*>(ptr) - m_buffer.constData();
+        Q_ASSERT(offset >= 0);
+        Q_ASSERT(offset < m_bufferLength);
+
         const qint16 pcmValue = *ptr;
         const qreal realValue = pcmToReal(pcmValue);
 
@@ -375,4 +393,3 @@ void Waveform::resetTiles(qint64 newStartPos)
 
     m_tileArrayStart = newStartPos;
 }
-

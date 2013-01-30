@@ -15,7 +15,7 @@
 #include "nertablewidget.h"
 #include "propertiestreewidget.h"
 #include "nercommon.h"
-
+#include "mediamngwidget.h"
 
 
 //QT_BEGIN_NAMESPACE
@@ -51,9 +51,12 @@ private:
     NERTableWidget *diffTableWid;
     PropertiesTreeWidget *propertiesTreeWidget;
 
+    MediaMngWidget *mediaMngWidget;
+
     QMap<QTreeWidgetItem*, NERTableWidget*> mapTableContentTree;
 
     QDockWidget *projectPropertiesDockWidget;
+    QDockWidget *audioWaveFormDockWidget;
 
     QAction *newProjectAction;
     QAction *saveProjectAction;

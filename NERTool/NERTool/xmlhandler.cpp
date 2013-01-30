@@ -27,20 +27,20 @@ bool XMLHandler::readTranscriberXML(QString &xmlFilePath,
                                     QList<BlockTRS> *trsBlocks,
                                     QList<Speaker> *speakerList)
 {
-	if(QFile::exists(xmlFilePath)){
+    if(QFile::exists(xmlFilePath)){
         QFile *xmlFile = new QFile(xmlFilePath);
         if(xmlFile->open(QIODevice::ReadOnly | QIODevice::Text))
         {
             return loadTranscriberXML(xmlFile, trsBlocks, speakerList);
         }
-	}
+    }
 
     return false;
 
 }
 
 bool XMLHandler::readSubtitleXML(QString &xmlFilePath,
-                                    QList<BlockTRS> *trsBlocks)
+                                 QList<BlockTRS> *trsBlocks)
 {
     if(QFile::exists(xmlFilePath)){
         QFile *xmlFile = new QFile(xmlFilePath);
@@ -90,16 +90,15 @@ bool XMLHandler::loadTranscriberXML(QFile *xmlFile,
                                     QList<BlockTRS> *trsBlocks,
                                     QList<Speaker> *speakerList){
 
-    bool isSyncBlock = false;
     QString syncTime;
     QString speaker;
 
     QXmlStreamReader *xmlReader = new QXmlStreamReader(xmlFile);
     QXmlStreamAttributes attrs;
 
-	while(!xmlReader->atEnd() && !xmlReader->hasError()) {
+    while(!xmlReader->atEnd() && !xmlReader->hasError()) {
 
-		/* Read next element.*/
+        /* Read next element.*/
         xmlReader->readNext();
 
 
@@ -117,61 +116,60 @@ bool XMLHandler::loadTranscriberXML(QFile *xmlFile,
                 textFinal.replace(",",", ");
                 btr.setSpeaker(speaker).setSyncTime(syncTime).setText(textFinal);
                 trsBlocks->append(btr);
-                qDebug(btr.toString().toAscii());
+                //qDebug(btr.toString().toAscii());
             }
             continue;
         }
 
-		/* If token is StartElement, we'll see if we can read it.*/
+        /* If token is StartElement, we'll see if we can read it.*/
         if(xmlReader->isStartElement()) {
-			if(xmlReader->name() == STR_SPEAKERS){
-				qDebug("\tSpeakers block...");
-				continue;
-			}
+            if(xmlReader->name() == STR_SPEAKERS){
+                qDebug("\tSpeakers block...");
+                continue;
+            }
 
-			if(xmlReader->name() == STR_SPEAKER){
-				qDebug("\tspeaker...");
-				//Read Speaker attributes
-				QXmlStreamAttributes attrs = xmlReader->attributes();
-				const QString id = attrs.value(STR_SPEAKER_ID).toString();
-				const QString name = attrs.value(STR_SPEAKER_NAME).toString();
+            if(xmlReader->name() == STR_SPEAKER){
+                qDebug("\tspeaker...");
+                //Read Speaker attributes
+                QXmlStreamAttributes attrs = xmlReader->attributes();
+                const QString id = attrs.value(STR_SPEAKER_ID).toString();
+                const QString name = attrs.value(STR_SPEAKER_NAME).toString();
                 const QString type = attrs.value(STR_SPEAKER_TYPE).toString();
                 Speaker sp;
                 sp.setId(id).setName(name).setType(type);
                 speakerList->append(sp);
-				continue;
-			}
+                continue;
+            }
 
-			if(xmlReader->name() == STR_TRANS) {
-				//Ignore it for the moment...
+            if(xmlReader->name() == STR_TRANS) {
+                //Ignore it for the moment...
                 qDebug("\tReading transcritption block...");
                 continue;
             }
             if(xmlReader->name() == STR_EPISODE) {
                 qDebug("\tReading episode block...");
                 continue;
-				
+
             }
-			if(xmlReader->name() == STR_SECTION){
-				continue;
-			}
-			if(xmlReader->name() == STR_TURN){
+            if(xmlReader->name() == STR_SECTION){
+                continue;
+            }
+            if(xmlReader->name() == STR_TURN){
                 attrs = xmlReader->attributes();
                 speaker = attrs.value(STR_TURN_SPEAKER).toString();
-				continue;
-			}
+                continue;
+            }
             else if(xmlReader->name() == STR_SYNC){
                 qDebug("\tReading Sync block...");
                 attrs = xmlReader->attributes();
                 syncTime = attrs.value(STR_SYNC_TIME).toString();
-                isSyncBlock = true;
                 continue;
             }
             
         }
 
 
-		if(xmlReader->isEndElement()) {
+        if(xmlReader->isEndElement()) {
             qDebug("\tClosing block...");
             continue;
         }
@@ -179,7 +177,7 @@ bool XMLHandler::loadTranscriberXML(QFile *xmlFile,
             qDebug("\tEnd document block...");
             continue;
         }
-	}
+    }
 
     return true;
 }
@@ -215,7 +213,7 @@ bool XMLHandler::loadSubtitleXML(QFile *xmlFile, QList<BlockTRS> *trsBlocks)
                 textFinal.replace(",",", ");
                 btr.setSpeaker(speaker).setSyncTime(syncTime).setText(textFinal);
                 trsBlocks->append(btr);
-                qDebug(btr.toString().toAscii());
+                //qDebug(btr.toString().toAscii());
             }
             continue;
         }
@@ -290,10 +288,15 @@ bool XMLHandler::writeProjectExportXML(QString &xmlFileName,
     xmlWriter->setAutoFormatting(true);
     xmlWriter->writeStartDocument();
 
+    xmlWriter->writeComment("************************************************");
+    xmlWriter->writeComment("* NER Export File XML");
+    xmlWriter->writeComment("************************************************");
+
     xmlWriter->writeStartElement(STR_NER_PROJECT);
     xmlWriter->writeAttribute(STR_NER_PROJECT_PROP_SAVEDATE,
                               QDateTime::currentDateTime().toString());
 
+    xmlWriter->writeComment("NER Original Transcription and Speakers Block");
 
     xmlWriter->writeStartElement(STR_TRANSC_TAG);
     xmlWriter->writeStartElement(STR_SPEAKERS_TAG);
@@ -327,42 +330,55 @@ bool XMLHandler::writeProjectExportXML(QString &xmlFileName,
     /*********************************************
      * Export all the included subtitle tables...
      *********************************************/
+    xmlWriter->writeComment("NER Comparison Tables Block");
+
     xmlWriter->writeStartElement(STR_TABLES_TAG);
-    for(int row=0; row < nerTablesList->count(); row++)
+    for(int t=0; t < nerTablesList->count(); t++)
     {
         xmlWriter->writeStartElement(STR_TABLE_TAG);
-        NERTableWidget *tableWidget = nerTablesList->at(row);
+        NERTableWidget *tableWidget = nerTablesList->at(t);
 
 
-        for(int i=0; i<tableWidget->rowCount(); i++)
+        for(int row=0; row<tableWidget->rowCount(); row++)
         {
             xmlWriter->writeStartElement(STR_TABLELINE_TAG);
 
-            QString speakerS = tableWidget->item(row, TIMESTAMP_COLUMN_INDEX)->text();
+            QString speakerS = tableWidget->item(row, SPEAKER_ID_COLUMN_INDEX)->text();
             xmlWriter->writeAttribute(STR_TABLELINE_PROP_SID, speakerS);
-            QString timeS = tableWidget->item(row, SPEAKER_ID_COLUMN_INDEX)->text();
+            QString timeS = tableWidget->item(row, TIMESTAMP_COLUMN_INDEX)->text();
             xmlWriter->writeAttribute(STR_TABLELINE_PROP_TIMESTAMP, timeS);
             DragWidget* transWidget = static_cast<DragWidget*>(tableWidget->cellWidget(row, TRANSCRIPTION_COLUMN_INDEX));
             xmlWriter->writeAttribute(STR_TABLELINE_PROP_TRANSCRIP, transWidget->getText());
 
 
-            DragWidget* widget = static_cast<DragWidget*>(tableWidget->cellWidget(row, SUBTITLES_COLUMN_INDEX));
-            for(int w=0; w < widget->countWords(); w++)
-            {
-                xmlWriter->writeStartElement(STR_WORD_TAG);
-                DragLabel* label = widget->getWordAt(i);
-                xmlWriter->writeAttribute(STR_WORD_PROP_NAME, label->labelText());
-                xmlWriter->writeAttribute(STR_WORD_PROP_ERROR, QString::number(label->getError()));
-                xmlWriter->writeAttribute(STR_WORD_PROP_ERROR, label->getComment());
+            NERSubTableWidget* subTable = static_cast<NERSubTableWidget*>(tableWidget->cellWidget(row, SUBTITLES_COLUMN_INDEX));
+            if(subTable == 0){
+                //no subtable was stored...
+                //proceed to next line...
+                continue;
             }
 
+            for(int w=0; w < subTable->rowCount(); w++)
+            {
+                xmlWriter->writeStartElement(STR_SUBTABLELINE_TAG);
+
+                DragWidget* dragWidget = static_cast<DragWidget*>(subTable->cellWidget(w,1));
+
+                for(int z=0; z<dragWidget->countWords(); z++){
+
+                    xmlWriter->writeStartElement(STR_WORD_TAG);
+                    DragLabel* label = dragWidget->getWordAt(z);
+                    xmlWriter->writeAttribute(STR_WORD_PROP_NAME, label->labelText());
+                    xmlWriter->writeAttribute(STR_WORD_PROP_ERROR, QString::number(label->getError()));
+                    xmlWriter->writeAttribute(STR_WORD_PROP_COMMENT, label->getComment());
+                    xmlWriter->writeEndElement();//STR_WORD_TAG
+                }
+                xmlWriter->writeEndElement();//STR_SUBTABLELINE_TAG
+            }
             xmlWriter->writeEndElement();//STR_TABLELINE_TAG
-
         }
-
         xmlWriter->writeEndElement();//STR_TABLE_TAG
     }
-
     xmlWriter->writeEndElement();//STR_TABLES_TAG
 
     xmlWriter->writeEndElement();//end NerProject

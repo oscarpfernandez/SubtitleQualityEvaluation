@@ -12,5 +12,11 @@
         <file>resources/pics/docs.png</file>
         <file>resources/pics/doc_subs.png</file>
         <file>resources/pics/doc_trans.png</file>
+        <file>resources/pics/player_forward.png</file>
+        <file>resources/pics/player_pause.png</file>
+        <file>resources/pics/player_play.png</file>
+        <file>resources/pics/player_rewind.png</file>
+        <file>resources/pics/player_stop.png</file>
+        <file>resources/pics/player_load.png</file>
     </qresource>
 </RCC>

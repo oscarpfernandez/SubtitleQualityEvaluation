@@ -12,6 +12,7 @@ DragLabel::DragLabel(const QString &text, QWidget *parent)
     m_labelText = text;
     editionComment = new QString();
     dwcomment = new DragLabelComment(parent);
+    errorType = NotDefinedYet;
 }
 
 /*******************************************************************************
@@ -120,8 +121,7 @@ DragLabel::EditionTypeEnum DragLabel::getError()
 
 void DragLabel::setComment(QString &newComment)
 {
-    editionComment->clear();
-    editionComment->append(newComment);
+    dwcomment->setEditComment(newComment);
 }
 
 QString DragLabel::getComment()
@@ -131,8 +131,6 @@ QString DragLabel::getComment()
 
 void DragLabel::showCommentEditor()
 {
-    QString c = getComment();
-    dwcomment->setEditComment(c);
     dwcomment->show();
 }
 

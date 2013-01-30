@@ -119,8 +119,8 @@ void NERTableWidget::loadSubtitlesXMLData(QList<BlockTRS> *transcription, QList<
  */
 void NERTableWidget::columnTableResized(int column, int oldWidth, int newWidth){
     QString d = QString::number(column).append("-").append(QString::number(oldWidth)).append("-").append(QString::number(newWidth));
-    qDebug("Column Resized!!!");
-    qDebug(d.toAscii());
+
+    //TODO prpagate this resize to the subtables...
 
     columnResized(column, oldWidth, newWidth);
 }
@@ -144,7 +144,7 @@ void NERTableWidget::insertNewTableEntry(QString &speaker, QString &timeStamp, Q
     setItem(line, TIMESTAMP_COLUMN_INDEX, tsItem);
 
     //Insert the chopped text block with the widget...
-    DragWidget *wordBox = new DragWidget(this, text, TRANSCRIPTION_COLUMN_WIDTH);
+    DragWidget *wordBox = new DragWidget(this, text, TRANSCRIPTION_COLUMN_WIDTH, false);
     setRowHeight(line, wordBox->getBlockSize().height());
     setColumnWidth(2,wordBox->getBlockSize().width());
     setCellWidget(line, TRANSCRIPTION_COLUMN_INDEX, wordBox);
@@ -183,6 +183,7 @@ NERSubTableWidget::NERSubTableWidget(QWidget *parent): QTableWidget(parent)
     //note: we don't want to display the line and column headers of each subtable
     verticalHeader()->setVisible(false);
     horizontalHeader()->setVisible(false);
+
 }
 
 int NERSubTableWidget::insertNewTableEntry(QString &timeStamp, QString &text)
@@ -196,7 +197,7 @@ int NERSubTableWidget::insertNewTableEntry(QString &timeStamp, QString &text)
     setItem(line, SUB_TIMESTAMP_COLUMN_INDEX, tsItem);
 
     //Insert the chopped text block with the widget...
-    DragWidget *wordBox = new DragWidget(this, text, SUBTITLES_COLUMN_WIDTH);
+    DragWidget *wordBox = new DragWidget(this, text, SUBTITLES_COLUMN_WIDTH, true);
     setRowHeight(line, wordBox->getBlockSize().height());
     setColumnWidth(SUBTITLES_COLUMN_INDEX,SUBTITLES_COLUMN_WIDTH);
     setCellWidget(line, SUB_SUBTITLES_COLUMN_INDEX, wordBox);
