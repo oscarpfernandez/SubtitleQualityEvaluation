@@ -57,6 +57,7 @@ private:
 
     QDockWidget *projectPropertiesDockWidget;
     QDockWidget *audioWaveFormDockWidget;
+    QDockWidget *videoPlayerDockWidget;
 
     QAction *newProjectAction;
     QAction *saveProjectAction;

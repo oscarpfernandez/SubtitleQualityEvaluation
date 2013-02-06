@@ -4,29 +4,38 @@ MediaMngWidget::MediaMngWidget(QWidget *parent) :
     QWidget(parent)
 {
 
+    videoPlayer = new Phonon::VideoWidget();
     audioOutput = new Phonon::AudioOutput(Phonon::MusicCategory, this);
     mediaObject = new Phonon::MediaObject(this);
+
     metaInformationResolver = new Phonon::MediaObject(this);
     mediaObject->setTickInterval(50);
+
+    mediaController = new Phonon::MediaController(mediaObject);
 
     connect(mediaObject, SIGNAL(tick(qint64)), this, SLOT(tickSlot(qint64)));
     connect(mediaObject, SIGNAL(stateChanged(Phonon::State,Phonon::State)),
             this, SLOT(stateChangedSlot(Phonon::State,Phonon::State)));
+    connect(mediaObject, SIGNAL(finished()), this, SLOT(finished()));
+    connect(mediaObject, SIGNAL(seekableChanged(bool)), this, SLOT(seekableChanged(bool)));
     connect(metaInformationResolver, SIGNAL(stateChanged(Phonon::State,Phonon::State)),
             this, SLOT(metaStateChangedSlot(Phonon::State,Phonon::State)));
+    connect(metaInformationResolver, SIGNAL(hasVideoChanged(bool)),
+            this, SLOT(hasVideochanged(bool)));
     connect(mediaObject, SIGNAL(currentSourceChanged(Phonon::MediaSource)),
             this, SLOT(sourceChangedSlot(Phonon::MediaSource)));
 
     Phonon::createPath(mediaObject, audioOutput);
+    Phonon::createPath(mediaObject, videoPlayer);
+
 
     QPalette palette;
     palette.setBrush(QPalette::Light, Qt::darkBlue);
     setPalette(palette);
 
+
     createActions();
     setupGUI();
-
-    loadAudioFileSlot();
 
 }
 
@@ -38,55 +47,37 @@ MediaMngWidget::~MediaMngWidget()
 
 void MediaMngWidget::createActions()
 {
-    //Video Actions
-    loadVideoFileAction = new QAction(tr("&Load Video File..."), this);
-    loadVideoFileAction->setShortcut(QKeySequence("Ctrl+F6"));
-    loadVideoFileAction->setIcon(QIcon(":/resources/pics/player_load.png"));
-    loadVideoFileAction->setStatusTip("Load video file");
-    connect(loadVideoFileAction, SIGNAL(triggered()), this, SLOT(loadVideoFileSlot()));
-
-    playVideoAction = new QAction(tr("&Play audio..."), this);
-    playVideoAction->setShortcut(QKeySequence("Ctrl+m"));
-    playVideoAction->setIcon(QIcon(":/resources/pics/player_play.png"));
-    playVideoAction->setStatusTip("Load video file");
-    connect(playVideoAction, SIGNAL(triggered()), this, SLOT(playVideoFileSlot()));
-
-    stopVideoAction = new QAction(tr("&Play audio..."), this);
-    stopVideoAction->setShortcut(QKeySequence("Ctrl+m"));
-    stopVideoAction->setIcon(QIcon(":/resources/pics/player_stop.png"));
-    stopVideoAction->setStatusTip("Load video file");
-    connect(stopVideoAction, SIGNAL(triggered()), this, SLOT(stopVideoFileSlot()));
-
-    //Audio Actions
-    loadAudioFileAction = new QAction(tr("&Load Audio File..."), this);
+    loadAudioFileAction = new QAction(tr("&Load Media File..."), this);
     loadAudioFileAction->setShortcut(QKeySequence("Ctrl+F5"));
     loadAudioFileAction->setIcon(QIcon(":/resources/pics/player_load.png"));
     loadAudioFileAction->setStatusTip("Load audio file");
-    connect(loadAudioFileAction, SIGNAL(triggered()), this, SLOT(loadAudioFileSlot()));
+    connect(loadAudioFileAction, SIGNAL(triggered()), this, SLOT(loadMediaFileSlot()));
 
     playAudioAction = new QAction(style()->standardIcon(QStyle::SP_MediaPlay), tr("Play"), this);
     playAudioAction->setShortcut(QKeySequence("Ctrl+p"));
     playAudioAction->setDisabled(true);
     playAudioAction->setIcon(QIcon(":/resources/pics/player_play.png"));
     playAudioAction->setStatusTip("Play audio file");
-    connect(playAudioAction, SIGNAL(triggered()), this, SLOT(playAudioFileSlot()));
-
-
+    connect(playAudioAction, SIGNAL(triggered()), this, SLOT(playMediaFileSlot()));
 
     pauseAudioAction = new QAction(style()->standardIcon(QStyle::SP_MediaPause), tr("Pause"), this);
     pauseAudioAction->setShortcut(QKeySequence("Ctrl+A"));
     pauseAudioAction->setStatusTip("Pause audio file");
     pauseAudioAction->setDisabled(true);
     pauseAudioAction->setIcon(QIcon(":/resources/pics/player_pause.png"));
-    connect(pauseAudioAction, SIGNAL(triggered()), this, SLOT(pauseAudioFileSlot()));
+    connect(pauseAudioAction, SIGNAL(triggered()), this, SLOT(pauseMediaFileSlot()));
 
     stopAudioAction = new QAction(style()->standardIcon(QStyle::SP_MediaStop), tr("Stop"), this);
     stopAudioAction->setShortcut(QKeySequence("Ctrl+S"));
     stopAudioAction->setStatusTip("Stop audio");
     stopAudioAction->setDisabled(true);
     stopAudioAction->setIcon(QIcon(":/resources/pics/player_stop.png"));
-    connect(stopAudioAction, SIGNAL(triggered()), this, SLOT(stopAudioFileSlot()));
+    connect(stopAudioAction, SIGNAL(triggered()), this, SLOT(stopMediaFileSlot()));
 
+    showVideoAction = new QAction(tr("Video"), this);
+    showVideoAction->setStatusTip(tr("Show video player..."));
+    showVideoAction->setEnabled(false);
+    connect(showVideoAction, SIGNAL(triggered()), this, SLOT(showVideoPlayer()));
 
 
 }
@@ -98,6 +89,10 @@ void MediaMngWidget::setupGUI()
     seekSlider->setMinimumHeight(30);
     seekSlider->setMediaObject(mediaObject);
 
+    volumeSlider = new Phonon::VolumeSlider(this);
+    volumeSlider->setAudioOutput(audioOutput);
+    volumeSlider->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
+
     QPalette palette;
     palette.setBrush(QPalette::Light, Qt::darkGray);
 
@@ -105,7 +100,6 @@ void MediaMngWidget::setupGUI()
     timeLcd->setAutoFillBackground(true);
     timeLcd->display("00:00:00.000");
     timeLcd->setSegmentStyle(QLCDNumber::Filled);
-//    timeLcd->setMinimumSize(80,30);
     timeLcd->setPalette(palette);
 
     fileNameLoaded = new QLineEdit(this);
@@ -115,9 +109,11 @@ void MediaMngWidget::setupGUI()
     fileNamelabel->setPalette(palette);
 
     buttonsBar = new QToolBar(this);
+    buttonsBar->addAction(loadAudioFileAction);
     buttonsBar->addAction(playAudioAction);
     buttonsBar->addAction(pauseAudioAction);
     buttonsBar->addAction(stopAudioAction);
+    buttonsBar->addAction(showVideoAction);
     buttonsBar->setMaximumWidth(buttonsBar->sizeHint().width());
 
     fileDescLayout = new QHBoxLayout;
@@ -128,6 +124,8 @@ void MediaMngWidget::setupGUI()
     sliderTimerLayout = new QHBoxLayout;
     sliderTimerLayout->addWidget(buttonsBar);
     sliderTimerLayout->addSpacing(20);
+    sliderTimerLayout->addWidget(volumeSlider);
+    sliderTimerLayout->addSpacing(20);
     sliderTimerLayout->addWidget(seekSlider);
     sliderTimerLayout->addSpacing(20);
     sliderTimerLayout->addWidget(timeLcd);
@@ -137,8 +135,47 @@ void MediaMngWidget::setupGUI()
     mainVBoxLayout->addSpacing(10);
     mainVBoxLayout->addLayout(sliderTimerLayout);
 
+    videoWindow = new QWidget();
+    QPalette bvidpalette = videoWindow->palette();
+    bvidpalette.setColor(QPalette::Window, Qt::black);
+    videoWindow->setWindowTitle(tr("Video Player"));
+    videoWindow->setPalette(bvidpalette);
+    videoWidLayout = new QVBoxLayout();
+    videoSubLabel = new QLabel();
+    videoSubLabel->setText(QString("This is a test!\n A real good one!"));
+    videoSubLabel->setFont(QFont("Console",20, true));
+    videoSubLabel->setFixedHeight(70);
+    videoSubLabel->setAlignment(Qt::AlignCenter | Qt::AlignHCenter);
+    videoSubLabel->setAutoFillBackground(true);
+    QPalette bpalette = videoSubLabel->palette();
+    bpalette.setColor(QPalette::Window, Qt::black);
+    bpalette.setColor(QPalette::WindowText, Qt::yellow);
+    videoSubLabel->setPalette(bpalette);
+    videoWidLayout->addWidget(videoPlayer);
+    videoWidLayout->addWidget(videoSubLabel);
+    videoWindow->setLayout(videoWidLayout);
+    videoWindow->setWindowFlags(Qt::WindowStaysOnTopHint);
+
+
+//    QString fileName = "/home/oscar/Downloads/subs.srt";
+//    QHash<QByteArray, QVariant>  properties;
+//    properties.insert("type", "file");
+//    properties.insert("name", fileName);
+//    Phonon::SubtitleDescription newSubtitle(0, properties);
+//    mediaController->setAutoplayTitles(true);
+//    mediaController->setCurrentSubtitle(newSubtitle);
+
     setLayout(mainVBoxLayout);
 
+}
+
+
+void MediaMngWidget::showVideoPlayer()
+{
+    if(!videoPlayer->isVisible()){
+        qDebug() << "Button Pressed ";
+        videoWindow->show();
+    }
 }
 
 
@@ -146,35 +183,28 @@ void MediaMngWidget::setupGUI()
 /**************
  * Slots
  *************/
-void MediaMngWidget::loadAudioFileSlot()
+void MediaMngWidget::loadMediaFileSlot()
 {
-    QString fileName = QFileDialog::getOpenFileName(this, tr("Select Music Files"),
-                                                      QDesktopServices::storageLocation(QDesktopServices::MusicLocation));
+    QString fileName = QFileDialog::getOpenFileName(
+                this, tr("Select Music Files"),
+                QDesktopServices::storageLocation(QDesktopServices::MusicLocation));
 
-        if (fileName.isEmpty()){
-            return;
-        }
+    if (fileName.isEmpty()){
+        return;
+    }
 
-        fileNameLoaded->setText(QString(fileName));
-//        if(source != 0){
-//            //if it was already initialized previously...
-//            delete source;
-//            source=NULL;
-//        }
-        source = new Phonon::MediaSource(fileName);
-        metaInformationResolver->setCurrentSource(*source);
-        mediaObject->stop();
-        mediaObject->clearQueue();
-        mediaObject->setCurrentSource(*source);
+    fileNameLoaded->setText(QString(fileName));
+
+    source = new Phonon::MediaSource(fileName);
+    metaInformationResolver->setCurrentSource(*source);
+    mediaObject->stop();
+    mediaObject->clearQueue();
+    mediaObject->setCurrentSource(*source);
 
 }
 
-void MediaMngWidget::loadVideoFileSlot()
-{
 
-}
-
-void MediaMngWidget::playAudioFileSlot()
+void MediaMngWidget::playMediaFileSlot()
 {
     bool wasPlaying = mediaObject->state() == Phonon::PlayingState;
 
@@ -190,7 +220,7 @@ void MediaMngWidget::playAudioFileSlot()
 
 }
 
-void MediaMngWidget::stopAudioFileSlot()
+void MediaMngWidget::stopMediaFileSlot()
 {
     if(mediaObject->state() == Phonon::PlayingState
             || mediaObject->state() == Phonon::PausedState)
@@ -200,7 +230,7 @@ void MediaMngWidget::stopAudioFileSlot()
 
 }
 
-void MediaMngWidget::pauseAudioFileSlot()
+void MediaMngWidget::pauseMediaFileSlot()
 {
     bool wasPlaying = mediaObject->state() == Phonon::PlayingState;
     if(wasPlaying){
@@ -209,12 +239,12 @@ void MediaMngWidget::pauseAudioFileSlot()
 
 }
 
-void MediaMngWidget::playVideoFileSlot()
+void MediaMngWidget::finished()
 {
-
+    mediaObject->stop();
 }
 
-void MediaMngWidget::stopVideoFileSlot()
+void MediaMngWidget::seekableChanged(bool isSeekChanged)
 {
 
 }
@@ -235,17 +265,20 @@ void MediaMngWidget::stateChangedSlot(Phonon::State newState, Phonon::State /*ol
         playAudioAction->setEnabled(false);
         pauseAudioAction->setEnabled(true);
         stopAudioAction->setEnabled(true);
+        loadAudioFileAction->setEnabled(false);
         break;
     case Phonon::StoppedState:
         stopAudioAction->setEnabled(false);
         playAudioAction->setEnabled(true);
         pauseAudioAction->setEnabled(false);
+        loadAudioFileAction->setEnabled(true);
         timeLcd->display("00:00:00.000");
         break;
     case Phonon::PausedState:
         pauseAudioAction->setEnabled(false);
         stopAudioAction->setEnabled(true);
         playAudioAction->setEnabled(true);
+        loadAudioFileAction->setEnabled(true);
         break;
     case Phonon::BufferingState:
         break;
@@ -271,4 +304,17 @@ void MediaMngWidget::sourceChangedSlot(const Phonon::MediaSource &source)
 void MediaMngWidget::metaStateChangedSlot(Phonon::State newState, Phonon::State oldState)
 {
 
+}
+
+void MediaMngWidget::hasVideochanged(bool hasVideoChange)
+{
+    if(hasVideoChange){
+        showVideoAction->setEnabled(true);
+        qDebug() << "Has Video Changed " << hasVideoChange;
+    }
+}
+
+void MediaMngWidget::updateVideoSubtitleSlot(QString &text)
+{
+    videoSubLabel->setText(text);
 }

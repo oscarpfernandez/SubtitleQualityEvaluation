@@ -8,6 +8,7 @@
 #include <QDate>
 #include <QTime>
 #include <QPushButton>
+#include <QPalette>
 #include "constants.h"
 
 class About : public QDialog

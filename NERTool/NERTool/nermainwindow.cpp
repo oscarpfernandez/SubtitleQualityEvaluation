@@ -237,6 +237,16 @@ void NERMainWindow::createDockableWidgets()
     audioWaveFormDockWidget->setToolTip(tr("Media player for audio and video content..."));
 
     addDockWidget(Qt::BottomDockWidgetArea, audioWaveFormDockWidget);
+
+//    videoPlayerDockWidget = new QDockWidget(tr("Video Player"));
+//    videoPlayerDockWidget->setObjectName("mediaControlDockWidget");
+//    videoPlayerDockWidget->setWidget(mediaMngWidget->getVideoPlayer());
+//    videoPlayerDockWidget->setAllowedAreas(Qt::AllDockWidgetAreas);
+//    videoPlayerDockWidget->setToolTip(tr("Video player..."));
+
+//    addDockWidget(Qt::AllDockWidgetAreas, videoPlayerDockWidget, Qt::Vertical);
+
+
 }
 
 

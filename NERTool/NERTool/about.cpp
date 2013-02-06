@@ -72,6 +72,10 @@ void About::createElements()
     mainVBoxLayout->addWidget(imageLabel);
     mainVBoxLayout->addWidget(textEdit);
     mainVBoxLayout->addLayout(buttonHBoxLayout);
+
+    QPalette palette = this->palette();
+    palette.setColor(QPalette::Window, Qt::black);
+    setPalette(palette);
 }
 
 void About::closeDialog()
