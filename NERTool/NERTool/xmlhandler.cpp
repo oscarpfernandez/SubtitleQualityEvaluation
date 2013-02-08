@@ -6,9 +6,9 @@
  * configuration.
  ******************************************************************************/
 
-XMLHandler::XMLHandler()
+XMLHandler::XMLHandler(QWidget *parent)
 {
-
+    _parent = parent;
 }
 
 XMLHandler::~XMLHandler()
@@ -361,6 +361,7 @@ bool XMLHandler::writeProjectExportXML(QString &xmlFileName,
             for(int w=0; w < subTable->rowCount(); w++)
             {
                 xmlWriter->writeStartElement(STR_SUBTABLELINE_TAG);
+                xmlWriter->writeAttribute(STR_SUBTABLELINE_PROP_TIMESTAMP, subTable->itemAt(w,0)->text());
 
                 DragWidget* dragWidget = static_cast<DragWidget*>(subTable->cellWidget(w,1));
 
@@ -388,7 +389,7 @@ bool XMLHandler::writeProjectExportXML(QString &xmlFileName,
     file->close();
     if (file->error()) {
         QMessageBox warningMessage;
-        warningMessage.setText("There was an error closing the save file.");
+        warningMessage.setText("There was an error closing the export file.");
         warningMessage.setWindowTitle("Warning");
         warningMessage.setIcon(QMessageBox::Warning);
         warningMessage.exec();
@@ -400,8 +401,129 @@ bool XMLHandler::writeProjectExportXML(QString &xmlFileName,
 }
 
 
+bool XMLHandler::readProjectExportXML(QString &xmlFileName,
+                                      QList<Speaker> *speakerList,
+                                      QList<BlockTRS> *transcription,
+                                      QList<NERTableWidget *> *nerTablesList)
+{
+    QFile *file = new QFile(xmlFileName);
+
+    if (!file->open(QIODevice::ReadOnly | QIODevice::Text)) {
+        return false;
+    }
+
+    QXmlStreamReader *xmlReader = new QXmlStreamReader();
+    xmlReader->setDevice(file);
+
+    while(!xmlReader->atEnd() && xmlReader->hasError())
+    {
+        /* Read next element.*/
+        xmlReader->readNext();
 
 
+        /* If token is just StartDocument, we'll go to next.*/
+        if(xmlReader->isStartDocument() ) {
+            continue;
+        }
+
+        if(xmlReader->isStartElement()){
+            if(xmlReader->name()==STR_NER_PROJECT){
+                continue;
+            }
+            if(xmlReader->name()==STR_TRANSC_TAG){
+                continue;
+            }
+            if(xmlReader->name()==STR_TRANSC_LINE_TAG){
+                QXmlStreamAttributes attributes = xmlReader->attributes();
+                const QString timeStamp = attributes.value(STR_TRANSC_LINE_PROP_TIMESTAMP).toString();
+                const QString speakerId = attributes.value(STR_TRANSC_LINE_PROP_SPEAKER).toString();
+                const QString text = attributes.value(STR_TRANSC_LINE_PROP_TEXT).toString();
+
+                BlockTRS btr;
+                btr.setSyncTime(timeStamp).setSpeaker(speakerId).setText(text);
+                transcription->append(btr);
+
+                continue;
+            }
+
+            if(xmlReader->name()==STR_SPEAKERS_TAG){
+                QXmlStreamAttributes attributes = xmlReader->attributes();
+                const QString speakerID = attributes.value(STR_SPEAKER_PROP_ID).toString();
+                const QString speakerName = attributes.value(STR_SPEAKER_PROP_NAME).toString();
+                const QString speakerType = attributes.value(STR_SPEAKER_PROP_TYPE).toString();
+                Speaker sp;
+                sp.setId(speakerID).setId(speakerName).setType(speakerType);
+                speakerList->append(sp);
+            }
+
+            if(xmlReader->name()==STR_TABLES_TAG){
+                continue;
+
+            }
+            if(xmlReader->name()==STR_TABLE_TAG){
+                //Read all the tables...
+                readNERTable(xmlReader, nerTablesList);
+
+            }
+
+
+        }
+
+    }//end while
+
+
+
+
+    //Close file descriptor
+    file->close();
+    if (file->error()) {
+        QMessageBox warningMessage;
+        warningMessage.setText("There was an error closing the export file.");
+        warningMessage.setWindowTitle("Warning");
+        warningMessage.setIcon(QMessageBox::Warning);
+        warningMessage.exec();
+        return false;
+    }
+
+    delete xmlReader;//free mem
+    return true;
+}
+
+
+bool XMLHandler::readNERTable(QXmlStreamReader *xmlReader,
+                              QList<NERTableWidget *> *nerTablesList)
+{
+    NERTableWidget *table = new NERTableWidget(_parent);
+
+    while(xmlReader->isEndElement() && xmlReader->name()==STR_TABLELINE_TAG){
+        xmlReader->readNext();
+
+        QXmlStreamAttributes attribs = xmlReader->attributes();
+        QString speaker = attribs.value(STR_TABLELINE_PROP_SID).toString();
+        QString timeStamp = attribs.value(STR_TABLELINE_PROP_TIMESTAMP).toString();
+        QString text = attribs.value(STR_TABLELINE_PROP_TRANSCRIP).toString();
+        table->insertNewTableEntry(speaker, timeStamp, text);
+
+        //Read all the sub words;
+        xmlReader->readNext();
+
+        while(xmlReader->name()!=STR_WORD_TAG){
+
+            QXmlStreamAttributes attributes = xmlReader->attributes();
+            const QString name = attributes.value(STR_WORD_PROP_NAME).toString();
+            const QString error = attributes.value(STR_WORD_PROP_ERROR).toString();
+            const QString comment = attributes.value(STR_WORD_PROP_COMMENT).toString();
+
+
+
+
+        }//while...
+
+        xmlReader->readNext();
+    }//while...
+
+
+}
 
 
 

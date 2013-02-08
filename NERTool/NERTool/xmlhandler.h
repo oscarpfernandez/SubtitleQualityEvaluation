@@ -55,6 +55,7 @@ const QString STR_TABLELINE_PROP_SID = "sID";
 const QString STR_TABLELINE_PROP_TIMESTAMP = "timestamp";
 const QString STR_TABLELINE_PROP_TRANSCRIP = "transcription";
 const QString STR_SUBTABLELINE_TAG = "SubTableLine";
+const QString STR_SUBTABLELINE_PROP_TIMESTAMP = "timestamp";
 const QString STR_WORD_TAG = "SubtWord";
 const QString STR_WORD_PROP_NAME = "name";
 const QString STR_WORD_PROP_ERROR = "error";
@@ -63,7 +64,7 @@ const QString STR_WORD_PROP_COMMENT = "comment";
 class XMLHandler {
 
 public:
-    XMLHandler();
+    XMLHandler(QWidget *parent);
     ~XMLHandler();
     bool readTranscriberXML(QString &xmlFileName,
                             QList<BlockTRS> *trsBlocks,
@@ -74,15 +75,22 @@ public:
                                QList<Speaker> *speakerList,
                                QList<BlockTRS> *transcription,
                                QList<NERTableWidget *> *nerTablesList);
+    bool readProjectExportXML(QString &xmlFileName,
+                               QList<Speaker> *speakerList,
+                               QList<BlockTRS> *transcription,
+                               QList<NERTableWidget*> *nerTablesList);
 
 
 private:
+    QWidget *_parent;
     bool loadTranscriberXML(QFile *xmlFile,
                             QList<BlockTRS> *trsBlocks,
                             QList<Speaker> *speakerList);
 
     bool loadSubtitleXML(QFile *xmlFile,
                          QList<BlockTRS> *trsBlocks);
+    bool readNERTable(QXmlStreamReader *xmlReader,
+                      QList<NERTableWidget*> *nerTablesList);
 };
 
 #endif

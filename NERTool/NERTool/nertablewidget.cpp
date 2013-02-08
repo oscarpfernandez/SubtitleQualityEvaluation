@@ -125,9 +125,9 @@ void NERTableWidget::columnTableResized(int column, int oldWidth, int newWidth){
     columnResized(column, oldWidth, newWidth);
 }
 
-void NERTableWidget::insertNewTableEntry(QString &speaker, QString &timeStamp, QString &text)
+int NERTableWidget::insertNewTableEntry(QString &speaker, QString &timeStamp, QString &text)
 {
-    if(text == 0 || text.count() == 0 ){ return; }
+    if(text == 0 || text.count() == 0 ){ return -1; }
 
     int line = rowCount();
     insertRow(line);
@@ -148,6 +148,8 @@ void NERTableWidget::insertNewTableEntry(QString &speaker, QString &timeStamp, Q
     setRowHeight(line, wordBox->getBlockSize().height());
     setColumnWidth(2,wordBox->getBlockSize().width());
     setCellWidget(line, TRANSCRIPTION_COLUMN_INDEX, wordBox);
+
+    return line;
 
 }
 
@@ -202,7 +204,7 @@ int NERSubTableWidget::insertNewTableEntry(QString &timeStamp, QString &text)
     setColumnWidth(SUBTITLES_COLUMN_INDEX,SUBTITLES_COLUMN_WIDTH);
     setCellWidget(line, SUB_SUBTITLES_COLUMN_INDEX, wordBox);
 
-    return line+1;
+    return line;
 }
 
 void NERSubTableWidget::getXMLNode()

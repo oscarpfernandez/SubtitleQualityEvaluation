@@ -36,7 +36,7 @@ NERMainWindow::~NERMainWindow()
  ******************************************************************************/
 void NERMainWindow::createGuiElements()
 {
-    xmlHandler = new XMLHandler();
+    xmlHandler = new XMLHandler(this);
     transcriptionList = new QList<BlockTRS>();
     speakerList = new QList<Speaker>();
     nerTablesList = new QList<NERTableWidget*>();
