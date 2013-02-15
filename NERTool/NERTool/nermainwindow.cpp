@@ -10,12 +10,15 @@ NERMainWindow::NERMainWindow(QWidget *parent) : QMainWindow(parent)
 	resize(1024,768);
     setWindowTitle(NER_APP_NAME);
 
+    projectSaveFilePath = new QString();
 	createGuiElements();
+    createDockableWidgets();
+
 	createActions();
 	createMenus();
 	createToolBars();
 	createStatusBar();
-    createDockableWidgets();
+
 
 	setCentralWidget(mainMdiArea);
 
@@ -42,7 +45,7 @@ void NERMainWindow::createGuiElements()
     nerTablesList = new QList<NERTableWidget*>();
 
 	mainMdiArea = new QMdiArea(this);
-    diffTableWid = new NERTableWidget(this);
+    //diffTableWid = new NERTableWidget(this);
 
     //mapTableContentTree = new QMap<QTreeWidgetItem*, NERTableWidget*>();
 
@@ -83,9 +86,16 @@ void NERMainWindow::createActions()
     saveProjectAction = new QAction(tr("&Save Project..."), this);
 	saveProjectAction->setShortcut(QKeySequence::Save);
     saveProjectAction->setIcon(QIcon(":/resources/pics/save.png"));
-    saveProjectAction->setStatusTip("Saves the current project");
+    saveProjectAction->setStatusTip("Save the current project");
     connect(saveProjectAction, SIGNAL(triggered()),
             this, SLOT(saveProjectSlot()));
+
+    saveAsProjectAction = new QAction(tr("&Save as Project..."), this);
+    saveAsProjectAction->setShortcut(QKeySequence::Save);
+    saveAsProjectAction->setIcon(QIcon(":/resources/pics/save.png"));
+    saveAsProjectAction->setStatusTip("Save As the current project");
+    connect(saveAsProjectAction, SIGNAL(triggered()),
+            this, SLOT(saveAsProjectSlot()));
 
 	closeProjectAction = new QAction(tr("&Close Project"), this);
     closeProjectAction->setShortcut(QKeySequence("Ctrl+Q"));
@@ -145,10 +155,12 @@ void NERMainWindow::createActions()
     tileSubWindowsAction->setEnabled(true);
     connect(tileSubWindowsAction, SIGNAL(triggered()), this, SLOT(tileWindowsSlot()));
 
-    showComparisonTable = new QAction(tr("Comparison Table"), this);
-    showComparisonTable->setStatusTip(tr("Comparison Table"));
-    connect(showComparisonTable, SIGNAL(triggered()),
-            this, SLOT(showComparisonTableSlot()));
+    viewPropertiesDockAction = projectPropertiesDockWidget->toggleViewAction();
+    viewPropertiesDockAction->setIcon(QIcon(":/resources/pics/docs.png"));
+
+    viewVideoPlayerDockAction = audioWaveFormDockWidget->toggleViewAction();
+    viewVideoPlayerDockAction->setIcon(QIcon(":/resources/pics/video_player.png"));
+
 
 }
 
@@ -162,6 +174,7 @@ void NERMainWindow::createMenus()
     fileMenu->addAction(newProjectAction);
     fileMenu->addAction(openProjectAction);
     fileMenu->addAction(saveProjectAction);
+    fileMenu->addAction(saveAsProjectAction);
     fileMenu->addAction(closeProjectAction);
 	fileMenu->addAction(closeAppAction);
 
@@ -173,9 +186,11 @@ void NERMainWindow::createMenus()
     toolsMenu->addAction(loadSubtsXmlFile);
 
 	windowMenu = menuBar()->addMenu(tr("&Window"));
-    windowMenu->addAction(showComparisonTable);
     windowMenu->addAction(cascadeSubWindowsAction);
     windowMenu->addAction(tileSubWindowsAction);
+    windowMenu->addSeparator();
+    windowMenu->addAction(viewPropertiesDockAction);
+    windowMenu->addAction(viewVideoPlayerDockAction);
 	
 	helpMenu = menuBar()->addMenu(tr("Help"));
 	helpMenu->addAction(aboutQTAction);
@@ -192,6 +207,8 @@ void NERMainWindow::createToolBars()
     fileToolbar->addAction(openProjectAction);
     fileToolbar->addAction(saveProjectAction);
     fileToolbar->addAction(closeProjectAction);
+    fileToolbar->addAction(viewVideoPlayerDockAction);
+    fileToolbar->addAction(viewPropertiesDockAction);
 	fileToolbar->addAction(aboutAction);
 }
 
@@ -238,15 +255,6 @@ void NERMainWindow::createDockableWidgets()
 
     addDockWidget(Qt::BottomDockWidgetArea, audioWaveFormDockWidget);
 
-//    videoPlayerDockWidget = new QDockWidget(tr("Video Player"));
-//    videoPlayerDockWidget->setObjectName("mediaControlDockWidget");
-//    videoPlayerDockWidget->setWidget(mediaMngWidget->getVideoPlayer());
-//    videoPlayerDockWidget->setAllowedAreas(Qt::AllDockWidgetAreas);
-//    videoPlayerDockWidget->setToolTip(tr("Video player..."));
-
-//    addDockWidget(Qt::AllDockWidgetAreas, videoPlayerDockWidget, Qt::Vertical);
-
-
 }
 
 
@@ -255,6 +263,8 @@ void NERMainWindow::createDockableWidgets()
  ******************************************************************************/
 void NERMainWindow::newProjectSlot()
 {
+    saveProjectSlot();
+    closeProjectSlot();
 
 }
 
@@ -262,6 +272,31 @@ void NERMainWindow::newProjectSlot()
  * Save current project, and export XML file.
  ******************************************************************************/
 void NERMainWindow::saveProjectSlot()
+{
+    if(projectSaveFilePath->isEmpty()){
+        QString xmlFileName = QFileDialog::getSaveFileName(
+                    this,
+                    tr("Save NER Project"),
+                    QDir::currentPath(),
+                    tr("NER Files (*.xner)"));
+        *projectSaveFilePath = xmlFileName;
+    }
+
+    if(projectSaveFilePath->isEmpty()){
+        return; //Nothing to do.
+    }
+
+    xmlHandler->writeProjectExportXML(*projectSaveFilePath,
+                                      speakerList,
+                                      transcriptionList,
+                                      nerTablesList);
+
+}
+
+/*******************************************************************************
+ * Save As current project, and export XML file.
+ ******************************************************************************/
+void NERMainWindow::saveAsProjectSlot()
 {
     QString xmlFileName = QFileDialog::getSaveFileName(
             this,
@@ -285,6 +320,20 @@ void NERMainWindow::saveProjectSlot()
  ******************************************************************************/
 void NERMainWindow::openProjectSlot()
 {
+    QString xmlFileName = QFileDialog::getOpenFileName(
+            this,
+            tr("Open NER Project"),
+            QDir::currentPath(),
+            tr("NER Files (*.xner)"));
+
+    if(xmlFileName.isEmpty()){
+        return; //Nothing to do.
+    }
+
+    xmlHandler->readProjectExportXML(xmlFileName,
+                                     speakerList,
+                                     transcriptionList,
+                                     nerTablesList);
 
 }
 
@@ -293,6 +342,32 @@ void NERMainWindow::openProjectSlot()
  ******************************************************************************/
 void NERMainWindow::closeProjectSlot()
 {
+    QMessageBox box;
+    box.setInformativeText("Are you sure ?\nThis will save the current project state.");
+    box.setText("Close project");
+    box.setBaseSize(100,80);
+    box.setIcon(QMessageBox::Question);
+    box.setStandardButtons(QMessageBox::No | QMessageBox::Yes);
+    int result = box.exec();
+    switch (result){
+    case QMessageBox::No :
+        return;
+    }
+
+    speakerList->clear();
+    transcriptionList->clear();
+
+    //Close subwindows and free memory...
+    mainMdiArea->closeAllSubWindows();
+    int numOfTables = nerTablesList->count();
+    for(int i=0; i<numOfTables;i++){
+        NERTableWidget *tableToRemove = nerTablesList->first();
+        mainMdiArea->removeSubWindow(tableToRemove);
+    }
+    nerTablesList->clear();
+
+    //Remove tree child nodes...
+    propertiesTreeWidget->clearAllTreeData();
 
 }
 
@@ -422,7 +497,7 @@ void NERMainWindow::loadSubtitlesFileSlot(){
         //Add a new subwindow
         QMdiSubWindow *subWindow = mainMdiArea->addSubWindow(table,
                                                              /*Qt::CustomizeWindowHint
-                                                                                                              |*/ Qt::WindowTitleHint
+                                                               |*/ Qt::WindowTitleHint
                                                              | Qt::WindowMinMaxButtonsHint
                                                              | Qt::WindowCloseButtonHint);
         QString title;
@@ -432,21 +507,19 @@ void NERMainWindow::loadSubtitlesFileSlot(){
         //Display new subwindow
         subWindow->setWindowTitle(title);
         subWindow->setMinimumSize(800,600);
-        subWindow->showNormal();
+        subWindow->show();
 
         QString s;
 
         //Insert new item in the tree...
-        propertiesTreeWidget->insertNewSubtitle(title, s, s);
+        propertiesTreeWidget->insertNewSubtitle(title, subWindow, s, s);
+
 
         delete trsList;
         trsList = NULL;
     }
 }
 
-void NERMainWindow::showComparisonTableSlot(){
-
-}
 
 void NERMainWindow::cascadeWindowsSlot()
 {

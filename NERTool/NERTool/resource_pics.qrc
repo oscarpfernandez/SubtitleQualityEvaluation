@@ -18,5 +18,6 @@
         <file>resources/pics/player_rewind.png</file>
         <file>resources/pics/player_stop.png</file>
         <file>resources/pics/player_load.png</file>
+        <file>resources/pics/video_player.png</file>
     </qresource>
 </RCC>

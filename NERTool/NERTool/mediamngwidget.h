@@ -22,6 +22,7 @@
 #include <phonon/volumeslider.h>
 #include <phonon/backendcapabilities.h>
 #include <phonon/MediaController>
+#include "nertablewidget.h"
 
 class MediaMngWidget : public QWidget
 {
@@ -84,6 +85,7 @@ public slots:
     void finished();
     void showVideoPlayer();
     void updateVideoSubtitleSlot(QString &text);
+    void loadVideoSubtitlesFromTableData(NERTableWidget *table);
     
 };
 

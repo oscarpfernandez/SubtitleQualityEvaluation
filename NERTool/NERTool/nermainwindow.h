@@ -61,6 +61,7 @@ private:
 
     QAction *newProjectAction;
     QAction *saveProjectAction;
+    QAction *saveAsProjectAction;
     QAction *openProjectAction;
     QAction *closeProjectAction;
 	QAction *closeAppAction;
@@ -69,9 +70,11 @@ private:
     QAction *viewPropertiesTree;
     QAction *loadTransXmlFile;
     QAction *loadSubtsXmlFile;
-    QAction *showComparisonTable;
     QAction *cascadeSubWindowsAction;
     QAction *tileSubWindowsAction;
+    QAction *viewPropertiesDockAction;
+    QAction *viewVideoPlayerDockAction;
+
 
     QLabel  *statusBarLeftLabel;
     QLabel  *statusBarMiddleLabel;
@@ -85,6 +88,7 @@ private:
 	QMenu *windowMenu;
     QMenu *helpMenu;
 
+    QString *projectSaveFilePath;
     XMLHandler *xmlHandler;
     QList<BlockTRS> *transcriptionList;
     QList<Speaker> *speakerList;
@@ -94,6 +98,7 @@ private:
 private slots:
     void newProjectSlot();
     void saveProjectSlot();
+    void saveAsProjectSlot();
     void openProjectSlot();
     void closeProjectSlot();
 	void closeApplicationSlot();
@@ -102,7 +107,6 @@ private slots:
 	void aboutSlot();
     void loadTranscriptionFileSlot();
     void loadSubtitlesFileSlot();
-    void showComparisonTableSlot();
     void cascadeWindowsSlot();
     void tileWindowsSlot();
 

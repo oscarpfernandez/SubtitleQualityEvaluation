@@ -7,22 +7,26 @@
 #include <QTreeWidget>
 #include <QGroupBox>
 #include <QSplitter>
+#include <QMdiSubWindow>
 #include <QMenu>
 #include <QEvent>
 #include <QMouseEvent>
+#include <QMap>
 
 class PropertiesTreeWidget : public QWidget
 {
     Q_OBJECT
 public:
     explicit PropertiesTreeWidget(QWidget *parent = 0);
-    void insertNewSubtitle(QString &fileName,
-                           QString &responsible,
-                           QString &description);
+    QTreeWidgetItem* insertNewSubtitle(QString &fileName,
+                                       QMdiSubWindow *subWindow,
+                                       QString &responsible,
+                                       QString &description);
     void insertNewTranslation(QString &fileName,
                               QString &responsible,
                               QString &description);
     void insertNewSpeaker(QString &speaker);
+    void clearAllTreeData();
     
 private:
     QSplitter   *splitter;
@@ -38,6 +42,8 @@ private:
     QAction *openSubAction;
     QAction *removeSubAction;
     QAction *editSubPropertiesAction;
+    QMap<QTreeWidgetItem*, QMdiSubWindow*> *subWindowsMap;
+
     void initTrees();
     void initContextMenuAction();
 
@@ -45,7 +51,7 @@ protected:
     bool eventFilter(QObject *obj, QEvent *event);
 
 private slots:
-    //void onTreeWidgetItemDoubleClicked(QTreeWidgetItem * item, int column);
+    void onTreeWidgetItemDoubleClicked(QTreeWidgetItem * item, int column);
     void openSubDocumentNodeSlot();
     void editSubPropertiesNode();
     void removeSubNodeSlot();

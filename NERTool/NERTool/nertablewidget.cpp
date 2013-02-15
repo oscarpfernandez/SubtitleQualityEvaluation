@@ -6,6 +6,10 @@
 #include "draglabel.h"
 #include "xmlhandler.h"
 
+QT_FORWARD_DECLARE_CLASS(NERSubTableWidget)
+
+
+
 /******************************************************************************
  * DiffTableWidget manages the table difference betwwen the original transcribded
  * and the subtitle texts. Manages the several word items allowing the export 
@@ -22,7 +26,7 @@ NERTableWidget::NERTableWidget(QWidget *parent) : QTableWidget(parent)
     setRowCount(0);
 
     horizontalHeader()->setResizeMode(QHeaderView::Interactive);
-    verticalHeader()->setResizeMode(QHeaderView::Interactive);
+    verticalHeader()->setResizeMode(QHeaderView::ResizeToContents);
 
 	QStringList headers;
     headers << "Speaker ID"
@@ -82,10 +86,10 @@ void NERTableWidget::loadSubtitlesXMLData(QList<BlockTRS> *transcription, QList<
             BlockTRS transBtr = transcription->at(j);
             BlockTRS transBtrNext = transcription->at(j+1);
 
-//            qDebug("TRS");
-//            qDebug(subBtr.toString().toAscii());
-//            qDebug(transBtr.toString().toAscii());
-//            qDebug(transBtrNext.toString().toAscii());
+            qDebug("TRS");
+            qDebug(subBtr.toString().toAscii());
+            qDebug(transBtr.toString().toAscii());
+            qDebug(transBtrNext.toString().toAscii());
 
 
             if(transBtr.getSyncTime().toDouble() <= subBtr.getSyncTime().toDouble()
@@ -101,7 +105,9 @@ void NERTableWidget::loadSubtitlesXMLData(QList<BlockTRS> *transcription, QList<
                 //skip to the new transcription line...
                 qDebug("Set cell widget...");
                 if(subTable->height() > rowHeight(line)){
-                    setRowHeight(line, subTable->height());
+                    //setRowHeight(line, subTable->height());
+                    verticalHeader()->resizeSection(line, 200/*subTable->height()*/);
+
                 }
 
                 setCellWidget(line++, SUBTITLES_COLUMN_INDEX, subTable);
@@ -179,12 +185,13 @@ NERSubTableWidget::NERSubTableWidget(QWidget *parent): QTableWidget(parent)
     setSelectionBehavior(QAbstractItemView::SelectRows);
     setSortingEnabled(false);
     setColumnCount(2);
-    setColumnWidth(SUB_TIMESTAMP_COLUMN_INDEX, SUB_TIMESTAMP_COLUMN_WIDTH);
-    setColumnWidth(SUB_SUBTITLES_COLUMN_INDEX, SUB_SUBTITLES_COLUMN_WIDTH+100);
+    //setColumnWidth(SUB_TIMESTAMP_COLUMN_INDEX, SUB_TIMESTAMP_COLUMN_WIDTH);
+    setColumnWidth(SUB_SUBTITLES_COLUMN_INDEX, SUB_SUBTITLES_COLUMN_WIDTH+150);
     setRowCount(0);
     //note: we don't want to display the line and column headers of each subtable
     verticalHeader()->setVisible(false);
     horizontalHeader()->setVisible(false);
+
 
 }
 
@@ -207,10 +214,22 @@ int NERSubTableWidget::insertNewTableEntry(QString &timeStamp, QString &text)
     return line;
 }
 
-void NERSubTableWidget::getXMLNode()
+BlockTRS NERSubTableWidget::getSubtableRowData(int row)
 {
+    BlockTRS ret;
+    if(row>=rowCount() || row < 0)
+    {
+        return ret;
+    }
 
+    QString timeStamp = item(row, SUB_TIMESTAMP_COLUMN_INDEX)->text();
+    QString subtitleText = item(row, SUB_SUBTITLES_COLUMN_INDEX)->text();
+
+    ret.setSyncTime(timeStamp).setText(subtitleText);
+
+    return ret;
 }
+
 
 NERSubTableWidget::~NERSubTableWidget()
 {

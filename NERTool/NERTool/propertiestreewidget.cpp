@@ -2,6 +2,8 @@
 
 PropertiesTreeWidget::PropertiesTreeWidget(QWidget *parent) : QWidget(parent)
 {
+    subWindowsMap = new QMap<QTreeWidgetItem*, QMdiSubWindow*>();
+
     mainVLayout = new QVBoxLayout();
     mainTreeWidget = new QTreeWidget(parent);
     mainTreeWidget->setSelectionMode(QAbstractItemView::SingleSelection);
@@ -9,15 +11,17 @@ PropertiesTreeWidget::PropertiesTreeWidget(QWidget *parent) : QWidget(parent)
     mainTreeWidget->installEventFilter(this);
 
     //REview!!
-//    connect(mainTreeWidget, SIGNAL(itemDoubleClicked(QTreeWidgetItem*,int)),
-//            this, SLOT(onTreeWidgetItemDoubleClicked(QTreeWidgetItem*,int)));
+    connect(mainTreeWidget, SIGNAL(itemDoubleClicked(QTreeWidgetItem*,int)),
+            this, SLOT(onTreeWidgetItemDoubleClicked(QTreeWidgetItem*,int)));
 
     mainItemTrans = new QTreeWidgetItem();
     mainItemTrans->setText(0, QString("Transcription"));
     mainItemTrans->setIcon(0, QIcon(":/resources/pics/docs.png"));
+    mainItemTrans->setExpanded(true);
     mainItemSubs = new QTreeWidgetItem();
     mainItemSubs->setIcon(0, QIcon(":/resources/pics/docs.png"));
     mainItemSubs->setText(0, QString("Subtitles"));
+    mainItemSubs->setExpanded(true);
 
     nerPropsTreeWidget = new QTreeWidget(parent);
     splitter = new QSplitter(Qt::Vertical, parent);
@@ -29,10 +33,13 @@ PropertiesTreeWidget::PropertiesTreeWidget(QWidget *parent) : QWidget(parent)
 
     //Set tree header
     QTreeWidgetItem* headerItem = new QTreeWidgetItem();
-    headerItem->setText(0,QString("File Name"));
+    headerItem->setText(0,QString("Name"));
     headerItem->setText(1,QString("Responsible"));
     headerItem->setText(2,QString("Description"));
     mainTreeWidget->setHeaderItem(headerItem);
+    mainTreeWidget->setColumnWidth(0,250);
+    mainTreeWidget->setColumnWidth(1,150);
+    mainTreeWidget->setColumnWidth(2,150);
 
     mainTreeGroupBoxLayout->addWidget(mainTreeWidget);
     mainTreeGroupBox->setLayout(mainTreeGroupBoxLayout);
@@ -57,21 +64,16 @@ PropertiesTreeWidget::PropertiesTreeWidget(QWidget *parent) : QWidget(parent)
     initContextMenuAction();
     initTrees();
 
-//    QString f = QString("Filename");
-//    QString n = QString("REposnsible");
-//    QString d = QString("Description");
-//    insertNewSubtitle(f, n, d);
-
 }
 
-//void PropertiesTreeWidget::onTreeWidgetItemDoubleClicked(QTreeWidgetItem * item, int column)
-//{
-//    if (column != 0) {
-//        //Allow editiong all expect the filename...
-//        qDebug("Item Edited");
-//        mainTreeWidget->editItem(item, column);
-//    }
-//}
+void PropertiesTreeWidget::onTreeWidgetItemDoubleClicked(QTreeWidgetItem * item, int column)
+{
+    if(subWindowsMap->contains(item)){
+        QMdiSubWindow *subwindow = subWindowsMap->value(item);
+        subwindow->showMaximized();
+    }
+
+}
 
 /*******************************************************************************
  * Initializes the root nodes of the properties tree.
@@ -98,21 +100,27 @@ void PropertiesTreeWidget::initContextMenuAction()
 /*******************************************************************************
  * Inserts a new subtitle document on the tree.
  ******************************************************************************/
-void PropertiesTreeWidget::insertNewSubtitle(QString &fileName,
-                                             QString &responsible,
-                                             QString &description)
+QTreeWidgetItem* PropertiesTreeWidget::insertNewSubtitle(QString &fileName,
+                                                         QMdiSubWindow *subWindow,
+                                                         QString &responsible,
+                                                         QString &description)
 {
     QTreeWidgetItem* item = new QTreeWidgetItem();
     item->setFlags(item->flags()
                    | Qt::ItemIsSelectable
                    | Qt::ItemIsEnabled
-                   | Qt::ItemIsEditable);
+                   /*| Qt::ItemIsEditable*/);
     item->setText(0, fileName);
     item->setText(1,responsible);
     item->setText(2,description);
     item->setIcon(0,QIcon(":/resources/pics/doc_subs.png"));
 
     mainItemSubs->addChild(item);
+    mainTreeWidget->expandAll();
+
+    subWindowsMap->insert(item, subWindow);
+
+    return item;
 }
 
 void PropertiesTreeWidget::insertNewTranslation(QString &fileName,
@@ -127,19 +135,27 @@ void PropertiesTreeWidget::insertNewTranslation(QString &fileName,
     item->setFlags(item->flags()
                    | Qt::ItemIsSelectable
                    | Qt::ItemIsEnabled
-                   | Qt::ItemIsEditable);
+                  /* | Qt::ItemIsEditable*/);
     item->setText(0, fileName);
     item->setText(1, responsible);
     item->setText(2, description);
     item->setIcon(0, QIcon(":/resources/pics/doc_subs.png"));
 
     mainItemTrans->addChild(item);
+    mainTreeWidget->expandAll();
 
 }
 
 void PropertiesTreeWidget::insertNewSpeaker(QString &speaker)
 {
 
+}
+
+void PropertiesTreeWidget::clearAllTreeData()
+{
+    //Remove all childs from both trees..
+    qDeleteAll(mainItemSubs->takeChildren());
+    qDeleteAll(mainItemTrans->takeChildren());
 }
 
 /*******************************************************************************

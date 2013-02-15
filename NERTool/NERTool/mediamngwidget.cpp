@@ -57,19 +57,19 @@ void MediaMngWidget::createActions()
     playAudioAction->setShortcut(QKeySequence("Ctrl+p"));
     playAudioAction->setDisabled(true);
     playAudioAction->setIcon(QIcon(":/resources/pics/player_play.png"));
-    playAudioAction->setStatusTip("Play audio file");
+    playAudioAction->setStatusTip("Play media");
     connect(playAudioAction, SIGNAL(triggered()), this, SLOT(playMediaFileSlot()));
 
     pauseAudioAction = new QAction(style()->standardIcon(QStyle::SP_MediaPause), tr("Pause"), this);
     pauseAudioAction->setShortcut(QKeySequence("Ctrl+A"));
-    pauseAudioAction->setStatusTip("Pause audio file");
+    pauseAudioAction->setStatusTip("Pause media");
     pauseAudioAction->setDisabled(true);
     pauseAudioAction->setIcon(QIcon(":/resources/pics/player_pause.png"));
     connect(pauseAudioAction, SIGNAL(triggered()), this, SLOT(pauseMediaFileSlot()));
 
     stopAudioAction = new QAction(style()->standardIcon(QStyle::SP_MediaStop), tr("Stop"), this);
     stopAudioAction->setShortcut(QKeySequence("Ctrl+S"));
-    stopAudioAction->setStatusTip("Stop audio");
+    stopAudioAction->setStatusTip("Stop media");
     stopAudioAction->setDisabled(true);
     stopAudioAction->setIcon(QIcon(":/resources/pics/player_stop.png"));
     connect(stopAudioAction, SIGNAL(triggered()), this, SLOT(stopMediaFileSlot()));
@@ -206,6 +206,7 @@ void MediaMngWidget::loadMediaFileSlot()
 
 void MediaMngWidget::playMediaFileSlot()
 {
+
     bool wasPlaying = mediaObject->state() == Phonon::PlayingState;
 
     if (mediaObject->state() == Phonon::StoppedState){
@@ -317,4 +318,32 @@ void MediaMngWidget::hasVideochanged(bool hasVideoChange)
 void MediaMngWidget::updateVideoSubtitleSlot(QString &text)
 {
     videoSubLabel->setText(text);
+}
+
+void MediaMngWidget::loadVideoSubtitlesFromTableData(NERTableWidget *table)
+{
+    if(table==0 || table->rowCount()==0)
+    {
+        return;
+    }
+
+    QList<BlockTRS> subtitleTable;
+
+    for(int i=0; i<table->rowCount(); i++)
+    {
+        NERSubTableWidget* subtable = (NERSubTableWidget*)table->item(i, SUBTITLES_COLUMN_INDEX);
+        if(subtable!=0){
+
+            for(int k=0; k<subtable->rowCount(); k++){
+                BlockTRS btr = subtable->getSubtableRowData(k);
+                subtitleTable.append(btr);
+            }
+
+        }
+
+
+    }
+
+
+
 }

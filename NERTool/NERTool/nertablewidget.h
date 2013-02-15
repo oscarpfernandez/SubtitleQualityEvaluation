@@ -36,9 +36,12 @@ Q_OBJECT
 public:
     NERTableWidget(QWidget *parent = 0);
     ~NERTableWidget();
-    int insertNewTableEntry(QString &speaker, QString &TimeStamp, QString &text);
+    int insertNewTableEntry(QString &speaker,
+                            QString &TimeStamp,
+                            QString &text);
     void loadXMLData(QList<BlockTRS> *trsBlocks);
-    void loadSubtitlesXMLData(QList<BlockTRS> *transcription, QList<BlockTRS> *trsBlocks);
+    void loadSubtitlesXMLData(QList<BlockTRS> *transcription,
+                              QList<BlockTRS> *trsBlocks);
     void deleteTablesContents();
 
 private:
@@ -56,7 +59,7 @@ public:
     NERSubTableWidget(QWidget *parent=0);
     ~NERSubTableWidget();
     int insertNewTableEntry(QString &timeStamp, QString &text);
-    void getXMLNode();
+    BlockTRS getSubtableRowData(int row);
 
 };
 
