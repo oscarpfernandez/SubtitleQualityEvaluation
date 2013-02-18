@@ -16,6 +16,7 @@
 #include <QFileDialog>
 #include <QDesktopServices>
 #include <QComboBox>
+#include <QTimer>
 #include <phonon/audiooutput.h>
 #include <phonon/videowidget.h>
 #include <phonon/seekslider.h>
@@ -48,7 +49,10 @@ private:
     Phonon::MediaController *mediaController;
 
     QMdiArea *mainMDIArea;
-    QComboBox *tableSelectionCombo;
+    QLabel *loadedMdiWinLabel;
+    QLineEdit *loadedMdiWinName;
+    QHash<qint64,QString> subtitles;
+    QTimer *subsTimeoutTimer;
 
     QLCDNumber *timeLcd;
     QToolBar *buttonsBar;
@@ -62,7 +66,7 @@ private:
     QAction *playAudioAction;
     QAction *pauseAudioAction;
     QAction *stopAudioAction;
-    QAction *showVideoAction;
+    //QAction *showVideoAction;
 
     QAction *loadVideoFileAction;
     QAction *playVideoAction;
@@ -90,10 +94,13 @@ public slots:
     void seekableChanged(bool isSeekChanged);
     void finished();
 //    void showVideoPlayer();
-    void updateVideoSubtitleSlot(QString &text);
     void loadVideoSubtitlesFromTableData(NERTableWidget *table);
     void setActivatedSubWindow(QMdiSubWindow* subwindow);
+    void clearVideoSubtitle();
     
+private:
+    void checkForSubtitleAndUpdateVideo(qlonglong timeInMilis);
+    QString splitSubtitleLine(QString sub);
 };
 
 #endif // MEDIAMNGWIDGET_H

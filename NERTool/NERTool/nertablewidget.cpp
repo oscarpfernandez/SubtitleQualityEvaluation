@@ -73,7 +73,7 @@ void NERTableWidget::loadSubtitlesXMLData(QList<BlockTRS> *transcription, QList<
 
     //Save the subtitles list...
     subtitleTableData = new QList<BlockTRS>(*subsTrsBlocks);
-    subtileDataHashedByTimestamp = new QHash<qint64,QString>();
+    subtileDataHashedByTimestamp = new QHash<qlonglong,QString>();
     for(int i=0; i<subtitleTableData->count(); i++){
         BlockTRS btr = subtitleTableData->at(i);
         QStringList ls = btr.getSyncTime().split(".");
@@ -185,6 +185,11 @@ void NERTableWidget::deleteTablesContents(){
         removeRow(i);
     }
     setRowCount(0);
+}
+
+QHash<qlonglong,QString> NERTableWidget::getHashedSubtableData()
+{
+    return *subtileDataHashedByTimestamp;
 }
 
 

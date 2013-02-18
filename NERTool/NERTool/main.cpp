@@ -23,11 +23,8 @@ int main(int argc, char *argv[])
 
     Sleeper::sleep(2000);
 
-#if defined(Q_OS_SYMBIAN)
     mainWin.showMaximized();
-#else
-    mainWin.show();
-#endif
+
     splash->finish(&mainWin);
     return app.exec();
 }

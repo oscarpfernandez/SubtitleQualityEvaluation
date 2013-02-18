@@ -5,6 +5,7 @@
 
 const QString NER_APP_NAME = "NER Tool";
 const int SUBTITLE_CHECK_INTERVAL = 50;
+const int SUBTITLE_CLEAN_TIMEOUT = 2500;
 
 /*
  * Struct to hold each line contained on the TRS XML file.

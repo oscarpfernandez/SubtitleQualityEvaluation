@@ -4,6 +4,7 @@ MediaMngWidget::MediaMngWidget(QWidget *parent, QMdiArea *mainMdiArea) :
     QWidget(parent)
 {
     mainMDIArea = mainMdiArea;
+    connect(mainMDIArea, SIGNAL(subWindowActivated(QMdiSubWindow*)), this, SLOT(setActivatedSubWindow(QMdiSubWindow*)));
 
     videoPlayer = new Phonon::VideoWidget();
     audioOutput = new Phonon::AudioOutput(Phonon::MusicCategory, this);
@@ -26,8 +27,12 @@ MediaMngWidget::MediaMngWidget(QWidget *parent, QMdiArea *mainMdiArea) :
     connect(mediaObject, SIGNAL(currentSourceChanged(Phonon::MediaSource)),
             this, SLOT(sourceChangedSlot(Phonon::MediaSource)));
 
+
     Phonon::createPath(mediaObject, audioOutput);
     Phonon::createPath(mediaObject, videoPlayer);
+
+    subsTimeoutTimer = new QTimer(this);
+    connect(subsTimeoutTimer, SIGNAL(timeout()), this, SLOT(clearVideoSubtitle()));
 
 
     QPalette palette;
@@ -109,9 +114,10 @@ void MediaMngWidget::setupGUI()
     fileNamelabel = new QLabel("File Name: ", this);
     fileNamelabel->setPalette(palette);
 
-    tableSelectionCombo = new QComboBox(this);
-    tableSelectionCombo->setFixedWidth(250);
-    //connect(mainMDIArea, SIGNAL(subWindowActivated(QMdiSubWindow*)), this, setActivatedSubWindow(QMdiSubWindow*));
+    loadedMdiWinLabel = new QLabel;
+    loadedMdiWinLabel->setText(tr("Window: "));
+    loadedMdiWinName = new QLineEdit;
+    loadedMdiWinName->setDisabled(true);
 
     buttonsBar = new QToolBar(this);
     buttonsBar->addAction(loadAudioFileAction);
@@ -124,9 +130,8 @@ void MediaMngWidget::setupGUI()
     fileDescLayout = new QHBoxLayout;
     fileDescLayout->addWidget(fileNamelabel);
     fileDescLayout->addWidget(fileNameLoaded);
-    fileDescLayout->addWidget(tableSelectionCombo);
-
-
+    fileDescLayout->addWidget(loadedMdiWinLabel);
+    fileDescLayout->addWidget(loadedMdiWinName);
 
     sliderTimerLayout = new QHBoxLayout;
     sliderTimerLayout->addWidget(buttonsBar);
@@ -150,7 +155,7 @@ void MediaMngWidget::setupGUI()
     videoWidLayout = new QVBoxLayout();
     videoSubLabel = new QLabel();
     videoSubLabel->setText(QString("This is a test!\n A real good one!"));
-    videoSubLabel->setFont(QFont("Console",20, true));
+    videoSubLabel->setFont(QFont("Times",12, true));
     videoSubLabel->setFixedHeight(70);
     videoSubLabel->setAlignment(Qt::AlignCenter | Qt::AlignHCenter);
     videoSubLabel->setAutoFillBackground(true);
@@ -298,8 +303,10 @@ void MediaMngWidget::stateChangedSlot(Phonon::State newState, Phonon::State /*ol
 void MediaMngWidget::tickSlot(qint64 time)
 {
     QTime displayTime(time / (60*60*1000), (time / 60000) % 60, (time / 1000) % 60, time % 1000);
-
     timeLcd->display(displayTime.toString("hh:mm:ss.zzz"));
+
+    checkForSubtitleAndUpdateVideo(time);
+
 }
 
 void MediaMngWidget::sourceChangedSlot(const Phonon::MediaSource &source)
@@ -317,14 +324,56 @@ void MediaMngWidget::metaStateChangedSlot(Phonon::State newState, Phonon::State 
 void MediaMngWidget::hasVideochanged(bool hasVideoChange)
 {
     if(hasVideoChange){
-        showVideoAction->setEnabled(true);
+        //showVideoAction->setEnabled(true);
         qDebug() << "Has Video Changed " << hasVideoChange;
     }
 }
 
-void MediaMngWidget::updateVideoSubtitleSlot(QString &text)
+void MediaMngWidget::checkForSubtitleAndUpdateVideo(qlonglong timeInMilis)
 {
-    videoSubLabel->setText(text);
+    qlonglong time = timeInMilis - (timeInMilis % SUBTITLE_CHECK_INTERVAL);
+
+    qDebug() << "Subs Chech -- " << time;
+
+    QString sub = subtitles.value(time, QString(""));
+
+    if(sub.count()!=0){
+        if(subsTimeoutTimer->isActive()){
+            subsTimeoutTimer->stop();
+        }
+
+        QString ret = splitSubtitleLine(sub);
+        videoSubLabel->setText(ret);
+
+        subsTimeoutTimer->start(SUBTITLE_CLEAN_TIMEOUT);
+    }
+}
+
+QString MediaMngWidget::splitSubtitleLine(QString sub)
+{
+    if(sub.count() <= 34){
+        return sub;
+    }
+
+    QStringList list = sub.split(" ");
+
+    QString ret;
+    int countChars = 0;
+    for(int i=0; i<list.count(); i++)
+    {
+        QString word = list.at(i);
+        if(countChars <= 34){
+            countChars += word.count();
+            ret.append(word).append(" ");
+        }
+        else{
+            countChars = word.count();
+            ret.append("\n").append(word).append(" ");
+        }
+    }
+
+
+    return ret;
 }
 
 void MediaMngWidget::loadVideoSubtitlesFromTableData(NERTableWidget *table)
@@ -356,6 +405,18 @@ QWidget* MediaMngWidget::getVideoWindow()
 
 void MediaMngWidget::setActivatedSubWindow(QMdiSubWindow *subwindow)
 {
-    NERTableWidget *table = (NERTableWidget*)subwindow->widget();
-    //QList<BlockTRS> btr = table->
+    if(subwindow==0){
+        return;
+    }
+
+    NERTableWidget *table = static_cast<NERTableWidget*>(subwindow->widget());
+    if(table!=0){
+        loadedMdiWinName->setText("New Window");
+        subtitles = table->getHashedSubtableData();
+    }
+}
+
+void MediaMngWidget::clearVideoSubtitle()
+{
+    videoSubLabel->setText("");
 }

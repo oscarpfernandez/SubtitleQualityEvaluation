@@ -39,12 +39,12 @@ public:
     void loadSubtitlesXMLData(QList<BlockTRS> *transcription,
                               QList<BlockTRS> *trsBlocks);
     void deleteTablesContents();
-    QList<BlockTRS> getSubtableData();
+    QHash<qlonglong,QString> getHashedSubtableData();
 
 private:
     QHeaderView *headerView;
     QList<BlockTRS> *subtitleTableData;
-    QHash<qint64,QString> *subtileDataHashedByTimestamp;
+    QHash<qlonglong,QString> *subtileDataHashedByTimestamp;
 
 public slots:
     void columnTableResized(int column, int oldWidth, int newWidth);

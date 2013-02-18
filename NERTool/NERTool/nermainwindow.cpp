@@ -19,7 +19,6 @@ NERMainWindow::NERMainWindow(QWidget *parent) : QMainWindow(parent)
 	createToolBars();
 	createStatusBar();
 
-
 	setCentralWidget(mainMdiArea);
 
 	initializeMDIWindows();
@@ -60,7 +59,7 @@ void NERMainWindow::createGuiElements()
 
     propertiesTreeWidget = new PropertiesTreeWidget(this);
 
-    mediaMngWidget = new MediaMngWidget(this);
+    mediaMngWidget = new MediaMngWidget(this, mainMdiArea);
 
 }
 
@@ -240,13 +239,18 @@ void NERMainWindow::createStatusBar()
  ******************************************************************************/
 void NERMainWindow::createDockableWidgets()
 {
+
+    QDesktopWidget *mydesk = QApplication::desktop();
+    int docksWidth = 0.30 * mydesk->width();
+
     projectPropertiesDockWidget = new QDockWidget(tr("Project Details"));
     projectPropertiesDockWidget->setObjectName("projectTreeDockWidget");
     projectPropertiesDockWidget->setWidget(propertiesTreeWidget);
     projectPropertiesDockWidget->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
     projectPropertiesDockWidget->setToolTip(tr("Project Details"));
-    projectPropertiesDockWidget->setMinimumWidth(150);
-    projectPropertiesDockWidget->setMaximumWidth(850);
+//    projectPropertiesDockWidget->setMinimumWidth(150);
+//    projectPropertiesDockWidget->setMaximumWidth(850);
+    projectPropertiesDockWidget->setFixedWidth(docksWidth);
     projectPropertiesDockWidget->setWindowIcon(QIcon(":/resources/pics/docs.png"));
 
     addDockWidget(Qt::RightDockWidgetArea, projectPropertiesDockWidget);
@@ -267,6 +271,9 @@ void NERMainWindow::createDockableWidgets()
                                            | Qt::RightDockWidgetArea
                                            | Qt::TopDockWidgetArea);
     videoPlayerDockWidget->setToolTip(tr("Video window..."));
+    videoPlayerDockWidget->setFixedWidth(docksWidth);
+    videoPlayerDockWidget->setFixedHeight(0.75*docksWidth);
+    videoPlayerDockWidget->setAutoFillBackground(true);
     QPalette bvidpalette = videoPlayerDockWidget->palette();
     bvidpalette.setColor(QPalette::Window, Qt::black);
     videoPlayerDockWidget->setPalette(bvidpalette);

@@ -10,6 +10,7 @@ QT_FORWARD_DECLARE_CLASS(QAudioFormat)
 // Miscellaneous utility functions
 //-----------------------------------------------------------------------------
 
+
 qint64 audioDuration(const QAudioFormat &format, qint64 bytes);
 qint64 audioLength(const QAudioFormat &format, qint64 microSeconds);
 
