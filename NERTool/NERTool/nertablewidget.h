@@ -9,8 +9,6 @@
 #include "nercommon.h"
 
 
-
-
 const int SPEAKER_ID_COLUMN_WIDTH = 100;
 const int SPEAKER_ID_COLUMN_INDEX = 0;
 const int TIMESTAMP_COLUMN_WIDTH = 70;
@@ -24,8 +22,6 @@ const int SUBTITLES_COLUMN_INDEX = 3;
 
 const int SUB_TIMESTAMP_COLUMN_INDEX = 0;
 const int SUB_SUBTITLES_COLUMN_INDEX = 1;
-
-
 
 
 class NERTableWidget : public QTableWidget
@@ -43,9 +39,12 @@ public:
     void loadSubtitlesXMLData(QList<BlockTRS> *transcription,
                               QList<BlockTRS> *trsBlocks);
     void deleteTablesContents();
+    QList<BlockTRS> getSubtableData();
 
 private:
     QHeaderView *headerView;
+    QList<BlockTRS> *subtitleTableData;
+    QHash<qint64,QString> *subtileDataHashedByTimestamp;
 
 public slots:
     void columnTableResized(int column, int oldWidth, int newWidth);

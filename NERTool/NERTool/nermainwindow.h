@@ -74,6 +74,7 @@ private:
     QAction *tileSubWindowsAction;
     QAction *viewPropertiesDockAction;
     QAction *viewVideoPlayerDockAction;
+    QAction *showVideoAction;
 
 
     QLabel  *statusBarLeftLabel;

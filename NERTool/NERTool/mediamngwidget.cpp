@@ -1,8 +1,9 @@
 #include "mediamngwidget.h"
 
-MediaMngWidget::MediaMngWidget(QWidget *parent) :
+MediaMngWidget::MediaMngWidget(QWidget *parent, QMdiArea *mainMdiArea) :
     QWidget(parent)
 {
+    mainMDIArea = mainMdiArea;
 
     videoPlayer = new Phonon::VideoWidget();
     audioOutput = new Phonon::AudioOutput(Phonon::MusicCategory, this);
@@ -74,10 +75,10 @@ void MediaMngWidget::createActions()
     stopAudioAction->setIcon(QIcon(":/resources/pics/player_stop.png"));
     connect(stopAudioAction, SIGNAL(triggered()), this, SLOT(stopMediaFileSlot()));
 
-    showVideoAction = new QAction(tr("Video"), this);
-    showVideoAction->setStatusTip(tr("Show video player..."));
-    showVideoAction->setEnabled(false);
-    connect(showVideoAction, SIGNAL(triggered()), this, SLOT(showVideoPlayer()));
+//    showVideoAction = new QAction(tr("Video"), this);
+//    showVideoAction->setStatusTip(tr("Show video player..."));
+//    showVideoAction->setEnabled(false);
+//    connect(showVideoAction, SIGNAL(triggered()), this, SLOT(showVideoPlayer()));
 
 
 }
@@ -108,17 +109,23 @@ void MediaMngWidget::setupGUI()
     fileNamelabel = new QLabel("File Name: ", this);
     fileNamelabel->setPalette(palette);
 
+    tableSelectionCombo = new QComboBox(this);
+    tableSelectionCombo->setFixedWidth(250);
+    //connect(mainMDIArea, SIGNAL(subWindowActivated(QMdiSubWindow*)), this, setActivatedSubWindow(QMdiSubWindow*));
+
     buttonsBar = new QToolBar(this);
     buttonsBar->addAction(loadAudioFileAction);
     buttonsBar->addAction(playAudioAction);
     buttonsBar->addAction(pauseAudioAction);
     buttonsBar->addAction(stopAudioAction);
-    buttonsBar->addAction(showVideoAction);
+//    buttonsBar->addAction(showVideoAction);
     buttonsBar->setMaximumWidth(buttonsBar->sizeHint().width());
 
     fileDescLayout = new QHBoxLayout;
     fileDescLayout->addWidget(fileNamelabel);
     fileDescLayout->addWidget(fileNameLoaded);
+    fileDescLayout->addWidget(tableSelectionCombo);
+
 
 
     sliderTimerLayout = new QHBoxLayout;
@@ -170,13 +177,13 @@ void MediaMngWidget::setupGUI()
 }
 
 
-void MediaMngWidget::showVideoPlayer()
-{
-    if(!videoPlayer->isVisible()){
-        qDebug() << "Button Pressed ";
-        videoWindow->show();
-    }
-}
+//void MediaMngWidget::showVideoPlayer()
+//{
+//    if(!videoPlayer->isVisible()){
+//        qDebug() << "Button Pressed ";
+//        videoWindow->show();
+//    }
+//}
 
 
 
@@ -338,12 +345,17 @@ void MediaMngWidget::loadVideoSubtitlesFromTableData(NERTableWidget *table)
                 BlockTRS btr = subtable->getSubtableRowData(k);
                 subtitleTable.append(btr);
             }
-
         }
-
-
     }
+}
 
+QWidget* MediaMngWidget::getVideoWindow()
+{
+    return videoWindow;
+}
 
-
+void MediaMngWidget::setActivatedSubWindow(QMdiSubWindow *subwindow)
+{
+    NERTableWidget *table = (NERTableWidget*)subwindow->widget();
+    //QList<BlockTRS> btr = table->
 }

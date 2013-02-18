@@ -4,6 +4,7 @@
 #include <qstring.h>
 
 const QString NER_APP_NAME = "NER Tool";
+const int SUBTITLE_CHECK_INTERVAL = 50;
 
 /*
  * Struct to hold each line contained on the TRS XML file.

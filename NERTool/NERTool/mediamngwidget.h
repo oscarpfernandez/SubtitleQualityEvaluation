@@ -15,6 +15,7 @@
 #include <QPushButton>
 #include <QFileDialog>
 #include <QDesktopServices>
+#include <QComboBox>
 #include <phonon/audiooutput.h>
 #include <phonon/videowidget.h>
 #include <phonon/seekslider.h>
@@ -24,12 +25,14 @@
 #include <phonon/MediaController>
 #include "nertablewidget.h"
 
+
 class MediaMngWidget : public QWidget
 {
     Q_OBJECT
 public:
-    explicit MediaMngWidget(QWidget *parent = 0);
+    explicit MediaMngWidget(QWidget *parent = 0, QMdiArea *mMdiArea=0);
     ~MediaMngWidget();
+    QWidget* getVideoWindow();
 
 private:
     void createActions();
@@ -43,6 +46,9 @@ private:
     Phonon::VideoWidget *videoPlayer;
     Phonon::VolumeSlider *volumeSlider;
     Phonon::MediaController *mediaController;
+
+    QMdiArea *mainMDIArea;
+    QComboBox *tableSelectionCombo;
 
     QLCDNumber *timeLcd;
     QToolBar *buttonsBar;
@@ -83,9 +89,10 @@ public slots:
     void hasVideochanged(bool hasVideoChange);
     void seekableChanged(bool isSeekChanged);
     void finished();
-    void showVideoPlayer();
+//    void showVideoPlayer();
     void updateVideoSubtitleSlot(QString &text);
     void loadVideoSubtitlesFromTableData(NERTableWidget *table);
+    void setActivatedSubWindow(QMdiSubWindow* subwindow);
     
 };
 

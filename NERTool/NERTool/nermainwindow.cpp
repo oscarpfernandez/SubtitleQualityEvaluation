@@ -45,6 +45,7 @@ void NERMainWindow::createGuiElements()
     nerTablesList = new QList<NERTableWidget*>();
 
 	mainMdiArea = new QMdiArea(this);
+
     //diffTableWid = new NERTableWidget(this);
 
     //mapTableContentTree = new QMap<QTreeWidgetItem*, NERTableWidget*>();
@@ -161,6 +162,8 @@ void NERMainWindow::createActions()
     viewVideoPlayerDockAction = audioWaveFormDockWidget->toggleViewAction();
     viewVideoPlayerDockAction->setIcon(QIcon(":/resources/pics/video_player.png"));
 
+    showVideoAction = videoPlayerDockWidget->toggleViewAction();
+    showVideoAction->setStatusTip(tr("Show video..."));
 
 }
 
@@ -209,6 +212,7 @@ void NERMainWindow::createToolBars()
     fileToolbar->addAction(closeProjectAction);
     fileToolbar->addAction(viewVideoPlayerDockAction);
     fileToolbar->addAction(viewPropertiesDockAction);
+    fileToolbar->addAction(showVideoAction);
 	fileToolbar->addAction(aboutAction);
 }
 
@@ -254,6 +258,20 @@ void NERMainWindow::createDockableWidgets()
     audioWaveFormDockWidget->setToolTip(tr("Media player for audio and video content..."));
 
     addDockWidget(Qt::BottomDockWidgetArea, audioWaveFormDockWidget);
+
+
+    videoPlayerDockWidget = new QDockWidget(tr("Video Player"));
+    videoPlayerDockWidget->setObjectName("videoControlDockWidget");
+    videoPlayerDockWidget->setWidget(mediaMngWidget->getVideoWindow());
+    videoPlayerDockWidget->setAllowedAreas(Qt::LeftDockWidgetArea
+                                           | Qt::RightDockWidgetArea
+                                           | Qt::TopDockWidgetArea);
+    videoPlayerDockWidget->setToolTip(tr("Video window..."));
+    QPalette bvidpalette = videoPlayerDockWidget->palette();
+    bvidpalette.setColor(QPalette::Window, Qt::black);
+    videoPlayerDockWidget->setPalette(bvidpalette);
+
+    addDockWidget(Qt::RightDockWidgetArea, videoPlayerDockWidget);
 
 }
 

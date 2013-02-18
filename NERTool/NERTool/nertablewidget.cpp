@@ -5,9 +5,9 @@
 #include "dragwidget.h"
 #include "draglabel.h"
 #include "xmlhandler.h"
+#include <QDebug>
 
 QT_FORWARD_DECLARE_CLASS(NERSubTableWidget)
-
 
 
 /******************************************************************************
@@ -45,6 +45,8 @@ NERTableWidget::NERTableWidget(QWidget *parent) : QTableWidget(parent)
 
     connect(headerView, SIGNAL(sectionResized(int,int,int)), this, SLOT(columnTableResized(int,int,int)));
 
+//    subtitleTableData = new QList<BlockTRS>();
+
 }
 
 void NERTableWidget::loadXMLData(QList<BlockTRS> *trsBlocks){
@@ -67,6 +69,24 @@ void NERTableWidget::loadSubtitlesXMLData(QList<BlockTRS> *transcription, QList<
     if(subsTrsBlocks==0 || subsTrsBlocks->count()==0 || transcription==0 || transcription->count()==0){
         //Nothing to do...
         return;
+    }
+
+    //Save the subtitles list...
+    subtitleTableData = new QList<BlockTRS>(*subsTrsBlocks);
+    subtileDataHashedByTimestamp = new QHash<qint64,QString>();
+    for(int i=0; i<subtitleTableData->count(); i++){
+        BlockTRS btr = subtitleTableData->at(i);
+        QStringList ls = btr.getSyncTime().split(".");
+        QString secs = ls[0];
+        QString mils = ls[1];
+        qlonglong timeMilis = (secs.toLongLong())*1000
+                + mils.toLongLong()
+                - mils.toLongLong() % SUBTITLE_CHECK_INTERVAL;
+        QString t = btr.getText();
+        subtileDataHashedByTimestamp->insert(timeMilis, t);
+
+        qDebug() << "Time " << QString("%1").arg(timeMilis);
+        qDebug() << "Text " << t;
     }
 
     //Merge the translation with the subtitles...
@@ -166,6 +186,7 @@ void NERTableWidget::deleteTablesContents(){
     }
     setRowCount(0);
 }
+
 
 NERTableWidget::~NERTableWidget()
 {
