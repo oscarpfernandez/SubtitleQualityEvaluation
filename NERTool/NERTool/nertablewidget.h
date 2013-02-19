@@ -7,6 +7,7 @@
 #include <qmdisubwindow.h>
 #include <QHBoxLayout>
 #include "nercommon.h"
+#include "mediamngwidget.h"
 
 
 const int SPEAKER_ID_COLUMN_WIDTH = 100;
@@ -23,6 +24,7 @@ const int SUBTITLES_COLUMN_INDEX = 3;
 const int SUB_TIMESTAMP_COLUMN_INDEX = 0;
 const int SUB_SUBTITLES_COLUMN_INDEX = 1;
 
+class MediaMngWidget;
 
 class NERTableWidget : public QTableWidget
 {
@@ -30,7 +32,7 @@ class NERTableWidget : public QTableWidget
 Q_OBJECT
 
 public:
-    NERTableWidget(QWidget *parent = 0);
+    NERTableWidget(QWidget *parent = 0, MediaMngWidget *mediaWidget=0);
     ~NERTableWidget();
     int insertNewTableEntry(QString &speaker,
                             QString &TimeStamp,
@@ -42,6 +44,7 @@ public:
     QHash<qlonglong,QString> getHashedSubtableData();
 
 private:
+    MediaMngWidget *mediaMngWidget;
     QHeaderView *headerView;
     QList<BlockTRS> *subtitleTableData;
     QHash<qlonglong,QString> *subtileDataHashedByTimestamp;
@@ -55,10 +58,16 @@ class NERSubTableWidget : public QTableWidget
     Q_OBJECT
 
 public:
-    NERSubTableWidget(QWidget *parent=0);
+    NERSubTableWidget(QWidget *parent=0, MediaMngWidget *mediaWidget=0);
     ~NERSubTableWidget();
     int insertNewTableEntry(QString &timeStamp, QString &text);
     BlockTRS getSubtableRowData(int row);
+
+private:
+    MediaMngWidget *mediaMngWidget;
+
+private slots:
+    void videoSeekFromStamp(int row, int column);
 
 };
 

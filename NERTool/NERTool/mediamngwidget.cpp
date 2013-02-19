@@ -10,6 +10,9 @@ MediaMngWidget::MediaMngWidget(QWidget *parent, QMdiArea *mainMdiArea) :
     audioOutput = new Phonon::AudioOutput(Phonon::MusicCategory, this);
     mediaObject = new Phonon::MediaObject(this);
 
+    isVideoAvailable = false;
+    isMediaSeekable = false;
+
     metaInformationResolver = new Phonon::MediaObject(this);
     mediaObject->setTickInterval(50);
 
@@ -168,28 +171,9 @@ void MediaMngWidget::setupGUI()
     videoWindow->setLayout(videoWidLayout);
     videoWindow->setWindowFlags(Qt::WindowStaysOnTopHint);
 
-
-//    QString fileName = "/home/oscar/Downloads/subs.srt";
-//    QHash<QByteArray, QVariant>  properties;
-//    properties.insert("type", "file");
-//    properties.insert("name", fileName);
-//    Phonon::SubtitleDescription newSubtitle(0, properties);
-//    mediaController->setAutoplayTitles(true);
-//    mediaController->setCurrentSubtitle(newSubtitle);
-
     setLayout(mainVBoxLayout);
 
 }
-
-
-//void MediaMngWidget::showVideoPlayer()
-//{
-//    if(!videoPlayer->isVisible()){
-//        qDebug() << "Button Pressed ";
-//        videoWindow->show();
-//    }
-//}
-
 
 
 /**************
@@ -259,7 +243,17 @@ void MediaMngWidget::finished()
 
 void MediaMngWidget::seekableChanged(bool isSeekChanged)
 {
+    isMediaSeekable = isSeekChanged;
+}
 
+void MediaMngWidget::seekVideo(qint64 time)
+{
+    if(!isMediaSeekable || time > mediaObject->totalTime() || time < 0)
+    {
+        //Nothing to do here...
+        return;
+    }
+    mediaObject->seek(time);
 }
 
 void MediaMngWidget::stateChangedSlot(Phonon::State newState, Phonon::State /*oldState*/)
@@ -323,10 +317,7 @@ void MediaMngWidget::metaStateChangedSlot(Phonon::State newState, Phonon::State 
 
 void MediaMngWidget::hasVideochanged(bool hasVideoChange)
 {
-    if(hasVideoChange){
-        //showVideoAction->setEnabled(true);
-        qDebug() << "Has Video Changed " << hasVideoChange;
-    }
+    isVideoAvailable = hasVideoChange;
 }
 
 void MediaMngWidget::checkForSubtitleAndUpdateVideo(qlonglong timeInMilis)

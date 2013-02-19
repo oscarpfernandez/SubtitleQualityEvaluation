@@ -511,7 +511,7 @@ void NERMainWindow::loadSubtitlesFileSlot(){
             continue; //proceed to next file...
         }
 
-        NERTableWidget *table = new NERTableWidget(this);
+        NERTableWidget *table = new NERTableWidget(this, mediaMngWidget);
         table->deleteTablesContents();
         table->loadXMLData(transcriptionList);
         table->loadSubtitlesXMLData(transcriptionList, trsList);

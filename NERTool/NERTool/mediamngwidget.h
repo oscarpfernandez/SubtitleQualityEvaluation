@@ -26,6 +26,7 @@
 #include <phonon/MediaController>
 #include "nertablewidget.h"
 
+class NERTableWidget;
 
 class MediaMngWidget : public QWidget
 {
@@ -61,13 +62,12 @@ private:
     QLineEdit *fileNameLoaded;
 
     bool isVideoAvailable;
+    bool isMediaSeekable;
 
     QAction *loadAudioFileAction;
     QAction *playAudioAction;
     QAction *pauseAudioAction;
     QAction *stopAudioAction;
-    //QAction *showVideoAction;
-
     QAction *loadVideoFileAction;
     QAction *playVideoAction;
     QAction *stopVideoAction;
@@ -92,6 +92,7 @@ public slots:
     void metaStateChangedSlot(Phonon::State newState, Phonon::State oldState);
     void hasVideochanged(bool hasVideoChange);
     void seekableChanged(bool isSeekChanged);
+    void seekVideo(qint64 time);
     void finished();
 //    void showVideoPlayer();
     void loadVideoSubtitlesFromTableData(NERTableWidget *table);

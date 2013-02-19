@@ -16,7 +16,7 @@ QT_FORWARD_DECLARE_CLASS(NERSubTableWidget)
  * of the data to an XML stream.
  ******************************************************************************/
 
-NERTableWidget::NERTableWidget(QWidget *parent) : QTableWidget(parent)
+NERTableWidget::NERTableWidget(QWidget *parent, MediaMngWidget *mediaWidget) : QTableWidget(parent)
 {
 	setSelectionMode(QAbstractItemView::SingleSelection);
     setSelectionBehavior(QAbstractItemView::SelectRows);
@@ -45,7 +45,7 @@ NERTableWidget::NERTableWidget(QWidget *parent) : QTableWidget(parent)
 
     connect(headerView, SIGNAL(sectionResized(int,int,int)), this, SLOT(columnTableResized(int,int,int)));
 
-//    subtitleTableData = new QList<BlockTRS>();
+    mediaMngWidget = mediaWidget;
 
 }
 
@@ -85,15 +85,15 @@ void NERTableWidget::loadSubtitlesXMLData(QList<BlockTRS> *transcription, QList<
         QString t = btr.getText();
         subtileDataHashedByTimestamp->insert(timeMilis, t);
 
-        qDebug() << "Time " << QString("%1").arg(timeMilis);
-        qDebug() << "Text " << t;
+        //qDebug() << "Time " << QString("%1").arg(timeMilis);
+        //qDebug() << "Text " << t;
     }
 
     //Merge the translation with the subtitles...
     int i=0;
     int line=0;
     for(int j=0; j<transcription->count()-1; j++){
-        NERSubTableWidget *subTable = new NERSubTableWidget(this);
+        NERSubTableWidget *subTable = new NERSubTableWidget(this, mediaMngWidget);
         subTable->setSelectionMode(QAbstractItemView::SingleSelection);
         subTable->setSelectionBehavior(QAbstractItemView::SelectRows);
         subTable->setDragEnabled(true);
@@ -205,7 +205,7 @@ NERTableWidget::~NERTableWidget()
  * will hold the subtitle information data. This nested structure is required
  * since the relation between transcription and subtitles is 1 to N.
  ******************************************************************************/
-NERSubTableWidget::NERSubTableWidget(QWidget *parent): QTableWidget(parent)
+NERSubTableWidget::NERSubTableWidget(QWidget *parent, MediaMngWidget *mediaWidget): QTableWidget(parent)
 {
     setSelectionMode(QAbstractItemView::SingleSelection);
     setSelectionBehavior(QAbstractItemView::SelectRows);
@@ -218,6 +218,9 @@ NERSubTableWidget::NERSubTableWidget(QWidget *parent): QTableWidget(parent)
     verticalHeader()->setVisible(false);
     horizontalHeader()->setVisible(false);
 
+    mediaMngWidget = mediaWidget;
+
+    connect(this, SIGNAL(cellClicked(int,int)), this, SLOT(videoSeekFromStamp(int,int)));
 
 }
 
@@ -229,6 +232,7 @@ int NERSubTableWidget::insertNewTableEntry(QString &timeStamp, QString &text)
     //Set timestamp
     QTableWidgetItem *tsItem = new QTableWidgetItem();
     tsItem->setText(timeStamp);
+    tsItem->setFlags(tsItem->flags() ^ Qt::ItemIsEditable);
     setItem(line, SUB_TIMESTAMP_COLUMN_INDEX, tsItem);
 
     //Insert the chopped text block with the widget...
@@ -254,6 +258,27 @@ BlockTRS NERSubTableWidget::getSubtableRowData(int row)
     ret.setSyncTime(timeStamp).setText(subtitleText);
 
     return ret;
+}
+
+
+void NERSubTableWidget::videoSeekFromStamp(int row, int column)
+{
+    qDebug() << "Row = " << row << "Column = " << column;
+
+    QString timeStamp = item(row, SUB_TIMESTAMP_COLUMN_INDEX)->text();
+
+    QStringList ls = timeStamp.split(".");
+    QString secs = ls[0];
+    QString mils = ls[1];
+    qlonglong timeMilis = (secs.toLongLong())*1000
+            + mils.toLongLong()
+            -mils.toLongLong() % SUBTITLE_CHECK_INTERVAL;
+
+    qDebug() << "Row = " << row << "Column = " << column;
+    qDebug() << "\nTimeMilis =" << timeMilis << "\nTimeOrig =" << timeStamp;
+
+    mediaMngWidget->seekVideo(timeMilis);
+
 }
 
 
