@@ -371,7 +371,7 @@ bool XMLHandler::writeProjectExportXML(QString &xmlFileName,
                     xmlWriter->writeStartElement(STR_WORD_TAG);
                     DragLabel* label = dragWidget->getWordAt(z);
                     xmlWriter->writeAttribute(STR_WORD_PROP_NAME, label->labelText());
-                    xmlWriter->writeAttribute(STR_WORD_PROP_ERROR, QString::number(label->getError()));
+                    xmlWriter->writeAttribute(STR_WORD_PROP_ERROR, QString::number(label->getErrorType()));
                     xmlWriter->writeAttribute(STR_WORD_PROP_COMMENT, label->getComment());
                     xmlWriter->writeEndElement();//STR_WORD_TAG
                 }
@@ -494,7 +494,7 @@ bool XMLHandler::readProjectExportXML(QString &xmlFileName,
 bool XMLHandler::readNERTable(QXmlStreamReader *xmlReader,
                               QList<NERTableWidget *> *nerTablesList)
 {
-    NERTableWidget *table = new NERTableWidget(_parent);
+    //NERTableWidget *table = new NERTableWidget(_parent);
 
     while(xmlReader->isEndElement()
           && xmlReader->name()!=STR_TABLE_TAG

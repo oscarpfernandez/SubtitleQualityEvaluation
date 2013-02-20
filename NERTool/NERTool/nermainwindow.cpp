@@ -45,18 +45,6 @@ void NERMainWindow::createGuiElements()
 
 	mainMdiArea = new QMdiArea(this);
 
-    //diffTableWid = new NERTableWidget(this);
-
-    //mapTableContentTree = new QMap<QTreeWidgetItem*, NERTableWidget*>();
-
-//    subWindowDiffTable = mainMdiArea->addSubWindow(diffTableWid,
-//                                                   Qt::CustomizeWindowHint
-//                                                   | Qt::WindowTitleHint
-//                                                   | Qt::WindowMinMaxButtonsHint);
-
-//    subWindowDiffTable->setWindowTitle("Trancription Data");
-//    subWindowDiffTable->setMinimumSize(800,600);
-
     propertiesTreeWidget = new PropertiesTreeWidget(this);
 
     mediaMngWidget = new MediaMngWidget(this, mainMdiArea);
@@ -248,8 +236,6 @@ void NERMainWindow::createDockableWidgets()
     projectPropertiesDockWidget->setWidget(propertiesTreeWidget);
     projectPropertiesDockWidget->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
     projectPropertiesDockWidget->setToolTip(tr("Project Details"));
-//    projectPropertiesDockWidget->setMinimumWidth(150);
-//    projectPropertiesDockWidget->setMaximumWidth(850);
     projectPropertiesDockWidget->setFixedWidth(docksWidth);
     projectPropertiesDockWidget->setWindowIcon(QIcon(":/resources/pics/docs.png"));
 
@@ -424,7 +410,6 @@ void NERMainWindow::aboutSlot()
 
 void NERMainWindow::initializeMDIWindows()
 {
-    //subWindowDiffTable->showNormal();
 
 }
 
@@ -511,7 +496,7 @@ void NERMainWindow::loadSubtitlesFileSlot(){
             continue; //proceed to next file...
         }
 
-        NERTableWidget *table = new NERTableWidget(this, mediaMngWidget);
+        NERTableWidget *table = new NERTableWidget(this, mediaMngWidget, transcriptionList);
         table->deleteTablesContents();
         table->loadXMLData(transcriptionList);
         table->loadSubtitlesXMLData(transcriptionList, trsList);

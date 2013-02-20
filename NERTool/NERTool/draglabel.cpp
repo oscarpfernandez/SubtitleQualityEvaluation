@@ -30,7 +30,7 @@ QString DragLabel::labelText() const
  * Args:
  * - EditionTypeEnum: the error type assigned to the widget.
  ******************************************************************************/
-void DragLabel::setupLabelType(DragLabel::EditionTypeEnum ete)
+void DragLabel::setupLabelType(EditionTypeEnum ete)
 {
     errorType = ete;
 
@@ -114,7 +114,7 @@ void DragLabel::setupLabelType(DragLabel::EditionTypeEnum ete)
     setPixmap(QPixmap::fromImage(image));
 }
 
-DragLabel::EditionTypeEnum DragLabel::getError()
+EditionTypeEnum DragLabel::getErrorType()
 {
     return errorType;
 }
@@ -133,4 +133,10 @@ void DragLabel::showCommentEditor()
 {
     dwcomment->show();
 }
+
+double DragLabel::getErrorWeight()
+{
+    return errorWeight;
+}
+
 

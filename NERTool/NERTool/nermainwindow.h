@@ -49,7 +49,6 @@ private:
 	QMdiSubWindow *subWindowDiffTable;
 
     QList<NERTableWidget *> *nerTablesList;
-    NERTableWidget *diffTableWid;
     PropertiesTreeWidget *propertiesTreeWidget;
 
     MediaMngWidget *mediaMngWidget;

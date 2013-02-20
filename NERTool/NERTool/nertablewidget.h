@@ -32,7 +32,9 @@ class NERTableWidget : public QTableWidget
 Q_OBJECT
 
 public:
-    NERTableWidget(QWidget *parent = 0, MediaMngWidget *mediaWidget=0);
+    NERTableWidget(QWidget *parent,
+                   MediaMngWidget *mediaWidget,
+                   QList<BlockTRS> *transcriptionList);
     ~NERTableWidget();
     int insertNewTableEntry(QString &speaker,
                             QString &TimeStamp,
@@ -42,12 +44,19 @@ public:
                               QList<BlockTRS> *trsBlocks);
     void deleteTablesContents();
     QHash<qlonglong,QString> getHashedSubtableData();
+    int computeNERStats_N();
+    double computeNERStats_NerValue();
+    double computeNERStats_EditionErrors();
+    double computeNERStats_RecognitionErrors();
+    double computeNERStats_Delay();
 
 private:
     MediaMngWidget *mediaMngWidget;
     QHeaderView *headerView;
     QList<BlockTRS> *subtitleTableData;
     QHash<qlonglong,QString> *subtileDataHashedByTimestamp;
+    QList<BlockTRS> *transcriptionList;
+    qlonglong getTimeInMilis(QString time);
 
 public slots:
     void columnTableResized(int column, int oldWidth, int newWidth);

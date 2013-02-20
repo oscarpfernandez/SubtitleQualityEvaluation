@@ -27,6 +27,8 @@ public:
     int countWords();
     DragLabel* getWordAt(int pos);
     QString getText();
+    double getEditionErrors();
+    double getRecognitionErrors();
 
 protected:
     //void dragEnterEvent(QDragEnterEvent *event);

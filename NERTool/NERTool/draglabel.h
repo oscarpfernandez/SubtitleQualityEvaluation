@@ -10,30 +10,38 @@ class QDragMoveEvent;
 class QFrame;
 QT_END_NAMESPACE
 
+enum EditionTypeEnum {
+    NotDefinedYet=0,
+    CorrectEdition=1,
+    EditionError=2,
+    RecognitionError=3
+};
+
+enum ModificationType {
+    Insertion=0,
+    Deletion=1,
+    Substitution=2
+};
+
 class DragLabel : public QLabel
 {
 public:
-    enum EditionTypeEnum {
-        NotDefinedYet=0,
-        CorrectEdition=1,
-        EditionError=2,
-        RecognitionError=3
-    };
-
     DragLabel(const QString &text, QWidget *parent);
     QString labelText() const;
-    void setupLabelType(DragLabel::EditionTypeEnum ete);
+    void setupLabelType(EditionTypeEnum ete);
     void setComment(QString &newComment);
     QString getComment();
     void showCommentEditor();
-    EditionTypeEnum getError();
+    EditionTypeEnum getErrorType();
+    double getErrorWeight();
 
 private:
     QString m_labelText;
     QSize size;
     QString *editionComment;
     DragLabelComment *dwcomment;
-    DragLabel::EditionTypeEnum errorType;
+    EditionTypeEnum errorType;
+    double errorWeight; //0.25, 0.5 or 1
 
 public slots:
     void setEditCommentSlot(QString &comment);

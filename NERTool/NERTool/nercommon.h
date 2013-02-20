@@ -52,4 +52,68 @@ public:
 };
 #endif
 
+/*******************************************************************************
+ * Structure to hold the NER Model statistic data per table.
+ ******************************************************************************/
+#ifndef NER_STATS_DATA
+#define NER_STATS_DATA
+struct NERStatsData
+{
+private:
+    int     NCount;
+    double  nerValue;
+    double  editionErrors;
+    double  recognitionErrors;
+    double  delayAcumulated;
+    int     delayCount;
+public:
+    int getNCount(){return NCount;}
+    NERStatsData& setNCount(int n){
+        NCount=n;
+        return *this;}
+    double getNerValue(){return nerValue;}
+    NERStatsData& setNerValue(double ner){
+        nerValue=ner;
+        return *this;}
+    double getEditionErrors(){return editionErrors;}
+    NERStatsData& setEditionErrors(double er){
+        editionErrors=er;
+        return *this;}
+    double getRecognitionErrors(){return recognitionErrors;}
+    NERStatsData& setRecognitionErrors(double re){
+        recognitionErrors=re;
+        return *this;}
+    double getDelayAcumulated(){return delayAcumulated;}
+    NERStatsData& setDelayAcumulated(double delay){
+        delayAcumulated=delay;
+        return *this;}
+    int getDelayCount(){return delayCount;}
+    NERStatsData& setDelayCount(int dc){
+        delayCount=dc;
+        return *this;}
+};
+#endif
+
+/******************************************************************************
+ * Debug setup
+ *****************************************************************************/
+class NullDebug
+{
+public:
+    template <typename T>
+    NullDebug& operator<<(const T&) { return *this; }
+};
+
+inline NullDebug nullDebug() { return NullDebug(); }
+
+#define DEBUG_ENABLED //Comment this to disable debug information...
+
+#ifdef DEBUG_ENABLED
+#   define ENGINE_DEBUG qDebug() //business as usual...
+#else
+#   define ENGINE_DEBUG nullDebug() //dummy debug...
+#endif
+
+/*** End of debug setup *******************************************************/
+
 #endif // NERCOMMON_H

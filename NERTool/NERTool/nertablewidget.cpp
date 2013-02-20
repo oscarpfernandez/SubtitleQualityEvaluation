@@ -16,7 +16,9 @@ QT_FORWARD_DECLARE_CLASS(NERSubTableWidget)
  * of the data to an XML stream.
  ******************************************************************************/
 
-NERTableWidget::NERTableWidget(QWidget *parent, MediaMngWidget *mediaWidget) : QTableWidget(parent)
+NERTableWidget::NERTableWidget(QWidget *parent,
+                               MediaMngWidget *mediaWidget,
+                               QList<BlockTRS> *transcription) : QTableWidget(parent)
 {
 	setSelectionMode(QAbstractItemView::SingleSelection);
     setSelectionBehavior(QAbstractItemView::SelectRows);
@@ -46,6 +48,7 @@ NERTableWidget::NERTableWidget(QWidget *parent, MediaMngWidget *mediaWidget) : Q
     connect(headerView, SIGNAL(sectionResized(int,int,int)), this, SLOT(columnTableResized(int,int,int)));
 
     mediaMngWidget = mediaWidget;
+    transcriptionList = transcription;
 
 }
 
@@ -85,8 +88,8 @@ void NERTableWidget::loadSubtitlesXMLData(QList<BlockTRS> *transcription, QList<
         QString t = btr.getText();
         subtileDataHashedByTimestamp->insert(timeMilis, t);
 
-        //qDebug() << "Time " << QString("%1").arg(timeMilis);
-        //qDebug() << "Text " << t;
+        ENGINE_DEBUG << "Time " << QString("%1").arg(timeMilis);
+        ENGINE_DEBUG << "Text " << t;
     }
 
     //Merge the translation with the subtitles...
@@ -106,18 +109,20 @@ void NERTableWidget::loadSubtitlesXMLData(QList<BlockTRS> *transcription, QList<
             BlockTRS transBtr = transcription->at(j);
             BlockTRS transBtrNext = transcription->at(j+1);
 
-            qDebug("TRS");
-            qDebug(subBtr.toString().toAscii());
-            qDebug(transBtr.toString().toAscii());
-            qDebug(transBtrNext.toString().toAscii());
+            ENGINE_DEBUG << "TRS";
+            ENGINE_DEBUG << subBtr.toString();
+            ENGINE_DEBUG << transBtr.toString();
+            ENGINE_DEBUG << transBtrNext.toString();
 
 
             if(transBtr.getSyncTime().toDouble() <= subBtr.getSyncTime().toDouble()
                     && subBtr.getSyncTime().toDouble() < transBtrNext.getSyncTime().toDouble() )
             {
-                qDebug("New entry...");
                 QString sync = subBtr.getSyncTime();
                 QString text = subBtr.getText();
+
+                ENGINE_DEBUG << "New entry -> Time = " << sync << "-- Text = " << text;
+
                 subTable->insertNewTableEntry(sync, text);
             }
 
@@ -192,6 +197,139 @@ QHash<qlonglong,QString> NERTableWidget::getHashedSubtableData()
     return *subtileDataHashedByTimestamp;
 }
 
+/*******************************************************************************
+ * NER Stats Computation.
+ ******************************************************************************/
+int NERTableWidget::computeNERStats_N()
+{
+    int numWords=0;
+    int numPontuation=0;
+
+    if(subtileDataHashedByTimestamp==0){
+
+        QList<QString> subtitles = subtileDataHashedByTimestamp->values();
+
+        for(int i=0; i<subtitles.count();++i){
+            QString str = subtitles.at(i);
+            numWords += str.trimmed().split(" ").count();
+
+            numPontuation += str.count(".");
+            numPontuation += str.count("!");
+            numPontuation += str.count("?");
+            numPontuation += str.count(";");
+            numPontuation += str.count(",");
+        }
+    }
+
+    return numWords + numPontuation;
+}
+
+double NERTableWidget::computeNERStats_NerValue(){
+
+    int N = computeNERStats_N();
+    double re = computeNERStats_RecognitionErrors();
+    double er = computeNERStats_EditionErrors();
+
+    double ner = 1.0f - (double)(re+er)/N;
+
+
+    ENGINE_DEBUG << "NER -> " << "\n\tN = " << N
+                 << "\n\tEdition Errors = "<< er
+                 << "\n\tRecog Errors = " << re
+                 << "\n\tNER = " << ner;
+
+    return ner;
+}
+
+double NERTableWidget::computeNERStats_EditionErrors()
+{
+    double editionError = 0;
+    for(int i=0; i<rowCount(); i++){
+
+        NERSubTableWidget *subTable = static_cast<NERSubTableWidget*>(cellWidget(i, SUBTITLES_COLUMN_INDEX));
+        if(subTable != 0){
+            for(int k=0; k<subTable->rowCount(); k++){
+
+                DragWidget *dw = static_cast<DragWidget*>(subTable->cellWidget(k, SUB_SUBTITLES_COLUMN_INDEX));
+                if(dw != 0){
+                    editionError += dw->getEditionErrors();
+                }
+            }
+        }
+
+        return editionError;
+    }
+
+}
+
+double NERTableWidget::computeNERStats_RecognitionErrors(){
+    double editionError = 0;
+    for(int i=0; i<rowCount(); i++){
+
+        NERSubTableWidget *subTable = static_cast<NERSubTableWidget*>(cellWidget(i, SUBTITLES_COLUMN_INDEX));
+        if(subTable != 0){
+            for(int k=0; k<subTable->rowCount(); k++){
+
+                DragWidget *dw = static_cast<DragWidget*>(subTable->cellWidget(k, SUB_SUBTITLES_COLUMN_INDEX));
+                if(dw != 0){
+                    editionError += dw->getRecognitionErrors();
+                }
+            }
+        }
+
+        return editionError;
+    }
+}
+
+double NERTableWidget::computeNERStats_Delay(){
+    double acumulatedDelay=0.0;
+    int numDelayCounts = 0;
+
+    int latestSubtitleIndex=0;
+
+    for(int i=0; i<transcriptionList->count(); ++i)
+    {
+        BlockTRS btr = transcriptionList->at(i);
+
+        if(!btr.getText().contains(" ") && !btr.getText().isEmpty()){
+            //single words.
+            for(int k = latestSubtitleIndex; k<subtitleTableData->count(); ++k)
+            {
+                BlockTRS subBtr = subtitleTableData->at(k);
+
+                if(btr.getText().compare(subBtr.getText())){
+                    qlonglong subTime = getTimeInMilis(subBtr.getSyncTime());
+                    qlonglong transTime = getTimeInMilis(btr.getSyncTime());
+
+                    if(subTime >= transTime){
+                        latestSubtitleIndex = k;
+
+                        acumulatedDelay += (subTime - transTime);
+                        numDelayCounts++;
+                    }
+                }
+            }
+        }
+    }
+
+    return acumulatedDelay/ (double)numDelayCounts;
+
+}
+
+qlonglong NERTableWidget::getTimeInMilis(QString time)
+{
+    if(time==0 || time.isEmpty()){
+        return 0;
+    }
+
+    QStringList ls = time.split(".");
+    QString secs = ls[0];
+    QString mils = ls[1];
+    qlonglong timeMilis = (secs.toLongLong())*1000 + mils.toLongLong();
+
+    return timeMilis;
+}
+
 
 NERTableWidget::~NERTableWidget()
 {
@@ -263,7 +401,7 @@ BlockTRS NERSubTableWidget::getSubtableRowData(int row)
 
 void NERSubTableWidget::videoSeekFromStamp(int row, int column)
 {
-    qDebug() << "Row = " << row << "Column = " << column;
+    ENGINE_DEBUG << "Row = " << row << "Column = " << column;
 
     QString timeStamp = item(row, SUB_TIMESTAMP_COLUMN_INDEX)->text();
 
@@ -274,13 +412,12 @@ void NERSubTableWidget::videoSeekFromStamp(int row, int column)
             + mils.toLongLong()
             -mils.toLongLong() % SUBTITLE_CHECK_INTERVAL;
 
-    qDebug() << "Row = " << row << "Column = " << column;
-    qDebug() << "\nTimeMilis =" << timeMilis << "\nTimeOrig =" << timeStamp;
+    ENGINE_DEBUG << "Row = " << row << "Column = " << column;
+    ENGINE_DEBUG << "\nTimeMilis =" << timeMilis << "\nTimeOrig =" << timeStamp;
 
     mediaMngWidget->seekVideo(timeMilis);
 
 }
-
 
 NERSubTableWidget::~NERSubTableWidget()
 {

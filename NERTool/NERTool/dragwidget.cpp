@@ -26,7 +26,7 @@ DragWidget::DragWidget(QWidget *parent,
 
         if (!word.isEmpty()) {
             DragLabel *wordLabel = new DragLabel(word, this);
-            wordLabel->setupLabelType(DragLabel::NotDefinedYet);
+            wordLabel->setupLabelType(NotDefinedYet);
             wordLabel->move(x, y);
             wordLabel->show();
             wordLabel->setAttribute(Qt::WA_DeleteOnClose);
@@ -215,15 +215,15 @@ bool DragWidget::eventFilter(QObject *obj, QEvent *event)
         if(selectedItem){
             if (selectedItem->text() == CORRECT_EDITION_STR)
             {
-                child->setupLabelType(DragLabel::CorrectEdition);
+                child->setupLabelType(CorrectEdition);
             }
             else if(selectedItem->text() == EDITION_ERROR)
             {
-                child->setupLabelType(DragLabel::EditionError);
+                child->setupLabelType(EditionError);
             }
             else if(selectedItem->text() == RECOG_ERROR_STR)
             {
-                child->setupLabelType(DragLabel::RecognitionError);
+                child->setupLabelType(RecognitionError);
             }
             else if(selectedItem->text() == EDITION_COMMENT){
                 //Modify comment used in the report...
@@ -272,3 +272,58 @@ QSize DragWidget::getBlockSize()
 
     return QSize(m_maxWidgetWidth+40, (m_numLines+1)*height + 10);
 }
+
+
+double DragWidget::getEditionErrors()
+{
+    double globalErrorValue = 0;
+    double partialErrorValue = 0;
+
+    EditionTypeEnum lastErrorType = NotDefinedYet;
+
+    for(int i=0; i<m_labelsPointerList->count(); ++i){
+        DragLabel *labelW = m_labelsPointerList->at(i);
+
+        EditionTypeEnum errorType = labelW->getErrorType();
+
+        if(errorType == EditionError){
+
+            if(errorType != lastErrorType){
+                globalErrorValue += partialErrorValue;
+                partialErrorValue = labelW->getErrorWeight();
+            }
+        }
+
+        lastErrorType = errorType;
+    }
+
+    return globalErrorValue;
+}
+
+double DragWidget::getRecognitionErrors()
+{
+    double globalErrorValue = 0;
+    double partialErrorValue = 0;
+
+    EditionTypeEnum lastErrorType(NotDefinedYet);
+    EditionTypeEnum errorType;
+
+    for(int i=0; i<m_labelsPointerList->count(); ++i){
+        DragLabel *labelW = m_labelsPointerList->at(i);
+
+         errorType = labelW->getErrorType();
+
+        if(errorType == RecognitionError){
+
+            if(errorType != lastErrorType){
+                globalErrorValue += partialErrorValue;
+                partialErrorValue = labelW->getErrorWeight();
+            }
+        }
+
+        lastErrorType = errorType;
+    }
+
+    return globalErrorValue;
+}
+

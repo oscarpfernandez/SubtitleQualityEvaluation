@@ -83,12 +83,6 @@ void MediaMngWidget::createActions()
     stopAudioAction->setIcon(QIcon(":/resources/pics/player_stop.png"));
     connect(stopAudioAction, SIGNAL(triggered()), this, SLOT(stopMediaFileSlot()));
 
-//    showVideoAction = new QAction(tr("Video"), this);
-//    showVideoAction->setStatusTip(tr("Show video player..."));
-//    showVideoAction->setEnabled(false);
-//    connect(showVideoAction, SIGNAL(triggered()), this, SLOT(showVideoPlayer()));
-
-
 }
 
 void MediaMngWidget::setupGUI()
@@ -127,7 +121,6 @@ void MediaMngWidget::setupGUI()
     buttonsBar->addAction(playAudioAction);
     buttonsBar->addAction(pauseAudioAction);
     buttonsBar->addAction(stopAudioAction);
-//    buttonsBar->addAction(showVideoAction);
     buttonsBar->setMaximumWidth(buttonsBar->sizeHint().width());
 
     fileDescLayout = new QHBoxLayout;
@@ -324,7 +317,7 @@ void MediaMngWidget::checkForSubtitleAndUpdateVideo(qlonglong timeInMilis)
 {
     qlonglong time = timeInMilis - (timeInMilis % SUBTITLE_CHECK_INTERVAL);
 
-    qDebug() << "Subs Chech -- " << time;
+    ENGINE_DEBUG << "Subs Chech -- " << time;
 
     QString sub = subtitles.value(time, QString(""));
 
