@@ -34,6 +34,7 @@ public:
     void showCommentEditor();
     EditionTypeEnum getErrorType();
     double getErrorWeight();
+    void setErrorWeight(double w);
 
 private:
     QString m_labelText;

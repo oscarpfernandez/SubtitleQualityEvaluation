@@ -139,4 +139,8 @@ double DragLabel::getErrorWeight()
     return errorWeight;
 }
 
+void DragLabel::setErrorWeight(double w){
+    errorWeight = w;
+}
+
 

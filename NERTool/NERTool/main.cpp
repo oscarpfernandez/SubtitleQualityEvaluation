@@ -28,5 +28,3 @@ int main(int argc, char *argv[])
     splash->finish(&mainWin);
     return app.exec();
 }
-
-

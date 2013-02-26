@@ -12,8 +12,17 @@ QT_END_NAMESPACE
 
 const QString CORRECT_EDITION_STR = "Correct";
 const QString RECOG_ERROR_STR = "RecognitionError";
-const QString EDITION_ERROR = "EditionError";
-const QString EDITION_COMMENT = "Edit Comnment";
+const QString EDITION_ERROR_STR = "EditionError";
+const QString EDITION_COMMENT_STR = "Edit Comnment";
+const QString INSERTION_STR = "Insertion";
+const QString DELETION_STR = "Deletion";
+const QString SUBSTITUTION_STR = "Substitution";
+const QString ERROR_WEIGHT_1_STR =  "1.00";
+const QString ERROR_WEIGHT_05_STR = "0.50";
+const QString ERROR_WEIGHT_025_STR = "0.25";
+const double  ERROR_WEIGHT_1 = 1.0;
+const double  ERROR_WEIGHT_025 = 0.25;
+const double  ERROR_WEIGHT_050 = 0.50;
 
 //! [0]
 class DragWidget : public QWidget
@@ -38,12 +47,27 @@ protected:
     bool eventFilter(QObject *obj, QEvent *event);
 
 private:
+    QAction* m_editionErrorAction;
+    QAction* m_recognitionErrorAction;
+    QAction* m_noErrorAction;
+    QAction* m_Error025Action;
+    QAction* m_Error050Action;
+    QAction* m_Error100Action;
+    QAction* m_insertionAction;
+    QAction* m_substitutionAction;
+    QAction* m_delectionAction;
+
     QList<DragLabel*> *m_labelsPointerList;
     bool m_isModifiable;
     int m_maxWidgetWidth;
     int m_numberOfLines;
     int m_labelSize;
     int m_numLines;
+
+    void createActions();
+    void uncheckAllErrorActions();
+    void uncheckAllWeightActions();
+    void uncheckAllTypeActions();
 
 };
 

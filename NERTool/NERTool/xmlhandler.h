@@ -58,6 +58,8 @@ const QString STR_SUBTABLELINE_PROP_TIMESTAMP = "timestamp";
 const QString STR_WORD_TAG = "SubtWord";
 const QString STR_WORD_PROP_NAME = "name";
 const QString STR_WORD_PROP_ERROR = "error";
+const QString STR_WORD_PROP_WEIGHT = "weight";
+const QString STR_WORD_PROP_TYPE = "type";
 const QString STR_WORD_PROP_COMMENT = "comment";
 
 class XMLHandler {

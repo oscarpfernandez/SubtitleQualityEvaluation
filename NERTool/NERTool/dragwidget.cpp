@@ -12,6 +12,8 @@ DragWidget::DragWidget(QWidget *parent,
                        int maxWidth,
                        bool isModifiable)  : QWidget(parent)
 {
+    createActions();
+
     m_isModifiable = isModifiable;
     m_labelsPointerList = new QList<DragLabel *>();
     int x = 5;
@@ -54,6 +56,51 @@ DragWidget::DragWidget(QWidget *parent,
 DragWidget::~DragWidget()
 {
 
+}
+
+void DragWidget::createActions()
+{
+    m_editionErrorAction = new QAction(EDITION_ERROR_STR, this);
+    m_editionErrorAction->setCheckable(true);
+    m_recognitionErrorAction = new QAction(RECOG_ERROR_STR, this);
+    m_recognitionErrorAction->setCheckable(true);
+    m_noErrorAction = new QAction(CORRECT_EDITION_STR, this);
+    m_noErrorAction->setCheckable(true);
+    m_Error025Action = new QAction(ERROR_WEIGHT_025_STR, this);
+    m_Error025Action->setCheckable(true);
+    m_Error050Action = new QAction(ERROR_WEIGHT_05_STR, this);
+    m_Error050Action->setCheckable(true);
+    m_Error100Action = new QAction(ERROR_WEIGHT_1_STR, this);
+    m_Error100Action->setCheckable(true);
+
+    m_insertionAction = new QAction(INSERTION_STR, this);
+    m_insertionAction->setCheckable(true);
+    m_substitutionAction = new QAction(SUBSTITUTION_STR, this);
+    m_substitutionAction->setCheckable(true);
+    m_delectionAction = new QAction(DELETION_STR, this);
+    m_delectionAction->setCheckable(true);
+
+}
+
+void DragWidget::uncheckAllErrorActions()
+{
+    m_editionErrorAction->setChecked(false);
+    m_recognitionErrorAction->setChecked(false);
+    m_noErrorAction->setChecked(false);
+}
+
+void DragWidget::uncheckAllWeightActions()
+{
+    m_Error025Action->setChecked(false);
+    m_Error050Action->setChecked(false);
+    m_Error100Action->setChecked(false);
+}
+
+void DragWidget::uncheckAllTypeActions()
+{
+    m_insertionAction->setChecked(false);
+    m_delectionAction->setChecked(false);
+    m_substitutionAction->setChecked(false);
 }
 
 /*******************************************************************************
@@ -204,33 +251,71 @@ bool DragWidget::eventFilter(QObject *obj, QEvent *event)
         //QPoint globalPos = this->viewport()->mapToGlobal(hotSpot);
 
         QMenu myMenu(this);
-        myMenu.addAction(CORRECT_EDITION_STR);
-        myMenu.addAction(EDITION_ERROR);
-        myMenu.addAction(RECOG_ERROR_STR);
+        myMenu.addAction(m_noErrorAction);
+        myMenu.addAction(m_editionErrorAction);
+        myMenu.addAction(m_recognitionErrorAction);
         myMenu.addSeparator();
-        myMenu.addAction(EDITION_COMMENT);
+        myMenu.addAction(EDITION_COMMENT_STR);
+        myMenu.addSeparator();
+        QMenu subMenu("Weight Error");
+        subMenu.addAction(m_Error025Action);
+        subMenu.addAction(m_Error050Action);
+        subMenu.addAction(m_Error100Action);
+        QMenu subMenu2("Type");
+        subMenu2.addAction(m_insertionAction);
+        subMenu2.addAction(m_delectionAction);
+        subMenu2.addAction(m_substitutionAction);
+        myMenu.addMenu(&subMenu);
+
         // ...
 
         QAction* selectedItem = myMenu.exec(globalPos);
         if(selectedItem){
             if (selectedItem->text() == CORRECT_EDITION_STR)
             {
+                uncheckAllErrorActions();
+                m_noErrorAction->setChecked(true);
                 child->setupLabelType(CorrectEdition);
             }
-            else if(selectedItem->text() == EDITION_ERROR)
+            else if(selectedItem->text() == EDITION_ERROR_STR)
             {
+                uncheckAllErrorActions();
+                m_editionErrorAction->setChecked(true);
                 child->setupLabelType(EditionError);
             }
             else if(selectedItem->text() == RECOG_ERROR_STR)
             {
+                uncheckAllErrorActions();
+                m_recognitionErrorAction->setChecked(true);
                 child->setupLabelType(RecognitionError);
             }
-            else if(selectedItem->text() == EDITION_COMMENT){
+            else if(selectedItem->text() == EDITION_COMMENT_STR){
                 //Modify comment used in the report...
                 QString comment = child->getComment();
                 child->setComment(comment);
                 child->showCommentEditor();
             }
+            else if(selectedItem->text() == ERROR_WEIGHT_025_STR){
+                uncheckAllWeightActions();
+                m_Error025Action->setChecked(true);
+                child->setErrorWeight(ERROR_WEIGHT_025);
+            }
+            else if(selectedItem->text() == ERROR_WEIGHT_05_STR){
+                uncheckAllWeightActions();
+                m_Error050Action->setChecked(true);
+                child->setErrorWeight(ERROR_WEIGHT_050);
+            }
+            else if(selectedItem->text() == ERROR_WEIGHT_1_STR){
+                uncheckAllWeightActions();
+                m_Error100Action->setChecked(true);
+                child->setErrorWeight(ERROR_WEIGHT_1);
+            }
+            else if(selectedItem->text() == INSERTION_STR){
+                uncheckAllTypeActions();
+                m_insertionAction->setChecked(true);
+
+            }
+
         }
         return true;
     }
