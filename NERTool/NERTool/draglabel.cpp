@@ -13,6 +13,8 @@ DragLabel::DragLabel(const QString &text, QWidget *parent)
     editionComment = new QString();
     dwcomment = new DragLabelComment(parent);
     errorType = NotDefinedYet;
+    errorClass = NotDefined;
+    errorWeight = 0;
 }
 
 /*******************************************************************************
@@ -142,5 +144,17 @@ double DragLabel::getErrorWeight()
 void DragLabel::setErrorWeight(double w){
     errorWeight = w;
 }
+
+void DragLabel::setErrorClass(ModificationType modType)
+{
+    errorClass = modType;
+}
+
+ModificationType DragLabel::getErrorClass()
+{
+    return errorClass;
+}
+
+
 
 

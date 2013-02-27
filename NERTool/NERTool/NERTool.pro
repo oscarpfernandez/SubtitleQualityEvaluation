@@ -21,7 +21,9 @@ SOURCES += main.cpp\
     utils.cpp \
     nertablewidget.cpp \
     draglabelcomment.cpp \
-    mediamngwidget.cpp
+    mediamngwidget.cpp \
+    qcustomplot.cpp \
+    nergraphwidget.cpp
 
 HEADERS  += nermainwindow.h \
     dragwidget.h \
@@ -35,7 +37,9 @@ HEADERS  += nermainwindow.h \
     nertablewidget.h \
     nercommon.h \
     draglabelcomment.h \
-    mediamngwidget.h
+    mediamngwidget.h \
+    qcustomplot.h \
+    nergraphwidget.h
 
 RC_FILE = app.rc
 

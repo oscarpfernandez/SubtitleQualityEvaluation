@@ -68,6 +68,7 @@ private:
     void uncheckAllErrorActions();
     void uncheckAllWeightActions();
     void uncheckAllTypeActions();
+    void setActionsEnabledForLabel(DragLabel* label);
 
 };
 

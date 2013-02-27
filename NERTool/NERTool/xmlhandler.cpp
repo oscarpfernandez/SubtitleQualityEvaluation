@@ -374,7 +374,7 @@ bool XMLHandler::writeProjectExportXML(QString &xmlFileName,
                     xmlWriter->writeAttribute(STR_WORD_PROP_ERROR, QString::number(label->getErrorType()));
                     xmlWriter->writeAttribute(STR_WORD_PROP_COMMENT, label->getComment());
                     xmlWriter->writeAttribute(STR_WORD_PROP_WEIGHT, QString::number(label->getErrorWeight()));
-                    xmlWriter->writeAttribute(STR_WORD_PROP_TYPE, label->getComment());
+                    xmlWriter->writeAttribute(STR_WORD_PROP_CLASS, QString::number(label->getErrorClass()));
                     xmlWriter->writeEndElement();//STR_WORD_TAG
                 }
                 xmlWriter->writeEndElement();//STR_SUBTABLELINE_TAG

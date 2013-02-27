@@ -222,6 +222,30 @@ QString DragWidget::getText()
 //    }
 //}
 
+
+void DragWidget::setActionsEnabledForLabel(DragLabel* label)
+{
+    if(label==0){
+        return;
+    }
+
+    EditionTypeEnum errorType = label->getErrorType();
+    m_noErrorAction->setChecked(errorType==CorrectEdition);
+    m_editionErrorAction->setChecked(errorType==EditionError);
+    m_recognitionErrorAction->setChecked(errorType==RecognitionError);
+
+    double errorWeight = label->getErrorWeight();
+    m_Error025Action->setChecked(errorWeight==ERROR_WEIGHT_025);
+    m_Error050Action->setChecked(errorWeight==ERROR_WEIGHT_050);
+    m_Error100Action->setChecked(errorWeight==ERROR_WEIGHT_1);
+
+    ModificationType modType = label->getErrorClass();
+    m_insertionAction->setChecked(modType==Insertion);
+    m_delectionAction->setChecked(modType==Deletion);
+    m_substitutionAction->setChecked(modType==Substitution);
+
+}
+
 /*******************************************************************************
  * QEvent filter for managing context menu call over the drag widget to change
  * the error status.
@@ -243,12 +267,9 @@ bool DragWidget::eventFilter(QObject *obj, QEvent *event)
         }
 
         QPoint hotSpot = mouseEvent->pos() - child->pos();
-        //QPoint hotSpot = event->pos();
-
-        // for most widgets
         QPoint globalPos = child->mapToGlobal(hotSpot);
-        // for QAbstractScrollArea and derived classes you would use:
-        //QPoint globalPos = this->viewport()->mapToGlobal(hotSpot);
+
+        setActionsEnabledForLabel(child);
 
         QMenu myMenu(this);
         myMenu.addAction(m_noErrorAction);
@@ -266,6 +287,7 @@ bool DragWidget::eventFilter(QObject *obj, QEvent *event)
         subMenu2.addAction(m_delectionAction);
         subMenu2.addAction(m_substitutionAction);
         myMenu.addMenu(&subMenu);
+        myMenu.addMenu(&subMenu2);
 
         // ...
 
@@ -312,8 +334,18 @@ bool DragWidget::eventFilter(QObject *obj, QEvent *event)
             }
             else if(selectedItem->text() == INSERTION_STR){
                 uncheckAllTypeActions();
+                child->setErrorClass(Insertion);
                 m_insertionAction->setChecked(true);
-
+            }
+            else if(selectedItem->text() == SUBSTITUTION_STR){
+                uncheckAllTypeActions();
+                child->setErrorClass(Substitution);
+                m_substitutionAction->setChecked(true);
+            }
+            else if(selectedItem->text() == DELETION_STR){
+                uncheckAllTypeActions();
+                child->setErrorClass(Deletion);
+                m_delectionAction->setChecked(true);
             }
 
         }

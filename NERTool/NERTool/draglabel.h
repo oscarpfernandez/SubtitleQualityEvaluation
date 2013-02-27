@@ -18,9 +18,10 @@ enum EditionTypeEnum {
 };
 
 enum ModificationType {
-    Insertion=0,
-    Deletion=1,
-    Substitution=2
+    NotDefined=0,
+    Insertion=1,
+    Deletion=2,
+    Substitution=3
 };
 
 class DragLabel : public QLabel
@@ -35,6 +36,8 @@ public:
     EditionTypeEnum getErrorType();
     double getErrorWeight();
     void setErrorWeight(double w);
+    void setErrorClass(ModificationType modType);
+    ModificationType getErrorClass();
 
 private:
     QString m_labelText;
@@ -43,6 +46,7 @@ private:
     DragLabelComment *dwcomment;
     EditionTypeEnum errorType;
     double errorWeight; //0.25, 0.5 or 1
+    ModificationType errorClass;
 
 public slots:
     void setEditCommentSlot(QString &comment);

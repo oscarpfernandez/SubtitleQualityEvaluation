@@ -1,6 +1,6 @@
 #include "nermainwindow.h"
 #include "ui_nermainwindow.h"
-
+#include "nergraphwidget.h"
 
 /*******************************************************************************
  * NER Main Application Window
