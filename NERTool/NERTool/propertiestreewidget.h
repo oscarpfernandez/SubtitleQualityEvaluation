@@ -12,6 +12,7 @@
 #include <QEvent>
 #include <QMouseEvent>
 #include <QMap>
+#include "nertablewidget.h"
 
 class PropertiesTreeWidget : public QWidget
 {
@@ -42,20 +43,25 @@ private:
     QAction *openSubAction;
     QAction *removeSubAction;
     QAction *editSubPropertiesAction;
+
     QMap<QTreeWidgetItem*, QMdiSubWindow*> *subWindowsMap;
 
+    QAction* openSubtitleAction;
+    QAction* removeFileAction;
+
     void initTrees();
-    void initContextMenuAction();
+    void createActions();
 
 protected:
     bool eventFilter(QObject *obj, QEvent *event);
+    void keyPressEvent(QKeyEvent *);
+    void keyReleaseEvent(QKeyEvent *);
 
 private slots:
     void onTreeWidgetItemDoubleClicked(QTreeWidgetItem * item, int column);
-    void openSubDocumentNodeSlot();
-    void editSubPropertiesNode();
+    void openSubtitleWindowSlot();
     void removeSubNodeSlot();
-
+    void renameDocumentNodeSlot(QTreeWidgetItem*item, int column);
     
 };
 

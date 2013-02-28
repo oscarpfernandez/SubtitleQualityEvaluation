@@ -818,7 +818,7 @@ void MainWindow::setupBarChartDemo(QCustomPlot *customPlot)
   customPlot->xAxis->setAutoTickLabels(false);
   customPlot->xAxis->setTickVector(ticks);
   customPlot->xAxis->setTickVectorLabels(labels);
-  customPlot->xAxis->setTickLabelRotation(60);
+  customPlot->xAxis->setTickLabelRotation(90);
   customPlot->xAxis->setSubTickCount(0);
   customPlot->xAxis->setTickLength(0, 4);
   customPlot->xAxis->setGrid(false);

@@ -1,12 +1,17 @@
 #include "mediamngwidget.h"
 
+/*******************************************************************************
+ * This class manages the media player widget for audio & video visualization
+ * with the synchronized subtitles.
+ ******************************************************************************/
+
 MediaMngWidget::MediaMngWidget(QWidget *parent, QMdiArea *mainMdiArea) :
     QWidget(parent)
 {
     mainMDIArea = mainMdiArea;
     connect(mainMDIArea, SIGNAL(subWindowActivated(QMdiSubWindow*)), this, SLOT(setActivatedSubWindow(QMdiSubWindow*)));
 
-    videoPlayer = new Phonon::VideoWidget();
+    videoPlayer = new Phonon::VideoWidget(this);
     audioOutput = new Phonon::AudioOutput(Phonon::MusicCategory, this);
     mediaObject = new Phonon::MediaObject(this);
 
@@ -53,7 +58,9 @@ MediaMngWidget::~MediaMngWidget()
 
 }
 
-
+/*******************************************************************************
+ * Loads up the widget's actions.
+ ******************************************************************************/
 void MediaMngWidget::createActions()
 {
     loadAudioFileAction = new QAction(tr("&Load Media File..."), this);
@@ -85,6 +92,9 @@ void MediaMngWidget::createActions()
 
 }
 
+/*******************************************************************************
+ * Set up the graphical widget od the player. Initialization and layout.
+ ******************************************************************************/
 void MediaMngWidget::setupGUI()
 {
     seekSlider = new Phonon::SeekSlider(this);
@@ -165,13 +175,12 @@ void MediaMngWidget::setupGUI()
     videoWindow->setWindowFlags(Qt::WindowStaysOnTopHint);
 
     setLayout(mainVBoxLayout);
-
 }
 
 
-/**************
- * Slots
- *************/
+/*******************************************************************************
+ * Load the media file.
+ ******************************************************************************/
 void MediaMngWidget::loadMediaFileSlot()
 {
     QString fileName = QFileDialog::getOpenFileName(
@@ -192,7 +201,9 @@ void MediaMngWidget::loadMediaFileSlot()
 
 }
 
-
+/*******************************************************************************
+ * Plays the loaded media data
+ ******************************************************************************/
 void MediaMngWidget::playMediaFileSlot()
 {
 
@@ -210,6 +221,9 @@ void MediaMngWidget::playMediaFileSlot()
 
 }
 
+/*******************************************************************************
+ * Stops media content.
+ ******************************************************************************/
 void MediaMngWidget::stopMediaFileSlot()
 {
     if(mediaObject->state() == Phonon::PlayingState
@@ -220,6 +234,9 @@ void MediaMngWidget::stopMediaFileSlot()
 
 }
 
+/*******************************************************************************
+ * Pause media content.
+ ******************************************************************************/
 void MediaMngWidget::pauseMediaFileSlot()
 {
     bool wasPlaying = mediaObject->state() == Phonon::PlayingState;
@@ -229,16 +246,25 @@ void MediaMngWidget::pauseMediaFileSlot()
 
 }
 
+/*******************************************************************************
+ * Slot activated when the media player finishes playing.
+ ******************************************************************************/
 void MediaMngWidget::finished()
 {
     mediaObject->stop();
 }
 
+/*******************************************************************************
+ * Slot that is set if the loaded media is seekable.
+ ******************************************************************************/
 void MediaMngWidget::seekableChanged(bool isSeekChanged)
 {
     isMediaSeekable = isSeekChanged;
 }
 
+/*******************************************************************************
+ * Slot for media seek for a different timestamp.
+ ******************************************************************************/
 void MediaMngWidget::seekVideo(qint64 time)
 {
     if(!isMediaSeekable || time > mediaObject->totalTime() || time < 0)
@@ -249,6 +275,10 @@ void MediaMngWidget::seekVideo(qint64 time)
     mediaObject->seek(time);
 }
 
+/*******************************************************************************
+ * Manages the media player states: playing, stopped, paused states and how
+ * the payer should behave.
+ ******************************************************************************/
 void MediaMngWidget::stateChangedSlot(Phonon::State newState, Phonon::State /*oldState*/)
 {
     switch (newState) {
@@ -287,6 +317,10 @@ void MediaMngWidget::stateChangedSlot(Phonon::State newState, Phonon::State /*ol
     }
 }
 
+/*******************************************************************************
+ * Slot for tick slot, for the timestamp clock update and subtitle
+ * synchronization with the video played.
+ ******************************************************************************/
 void MediaMngWidget::tickSlot(qint64 time)
 {
     QTime displayTime(time / (60*60*1000), (time / 60000) % 60, (time / 1000) % 60, time % 1000);
@@ -296,6 +330,10 @@ void MediaMngWidget::tickSlot(qint64 time)
 
 }
 
+/*******************************************************************************
+ * Slot called when a new media is loaded into the player, to reset the
+ * timestamp.
+ ******************************************************************************/
 void MediaMngWidget::sourceChangedSlot(const Phonon::MediaSource &source)
 {
     timeLcd->display("00:00:00.000");
@@ -303,16 +341,25 @@ void MediaMngWidget::sourceChangedSlot(const Phonon::MediaSource &source)
 
 }
 
+/*******************************************************************************
+ *
+ ******************************************************************************/
 void MediaMngWidget::metaStateChangedSlot(Phonon::State newState, Phonon::State oldState)
 {
 
 }
 
+/*******************************************************************************
+ * Slot to notify if the media loaded is a video or plain audio.
+ ******************************************************************************/
 void MediaMngWidget::hasVideochanged(bool hasVideoChange)
 {
     isVideoAvailable = hasVideoChange;
 }
 
+/*******************************************************************************
+ * Synchronizes the subtitles with the timestamp.
+ ******************************************************************************/
 void MediaMngWidget::checkForSubtitleAndUpdateVideo(qlonglong timeInMilis)
 {
     qlonglong time = timeInMilis - (timeInMilis % SUBTITLE_CHECK_INTERVAL);
@@ -333,6 +380,10 @@ void MediaMngWidget::checkForSubtitleAndUpdateVideo(qlonglong timeInMilis)
     }
 }
 
+/*******************************************************************************
+ * Splits subtitles checking if its lines do not exceed the standard 34
+ * characters.
+ ******************************************************************************/
 QString MediaMngWidget::splitSubtitleLine(QString sub)
 {
     if(sub.count() <= 34){
@@ -360,6 +411,9 @@ QString MediaMngWidget::splitSubtitleLine(QString sub)
     return ret;
 }
 
+/*******************************************************************************
+ * Loads the subtitles from the NER table for internal usage.
+ ******************************************************************************/
 void MediaMngWidget::loadVideoSubtitlesFromTableData(NERTableWidget *table)
 {
     if(table==0 || table->rowCount()==0)
@@ -382,11 +436,18 @@ void MediaMngWidget::loadVideoSubtitlesFromTableData(NERTableWidget *table)
     }
 }
 
+/*******************************************************************************
+ * Returns this video widget's instance
+ ******************************************************************************/
 QWidget* MediaMngWidget::getVideoWindow()
 {
     return videoWindow;
 }
 
+/*******************************************************************************
+ * Checks the activated subtitle table in order to extract the subtitles data
+ * used in video synchronization.
+ ******************************************************************************/
 void MediaMngWidget::setActivatedSubWindow(QMdiSubWindow *subwindow)
 {
     if(subwindow==0){
@@ -400,6 +461,9 @@ void MediaMngWidget::setActivatedSubWindow(QMdiSubWindow *subwindow)
     }
 }
 
+/*******************************************************************************
+ * Clears the video subtitles.
+ ******************************************************************************/
 void MediaMngWidget::clearVideoSubtitle()
 {
     videoSubLabel->setText("");

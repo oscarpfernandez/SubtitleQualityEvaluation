@@ -12,7 +12,7 @@ QT_FORWARD_DECLARE_CLASS(NERSubTableWidget)
 
 /******************************************************************************
  * DiffTableWidget manages the table difference betwwen the original transcribded
- * and the subtitle texts. Manages the several word items allowing the export 
+ * and the subtitle texts. Manages the several word items allowing the export
  * of the data to an XML stream.
  ******************************************************************************/
 
@@ -20,17 +20,20 @@ NERTableWidget::NERTableWidget(QWidget *parent,
                                MediaMngWidget *mediaWidget,
                                QList<BlockTRS> *transcription) : QTableWidget(parent)
 {
-	setSelectionMode(QAbstractItemView::SingleSelection);
+    setSelectionMode(QAbstractItemView::SingleSelection);
     setSelectionBehavior(QAbstractItemView::SelectRows);
     //setFont(QFont("Courier New", 10, QFont::Normal));
-	setSortingEnabled(false);
+    setSortingEnabled(false);
     setColumnCount(4);
+
+    setAttribute(Qt::WA_DeleteOnClose);
+
     setRowCount(0);
 
     horizontalHeader()->setResizeMode(QHeaderView::Interactive);
     verticalHeader()->setResizeMode(QHeaderView::ResizeToContents);
 
-	QStringList headers;
+    QStringList headers;
     headers << "Speaker ID"
             << "Timestamp"
             << "Transcription"
@@ -50,6 +53,12 @@ NERTableWidget::NERTableWidget(QWidget *parent,
     mediaMngWidget = mediaWidget;
     transcriptionList = transcription;
 
+}
+
+NERTableWidget::~NERTableWidget()
+{
+    delete headerView;
+    headerView = NULL;
 }
 
 void NERTableWidget::loadXMLData(QList<BlockTRS> *trsBlocks){
@@ -330,13 +339,6 @@ qlonglong NERTableWidget::getTimeInMilis(QString time)
     return timeMilis;
 }
 
-
-NERTableWidget::~NERTableWidget()
-{
-    delete headerView;
-    headerView = NULL;
-}
-
 /*******************************************************************************
  *******************************************************************************
  * NERSubTableWidget class defines the structure if each subtable entry that
@@ -374,7 +376,7 @@ int NERSubTableWidget::insertNewTableEntry(QString &timeStamp, QString &text)
     setItem(line, SUB_TIMESTAMP_COLUMN_INDEX, tsItem);
 
     //Insert the chopped text block with the widget...
-    DragWidget *wordBox = new DragWidget(this, text, SUBTITLES_COLUMN_WIDTH, true);
+    DragWidget *wordBox = new DragWidget(this, text, SUBTITLES_COLUMN_WIDTH-30, true);
     setRowHeight(line, wordBox->getBlockSize().height());
     setColumnWidth(SUBTITLES_COLUMN_INDEX,SUBTITLES_COLUMN_WIDTH);
     setCellWidget(line, SUB_SUBTITLES_COLUMN_INDEX, wordBox);

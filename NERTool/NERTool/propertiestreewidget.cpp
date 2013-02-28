@@ -1,5 +1,10 @@
 #include "propertiestreewidget.h"
 
+/*******************************************************************************
+ * This classes mananges the properties tree widget reporting the files loaded
+ * both of the translation and subtitles.
+ ******************************************************************************/
+
 PropertiesTreeWidget::PropertiesTreeWidget(QWidget *parent) : QWidget(parent)
 {
     subWindowsMap = new QMap<QTreeWidgetItem*, QMdiSubWindow*>();
@@ -11,8 +16,8 @@ PropertiesTreeWidget::PropertiesTreeWidget(QWidget *parent) : QWidget(parent)
     mainTreeWidget->installEventFilter(this);
 
     //REview!!
-    connect(mainTreeWidget, SIGNAL(itemDoubleClicked(QTreeWidgetItem*,int)),
-            this, SLOT(onTreeWidgetItemDoubleClicked(QTreeWidgetItem*,int)));
+    connect(mainTreeWidget, SIGNAL(itemChanged(QTreeWidgetItem*,int)),
+            this, SLOT(renameDocumentNodeSlot(QTreeWidgetItem*,int)));
 
     mainItemTrans = new QTreeWidgetItem();
     mainItemTrans->setText(0, QString("Transcription"));
@@ -57,11 +62,11 @@ PropertiesTreeWidget::PropertiesTreeWidget(QWidget *parent) : QWidget(parent)
 
     mainVLayout->addWidget(splitter);
 
+
     setLayout(mainVLayout);
     setWindowIcon(QIcon(":/resources/pics/docs.png"));
 
-
-    initContextMenuAction();
+    createActions();
     initTrees();
 
 }
@@ -83,17 +88,13 @@ void PropertiesTreeWidget::initTrees(){
     mainTreeWidget->addTopLevelItem(mainItemSubs);
 }
 
-void PropertiesTreeWidget::initContextMenuAction()
+void PropertiesTreeWidget::createActions()
 {
-    openSubAction = new QAction(QIcon(), QString("Open"), this);
-    connect(openSubAction, SIGNAL(triggered()), this, SLOT(openSubDocumentNodeSlot()));
+    openSubtitleAction = new QAction(tr("Show table"), this);
+    connect(openSubtitleAction, SIGNAL(triggered()), this, SLOT(openSubtitleWindowSlot()));
 
-    removeSubAction = new QAction(QIcon(), QString("Edit Properties..."), this);
-    connect(removeSubAction, SIGNAL(triggered()), this, SLOT(removeSubNodeSlot()));
-
-    editSubPropertiesAction = new QAction(QIcon(), QString("Remove..."), this);
-    connect(editSubPropertiesAction, SIGNAL(triggered()), this, SLOT(editSubPropertiesNode()));
-
+    removeFileAction = new QAction(tr("Remove..."), this);
+    connect(removeFileAction, SIGNAL(triggered()), this, SLOT(removeSubNodeSlot()));
 }
 
 
@@ -109,7 +110,7 @@ QTreeWidgetItem* PropertiesTreeWidget::insertNewSubtitle(QString &fileName,
     item->setFlags(item->flags()
                    | Qt::ItemIsSelectable
                    | Qt::ItemIsEnabled
-                   /*| Qt::ItemIsEditable*/);
+                   | Qt::ItemIsEditable);
     item->setText(0, fileName);
     item->setText(1,responsible);
     item->setText(2,description);
@@ -123,6 +124,9 @@ QTreeWidgetItem* PropertiesTreeWidget::insertNewSubtitle(QString &fileName,
     return item;
 }
 
+/*******************************************************************************
+ * Insert a new transklation item in  the translastions item.
+ ******************************************************************************/
 void PropertiesTreeWidget::insertNewTranslation(QString &fileName,
                                                 QString &responsible,
                                                 QString &description)
@@ -135,7 +139,7 @@ void PropertiesTreeWidget::insertNewTranslation(QString &fileName,
     item->setFlags(item->flags()
                    | Qt::ItemIsSelectable
                    | Qt::ItemIsEnabled
-                  /* | Qt::ItemIsEditable*/);
+                   | Qt::ItemIsEditable);
     item->setText(0, fileName);
     item->setText(1, responsible);
     item->setText(2, description);
@@ -151,6 +155,9 @@ void PropertiesTreeWidget::insertNewSpeaker(QString &speaker)
 
 }
 
+/*******************************************************************************
+ * Remove all the tree data.
+ ******************************************************************************/
 void PropertiesTreeWidget::clearAllTreeData()
 {
     //Remove all childs from both trees..
@@ -165,8 +172,19 @@ bool PropertiesTreeWidget::eventFilter(QObject *obj, QEvent *event)
 {
     if(event->type() == QEvent::ContextMenu)
     {
+        //Disable context menu for main nodes AND translation node...
         QList<QTreeWidgetItem*> itemList = mainTreeWidget->selectedItems();
         QTreeWidgetItem* item = itemList.at(0);
+
+        if(mainItemTrans->childCount()>0){
+            QTreeWidgetItem* itemC = mainItemTrans->child(0);
+            if(itemC == item){
+                //disable...
+                return true;
+            }
+        }
+
+
         if(item->parent()==NULL){
             //If the node is top level (==NULL), don't enable context menu
             return true;
@@ -175,10 +193,9 @@ bool PropertiesTreeWidget::eventFilter(QObject *obj, QEvent *event)
         QMouseEvent *mouseEvent = static_cast<QMouseEvent*> (event);
         QMenu *menu = new QMenu(this);
 
-        menu->addAction(new QAction("Open content",this));
-        menu->addAction(new QAction("Edit properties...",this));
+        menu->addAction(openSubtitleAction);
         menu->addSeparator();
-        menu->addAction(new QAction("Remove",this));
+        menu->addAction(removeFileAction);
         menu->exec(mouseEvent->globalPos());
 
         return false;
@@ -191,15 +208,86 @@ bool PropertiesTreeWidget::eventFilter(QObject *obj, QEvent *event)
 /*******************************************************************************
  * Context Menu actions for the tree items.
  ******************************************************************************/
-void PropertiesTreeWidget::openSubDocumentNodeSlot()
+void PropertiesTreeWidget::openSubtitleWindowSlot()
 {
+    QList<QTreeWidgetItem*> itemList = mainTreeWidget->selectedItems();
+    QTreeWidgetItem* item = itemList.at(0);
+    if(item!=NULL && subWindowsMap->contains(item)){
+        QMdiSubWindow *subwindow = subWindowsMap->value(item);
+        subwindow->showMaximized();
+    }
+}
+
+void PropertiesTreeWidget::renameDocumentNodeSlot(QTreeWidgetItem* item, int column)
+{
+    if(item!=NULL && column==0){
+        QMdiSubWindow *subwindow = subWindowsMap->value(item);
+        subwindow->setWindowTitle(item->text(0));
+    }
 
 }
 
-void PropertiesTreeWidget::editSubPropertiesNode(){
-
+/*******************************************************************************
+ * Key listener method overriden to monitor keys.
+ ******************************************************************************/
+void PropertiesTreeWidget::keyPressEvent(QKeyEvent *event)
+{
+    if(event->key() == Qt::Key_Enter || event->key() == Qt::Key_Return)
+    {
+        QList<QTreeWidgetItem*> itemList = mainTreeWidget->selectedItems();
+        QTreeWidgetItem* item = itemList.at(0);
+        if(item!=NULL && subWindowsMap->contains(item)){
+            QMdiSubWindow *subwindow = subWindowsMap->value(item);
+            subwindow->showMaximized();
+        }
+    }
 }
 
-void PropertiesTreeWidget::removeSubNodeSlot(){
+void PropertiesTreeWidget::keyReleaseEvent(QKeyEvent *event)
+{
+    if(event->key() == Qt::Key_Control)
+    {
 
+    }
+}
+
+/*******************************************************************************
+ * Remove Subtitle file node from the tree AND the table data.
+ ******************************************************************************/
+void PropertiesTreeWidget::removeSubNodeSlot()
+{
+    QList<QTreeWidgetItem*> itemList = mainTreeWidget->selectedItems();
+    QTreeWidgetItem* item = itemList.at(0);
+    QMdiSubWindow *subwindow = subWindowsMap->value(item);
+
+    QMessageBox box;
+    QString text;
+    text.append("Delete table ")
+            .append("\"")
+            .append(subwindow->windowTitle())
+            .append("\" ?");
+    box.setText(text);
+    box.setInformativeText("After deletion the data is NOT recoverable.");
+    box.setBaseSize(150,60);
+    box.setIcon(QMessageBox::Warning);
+    box.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+    box.setDefaultButton(QMessageBox::No);
+    int ret = box.exec();
+    switch (ret) {
+    case QMessageBox::No:
+        return;//Get out of here!!!...Deletion aborted!
+    default:
+        // should never be reached
+        break;
+    }
+
+
+    if(item!=NULL && subWindowsMap->contains(item)){
+        QMdiSubWindow *subwindow = subWindowsMap->value(item);
+        NERTableWidget *table = static_cast<NERTableWidget*>(subwindow->widget());
+        subwindow->close();
+        subWindowsMap->remove(item);
+        table->close();
+        mainItemSubs->removeChild(item);
+    }
 }

@@ -10,7 +10,6 @@ NERGraphWidget::NERGraphWidget(QWidget *parent) : QWidget(parent)
 {
     customPlot = new QCustomPlot(parent);
 
-    QString demoName = "Bar Chart Demo";
     // create empty bar chart objects:
     correctEditions = new QCPBars(customPlot->xAxis, customPlot->yAxis);
     editionErrors = new QCPBars(customPlot->xAxis, customPlot->yAxis);
@@ -39,40 +38,40 @@ NERGraphWidget::NERGraphWidget(QWidget *parent) : QWidget(parent)
     correctEditions->moveAbove(editionErrors);
 
     // prepare x axis with country labels:
-    QVector<double> ticks;
-    QVector<QString> labels;
-    ticks << 1 << 2 << 3 << 4 << 5 << 6 << 7;
-    labels << "USA" << "Japan" << "Germany" << "France" << "UK" << "Italy" << "Canada";
-    customPlot->xAxis->setAutoTicks(false);
-    customPlot->xAxis->setAutoTickLabels(false);
-    customPlot->xAxis->setTickVector(ticks);
-    customPlot->xAxis->setTickVectorLabels(labels);
-    customPlot->xAxis->setTickLabelRotation(60);
-    customPlot->xAxis->setSubTickCount(0);
-    customPlot->xAxis->setTickLength(0, 4);
-    customPlot->xAxis->setGrid(false);
-    customPlot->xAxis->setRange(0, 8);
+//    QVector<double> ticks;
+//    QVector<QString> labels;
+//    ticks << 1 << 2 << 3 << 4 << 5 << 6 << 7;
+//    labels << "USA" << "Japan" << "Germany" << "France" << "UK" << "Italy" << "Canada";
+//    customPlot->xAxis->setAutoTicks(false);
+//    customPlot->xAxis->setAutoTickLabels(false);
+//    customPlot->xAxis->setTickVector(ticks);
+//    customPlot->xAxis->setTickVectorLabels(labels);
+//    customPlot->xAxis->setTickLabelRotation(60);
+//    customPlot->xAxis->setSubTickCount(0);
+//    customPlot->xAxis->setTickLength(0, 4);
+//    customPlot->xAxis->setGrid(false);
+//    customPlot->xAxis->setRange(0, 8);
 
     // prepare y axis:
-    customPlot->yAxis->setRange(0, 12.1);
-    customPlot->yAxis->setPadding(5); // a bit more space to the left border
-    customPlot->yAxis->setLabel("Power Consumption in\nKilowatts per Capita (2007)");
-    customPlot->yAxis->setSubGrid(true);
-    QPen gridPen;
-    gridPen.setStyle(Qt::SolidLine);
-    gridPen.setColor(QColor(0, 0, 0, 25));
-    customPlot->yAxis->setGridPen(gridPen);
-    gridPen.setStyle(Qt::DotLine);
-    customPlot->yAxis->setSubGridPen(gridPen);
+//    customPlot->yAxis->setRange(0, 12.1);
+//    customPlot->yAxis->setPadding(5); // a bit more space to the left border
+//    customPlot->yAxis->setLabel("Power Consumption in\nKilowatts per Capita (2007)");
+//    customPlot->yAxis->setSubGrid(true);
+//    QPen gridPen;
+//    gridPen.setStyle(Qt::SolidLine);
+//    gridPen.setColor(QColor(0, 0, 0, 25));
+//    customPlot->yAxis->setGridPen(gridPen);
+//    gridPen.setStyle(Qt::DotLine);
+//    customPlot->yAxis->setSubGridPen(gridPen);
 
     // Add data:
-    QVector<double> recogErrorsData, editionErrorsData, correctEditionsData;
-    recogErrorsData  << 0.86*10.5 << 0.83*5.5 << 0.84*5.5 << 0.52*5.8 << 0.89*5.2 << 0.90*4.2 << 0.67*11.2;
-    editionErrorsData << 0.08*10.5 << 0.12*5.5 << 0.12*5.5 << 0.40*5.8 << 0.09*5.2 << 0.00*4.2 << 0.07*11.2;
-    correctEditionsData   << 0.06*10.5 << 0.05*5.5 << 0.04*5.5 << 0.06*5.8 << 0.02*5.2 << 0.07*4.2 << 0.25*11.2;
-    recogErrors->setData(ticks, recogErrorsData);
-    editionErrors->setData(ticks, editionErrorsData);
-    correctEditions->setData(ticks, correctEditionsData);
+//    QVector<double> recogErrorsData, editionErrorsData, correctEditionsData;
+//    recogErrorsData  << 0.86*10.5 << 0.83*5.5 << 0.84*5.5 << 0.52*5.8 << 0.89*5.2 << 0.90*4.2 << 0.67*11.2;
+//    editionErrorsData << 0.08*10.5 << 0.12*5.5 << 0.12*5.5 << 0.40*5.8 << 0.09*5.2 << 0.00*4.2 << 0.07*11.2;
+//    correctEditionsData   << 0.06*10.5 << 0.05*5.5 << 0.04*5.5 << 0.06*5.8 << 0.02*5.2 << 0.07*4.2 << 0.25*11.2;
+//    recogErrors->setData(ticks, recogErrorsData);
+//    editionErrors->setData(ticks, editionErrorsData);
+//    correctEditions->setData(ticks, correctEditionsData);
 
     // setup legend:
     customPlot->legend->setVisible(true);
@@ -105,14 +104,30 @@ void NERGraphWidget::setupBarPlot(QVector<QString> &tickNerTableNames,
     QVector<double> ticks;
     QVector<QString> labels;
 
-    //Set ticks and labels for the X axis...
+
+
+    /*
+     * Set ticks and labels for the X axis...
+     */
     for(int i=0; i<tickNerTableNames.count(); i++)
     {
         ticks << i+1;
         labels << tickNerTableNames.at(i);
     }
 
+    customPlot->xAxis->setAutoTicks(false);
+    customPlot->xAxis->setAutoTickLabels(false);
+    customPlot->xAxis->setTickVector(ticks);
+    customPlot->xAxis->setTickVectorLabels(labels);
+    customPlot->xAxis->setTickLabelRotation(90);
+    customPlot->xAxis->setSubTickCount(0);
+    customPlot->xAxis->setTickLength(0, 4);
+    customPlot->xAxis->setGrid(false);
+    customPlot->xAxis->setRange(0, ticks.count());
+
     QVector<double> recogErrorsData, editionErrorsData, correctEditionsData;
+
+    int maxN = 0;
 
     for(int k=0; k<data.count(); k++){
         NERStatsData stats = data.at(k);
@@ -121,15 +136,32 @@ void NERGraphWidget::setupBarPlot(QVector<QString> &tickNerTableNames,
         correctEditionsData  << stats.getNCount()
                                 - stats.getEditionErrors()
                                 - stats.getRecognitionErrors();
-        recogErrors->clearData();
-        recogErrors->setData(ticks, recogErrorsData);
-        editionErrors->clearData();
-        editionErrors->setData(ticks, editionErrorsData);
-        correctEditions->clearData();
-        correctEditions->setData(ticks, correctEditionsData);
+
+        maxN = std::max(maxN, stats.getNCount());
     }
 
+    recogErrors->clearData();
+    recogErrors->setData(ticks, recogErrorsData);
+    editionErrors->clearData();
+    editionErrors->setData(ticks, editionErrorsData);
+    correctEditions->clearData();
+    correctEditions->setData(ticks, correctEditionsData);
+
+    /*
+     * Prepare Y-axis
+     */
+    customPlot->yAxis->setRange(0, maxN);
+    customPlot->yAxis->setPadding(5); // a bit more space to the left border
+    customPlot->yAxis->setLabel("Number of words");
+    customPlot->yAxis->setSubGrid(true);
+    QPen gridPen;
+    gridPen.setStyle(Qt::SolidLine);
+    gridPen.setColor(QColor(0, 0, 0, 25));
+    customPlot->yAxis->setGridPen(gridPen);
+    gridPen.setStyle(Qt::DotLine);
+    customPlot->yAxis->setSubGridPen(gridPen);
 
 
-
+    //Redraw everything...
+    customPlot->replot();
 }
