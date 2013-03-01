@@ -28,7 +28,10 @@ public:
                               QString &description);
     void insertNewSpeaker(QString &speaker);
     void clearAllTreeData();
-    
+    void removeAllSubNodes();
+    QMap<QTreeWidgetItem*, QMdiSubWindow *> *getTreeSubWindowsMap();
+    QTreeWidgetItem* getTranslationNode();
+
 private:
     QSplitter   *splitter;
     QVBoxLayout *mainVLayout;

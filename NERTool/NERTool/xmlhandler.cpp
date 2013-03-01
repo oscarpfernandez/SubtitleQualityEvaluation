@@ -271,7 +271,8 @@ bool XMLHandler::loadSubtitleXML(QFile *xmlFile, QList<BlockTRS> *trsBlocks)
 bool XMLHandler::writeProjectExportXML(QString &xmlFileName,
                                        QList<Speaker> *speakerList,
                                        QList<BlockTRS> *transcription,
-                                       QList<NERTableWidget *> *nerTablesList)
+                                       QTreeWidgetItem *transcTreeNode,
+                                       QMap<QTreeWidgetItem*, QMdiSubWindow*> *subWindowsMap)
 {
 
     QFile *file = new QFile(xmlFileName);
@@ -298,6 +299,18 @@ bool XMLHandler::writeProjectExportXML(QString &xmlFileName,
     xmlWriter->writeComment("NER Original Transcription and Speakers Block");
 
     xmlWriter->writeStartElement(STR_TRANSC_TAG);
+
+    QString name, responsible, description;
+    if(transcTreeNode!=NULL){
+        name = transcTreeNode->text(0);
+        responsible = transcTreeNode->text(1);
+        description = transcTreeNode->text(2);
+    }
+
+    xmlWriter->writeAttribute(STR_TABLE_PROP_NAME, name);
+    xmlWriter->writeAttribute(STR_TABLE_PROP_RESPONSIBLE, responsible);
+    xmlWriter->writeAttribute(STR_TABLE_PROP_DESCRIPTION, description);
+
     xmlWriter->writeStartElement(STR_SPEAKERS_TAG);
 
     for(int i=0; i<speakerList->count(); i++)
@@ -334,11 +347,20 @@ bool XMLHandler::writeProjectExportXML(QString &xmlFileName,
     xmlWriter->writeComment("*******************************");
 
     xmlWriter->writeStartElement(STR_TABLES_TAG);
-    for(int t=0; t < nerTablesList->count(); t++)
+
+    QList<QTreeWidgetItem*> tableTreeNodes = subWindowsMap->keys();
+
+    for(int t=0; t < tableTreeNodes.count(); t++)
     {
         xmlWriter->writeStartElement(STR_TABLE_TAG);
-        NERTableWidget *tableWidget = nerTablesList->at(t);
 
+        QTreeWidgetItem* treeItem = tableTreeNodes.at(t);
+        QMdiSubWindow* subWindow = subWindowsMap->value(treeItem);
+        NERTableWidget* tableWidget = static_cast<NERTableWidget*>(subWindow->widget());
+
+        xmlWriter->writeAttribute(STR_TABLE_PROP_NAME, treeItem->text(0));
+        xmlWriter->writeAttribute(STR_TABLE_PROP_RESPONSIBLE, treeItem->text(1));
+        xmlWriter->writeAttribute(STR_TABLE_PROP_DESCRIPTION, treeItem->text(2));
 
         for(int row=0; row<tableWidget->rowCount(); row++)
         {

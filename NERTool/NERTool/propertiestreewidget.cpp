@@ -222,7 +222,9 @@ void PropertiesTreeWidget::renameDocumentNodeSlot(QTreeWidgetItem* item, int col
 {
     if(item!=NULL && column==0){
         QMdiSubWindow *subwindow = subWindowsMap->value(item);
-        subwindow->setWindowTitle(item->text(0));
+        if(subwindow!=NULL){
+            subwindow->setWindowTitle(item->text(0));
+        }
     }
 
 }
@@ -290,4 +292,31 @@ void PropertiesTreeWidget::removeSubNodeSlot()
         table->close();
         mainItemSubs->removeChild(item);
     }
+}
+
+void PropertiesTreeWidget::removeAllSubNodes()
+{
+    QList<QTreeWidgetItem*> nodes = subWindowsMap->keys();
+
+    for(int i=0; i<nodes.count();i++){
+        QTreeWidgetItem *item = nodes.at(i);
+        QMdiSubWindow *subwindow = subWindowsMap->value(item);
+        subwindow->close();
+        subWindowsMap->remove(item);
+        mainItemSubs->removeChild(item);
+    }
+
+}
+
+QMap<QTreeWidgetItem*, QMdiSubWindow*>* PropertiesTreeWidget::getTreeSubWindowsMap()
+{
+    return subWindowsMap;
+}
+
+QTreeWidgetItem* PropertiesTreeWidget::getTranslationNode()
+{
+    if(mainItemTrans->childCount()==0){
+        return NULL;
+    }
+    return mainItemTrans->child(0);
 }

@@ -7,6 +7,7 @@
 #include <QXmlStreamWriter>
 #include <QMessageBox>
 #include <QDateTime>
+#include <QTreeWidgetItem>
 #include "nercommon.h"
 #include "nertablewidget.h"
 #include "dragwidget.h"
@@ -49,6 +50,9 @@ const QString STR_SPEAKER_PROP_TYPE = "sType";
 
 const QString STR_TABLES_TAG = "Tables";
 const QString STR_TABLE_TAG = "Table";
+const QString STR_TABLE_PROP_NAME = "tableName";
+const QString STR_TABLE_PROP_RESPONSIBLE = "responsible";
+const QString STR_TABLE_PROP_DESCRIPTION = "description";
 const QString STR_TABLELINE_TAG = "TableLine";
 const QString STR_TABLELINE_PROP_SID = "sID";
 const QString STR_TABLELINE_PROP_TIMESTAMP = "timestamp";
@@ -75,7 +79,8 @@ public:
     bool writeProjectExportXML(QString &xmlFileName,
                                QList<Speaker> *speakerList,
                                QList<BlockTRS> *transcription,
-                               QList<NERTableWidget *> *nerTablesList);
+                               QTreeWidgetItem *transcTreeNode,
+                               QMap<QTreeWidgetItem *, QMdiSubWindow *> *subWindowsMap);
     bool readProjectExportXML(QString &xmlFileName,
                                QList<Speaker> *speakerList,
                                QList<BlockTRS> *transcription,

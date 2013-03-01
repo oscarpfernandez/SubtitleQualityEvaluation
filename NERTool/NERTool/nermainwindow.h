@@ -43,8 +43,6 @@ private:
 	void initializeMDIWindows();
     void enableActionsTransLoaded();
 
-    void addNewTableAndTreeNode();
-
 	QMdiArea *mainMdiArea;
 	QMdiSubWindow *subWindowDiffTable;
 
@@ -52,8 +50,6 @@ private:
     PropertiesTreeWidget *propertiesTreeWidget;
 
     MediaMngWidget *mediaMngWidget;
-
-    QMap<QTreeWidgetItem*, NERTableWidget*> mapTableContentTree;
 
     QDockWidget *projectPropertiesDockWidget;
     QDockWidget *audioWaveFormDockWidget;
@@ -94,6 +90,7 @@ private:
     QList<BlockTRS> *transcriptionList;
     QList<Speaker> *speakerList;
     bool isTranscriptionLoaded;
+    bool isSubtitlesLoaded;
 
 
 private slots:

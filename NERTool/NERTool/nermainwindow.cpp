@@ -19,6 +19,9 @@ NERMainWindow::NERMainWindow(QWidget *parent) : QMainWindow(parent)
 	createToolBars();
 	createStatusBar();
 
+    isTranscriptionLoaded = false;
+    isSubtitlesLoaded = false;
+
 	setCentralWidget(mainMdiArea);
 
 	initializeMDIWindows();
@@ -300,7 +303,8 @@ void NERMainWindow::saveProjectSlot()
     xmlHandler->writeProjectExportXML(*projectSaveFilePath,
                                       speakerList,
                                       transcriptionList,
-                                      nerTablesList);
+                                      propertiesTreeWidget->getTranslationNode(),
+                                      propertiesTreeWidget->getTreeSubWindowsMap());
 
 }
 
@@ -322,7 +326,8 @@ void NERMainWindow::saveAsProjectSlot()
     xmlHandler->writeProjectExportXML(xmlFileName,
                                       speakerList,
                                       transcriptionList,
-                                      nerTablesList);
+                                      propertiesTreeWidget->getTranslationNode(),
+                                      propertiesTreeWidget->getTreeSubWindowsMap());
 
 }
 
@@ -380,6 +385,9 @@ void NERMainWindow::closeProjectSlot()
     //Remove tree child nodes...
     propertiesTreeWidget->clearAllTreeData();
 
+    isTranscriptionLoaded = false;
+    isSubtitlesLoaded = false;
+
 }
 
 /*******************************************************************************
@@ -428,6 +436,25 @@ void NERMainWindow::enableActionsTransLoaded(){
 void NERMainWindow::loadTranscriptionFileSlot()
 {
 
+    if(isTranscriptionLoaded && isSubtitlesLoaded){
+        QMessageBox box;
+        box.setText("Do you wish to reload Transcription table ?");
+        box.setInformativeText("This will delete any Subtitle tables loaded and cannot be undone!\nProceed ?");
+        box.setBaseSize(150,60);
+        box.setIcon(QMessageBox::Warning);
+        box.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+        box.setDefaultButton(QMessageBox::No);
+        int ret = box.exec();
+        switch (ret) {
+        case QMessageBox::No:
+            return;//cancel all this...
+        default:
+            // should never be reached
+            propertiesTreeWidget->removeAllSubNodes();
+            isSubtitlesLoaded = false;
+        }
+    }
+
     QString fileName = QFileDialog::getOpenFileName(
             this,
             tr("Open TRS File"),
@@ -441,7 +468,9 @@ void NERMainWindow::loadTranscriptionFileSlot()
     transcriptionList->clear();
     speakerList->clear();
 
-    isTranscriptionLoaded = xmlHandler->readTranscriberXML(fileName, transcriptionList, speakerList);
+    isTranscriptionLoaded = xmlHandler->readTranscriberXML(fileName,
+                                                           transcriptionList,
+                                                           speakerList);
 
     QString s;
     QFileInfo info(fileName);
@@ -451,11 +480,6 @@ void NERMainWindow::loadTranscriptionFileSlot()
 
 }
 
-void NERMainWindow::addNewTableAndTreeNode()
-{
-
-
-}
 
 /*******************************************************************************
  * Loads a "transcriber" XML file containing "subtitle" content.
@@ -523,6 +547,8 @@ void NERMainWindow::loadSubtitlesFileSlot(){
 
         //Insert new item in the tree...
         propertiesTreeWidget->insertNewSubtitle(title, subWindow, s, s);
+
+        isSubtitlesLoaded = true;
 
 
         delete trsList;

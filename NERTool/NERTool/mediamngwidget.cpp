@@ -160,7 +160,7 @@ void MediaMngWidget::setupGUI()
     videoWindow->setPalette(bvidpalette);
     videoWidLayout = new QVBoxLayout();
     videoSubLabel = new QLabel();
-    videoSubLabel->setText(QString("This is a test!\n A real good one!"));
+    videoSubLabel->setText(QString("..."));
     videoSubLabel->setFont(QFont("Times",12, true));
     videoSubLabel->setFixedHeight(70);
     videoSubLabel->setAlignment(Qt::AlignCenter | Qt::AlignHCenter);
