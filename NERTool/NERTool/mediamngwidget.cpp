@@ -450,13 +450,13 @@ QWidget* MediaMngWidget::getVideoWindow()
  ******************************************************************************/
 void MediaMngWidget::setActivatedSubWindow(QMdiSubWindow *subwindow)
 {
-    if(subwindow==0){
+    if(subwindow==0 || !subwindow->isVisible()){
         return;
     }
 
     NERTableWidget *table = static_cast<NERTableWidget*>(subwindow->widget());
     if(table!=0){
-        loadedMdiWinName->setText("New Window");
+        loadedMdiWinName->setText(subwindow->windowTitle());
         subtitles = table->getHashedSubtableData();
     }
 }

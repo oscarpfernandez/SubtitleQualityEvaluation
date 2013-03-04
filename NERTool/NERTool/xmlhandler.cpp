@@ -307,9 +307,9 @@ bool XMLHandler::writeProjectExportXML(QString &xmlFileName,
         description = transcTreeNode->text(2);
     }
 
-    xmlWriter->writeAttribute(STR_TABLE_PROP_NAME, name);
-    xmlWriter->writeAttribute(STR_TABLE_PROP_RESPONSIBLE, responsible);
-    xmlWriter->writeAttribute(STR_TABLE_PROP_DESCRIPTION, description);
+    xmlWriter->writeAttribute(STR_TRANSC_PROP_NAME, name);
+    xmlWriter->writeAttribute(STR_TRANSC_RESPONSIBLE, responsible);
+    xmlWriter->writeAttribute(STR_TRANSC_DESCRIPTION, description);
 
     xmlWriter->writeStartElement(STR_SPEAKERS_TAG);
 
@@ -429,7 +429,9 @@ bool XMLHandler::writeProjectExportXML(QString &xmlFileName,
 bool XMLHandler::readProjectExportXML(QString &xmlFileName,
                                       QList<Speaker> *speakerList,
                                       QList<BlockTRS> *transcription,
-                                      QList<NERTableWidget *> *nerTablesList)
+                                      QList<NERTableWidget *> *nerTablesList,
+                                      MediaMngWidget *mediaWid,
+                                      PropertiesTreeWidget *treeWidget)
 {
     QFile *file = new QFile(xmlFileName);
 
@@ -437,10 +439,16 @@ bool XMLHandler::readProjectExportXML(QString &xmlFileName,
         return false;
     }
 
+
+    bool isLoadingATable = false;
+    NERTableWidget* currentTable;
+    NERSubTableWidget* currentSubtable;
+
+
     QXmlStreamReader *xmlReader = new QXmlStreamReader();
     xmlReader->setDevice(file);
 
-    while(!xmlReader->atEnd() && xmlReader->hasError())
+    while(!xmlReader->atEnd() && !xmlReader->hasError())
     {
         /* Read next element.*/
         xmlReader->readNext();
@@ -448,17 +456,29 @@ bool XMLHandler::readProjectExportXML(QString &xmlFileName,
 
         /* If token is just StartDocument, we'll go to next.*/
         if(xmlReader->isStartDocument() ) {
+            ENGINE_DEBUG << ">>> Start Doc";
             continue;
         }
 
         if(xmlReader->isStartElement()){
             if(xmlReader->name()==STR_NER_PROJECT){
+                ENGINE_DEBUG << ">>> New Project";
                 continue;
             }
             if(xmlReader->name()==STR_TRANSC_TAG){
+                ENGINE_DEBUG << ">>> Transcription";
+                QXmlStreamAttributes attributes = xmlReader->attributes();
+                QString name = attributes.value(STR_TRANSC_PROP_NAME).toString();
+                QString resp = attributes.value(STR_TRANSC_RESPONSIBLE).toString();
+                QString desc = attributes.value(STR_TRANSC_DESCRIPTION).toString();
+
+                treeWidget->insertNewTranslation(name, resp, desc);
+
                 continue;
             }
             if(xmlReader->name()==STR_TRANSC_LINE_TAG){
+                ENGINE_DEBUG << ">>> Transcription Line";
+
                 QXmlStreamAttributes attributes = xmlReader->attributes();
                 const QString timeStamp = attributes.value(STR_TRANSC_LINE_PROP_TIMESTAMP).toString();
                 const QString speakerId = attributes.value(STR_TRANSC_LINE_PROP_SPEAKER).toString();
@@ -472,6 +492,8 @@ bool XMLHandler::readProjectExportXML(QString &xmlFileName,
             }
 
             if(xmlReader->name()==STR_SPEAKERS_TAG){
+                ENGINE_DEBUG << ">>> Speakers ";
+
                 QXmlStreamAttributes attributes = xmlReader->attributes();
                 const QString speakerID = attributes.value(STR_SPEAKER_PROP_ID).toString();
                 const QString speakerName = attributes.value(STR_SPEAKER_PROP_NAME).toString();
@@ -482,21 +504,64 @@ bool XMLHandler::readProjectExportXML(QString &xmlFileName,
             }
 
             if(xmlReader->name()==STR_TABLES_TAG){
+                ENGINE_DEBUG << ">>> Tables Tag";
+
                 continue;
 
             }
             if(xmlReader->name()==STR_TABLE_TAG){
-                //Read all the tables...
-                readNERTable(xmlReader, nerTablesList);
+                ENGINE_DEBUG << ">>> A table...";
 
+                //Read all the table...
+                isLoadingATable = true;
+
+                currentTable = new NERTableWidget(_parent);
+                currentTable->setMediaWidget(mediaWid);
+
+                nerTablesList->append(currentTable);
+
+                QXmlStreamAttributes attribs = xmlReader->attributes();
+                QString tableName = attribs.value(STR_TABLE_PROP_NAME).toString();
+                QString responsible = attribs.value(STR_TABLE_PROP_RESPONSIBLE).toString();
+                QString description = attribs.value(STR_TABLE_PROP_DESCRIPTION).toString();
+
+                currentTable->setTableName(tableName);
+                currentTable->setResponsible(responsible);
+                currentTable->setDescription(description);
+
+                ENGINE_DEBUG << ">>> Table props:\n\t" << tableName
+                             << "\n\t" << responsible
+                             << "\n\t" << description;
+
+                continue;
+            }
+
+             if(xmlReader->isEndElement() && xmlReader->name()==STR_TABLE_TAG){
+                 continue;
+             }
+
+            if(xmlReader->name() == STR_TABLELINE_TAG){
+                ENGINE_DEBUG << "Table Line...";
+
+                QXmlStreamAttributes attribs = xmlReader->attributes();
+                QString speakerID = attribs.value(STR_TABLELINE_PROP_SID).toString();
+                QString timeStamp = attribs.value(STR_TABLELINE_PROP_TIMESTAMP).toString();
+                QString transcription = attribs.value(STR_TABLELINE_PROP_TRANSCRIP).toString();
+
+                currentTable->insertNewTableEntry(speakerID, timeStamp, transcription);
+
+                continue;
+            }
+
+            if(xmlReader->name() == STR_SUBTABLELINE_TAG){
+
+                continue;
             }
 
 
         }
 
     }//end while
-
-
 
 
     //Close file descriptor
@@ -518,11 +583,9 @@ bool XMLHandler::readProjectExportXML(QString &xmlFileName,
 bool XMLHandler::readNERTable(QXmlStreamReader *xmlReader,
                               QList<NERTableWidget *> *nerTablesList)
 {
-    //NERTableWidget *table = new NERTableWidget(_parent);
+    NERTableWidget *table = new NERTableWidget(_parent);
 
-    while(xmlReader->isEndElement()
-          && xmlReader->name()!=STR_TABLE_TAG
-          && xmlReader->name()==STR_TABLELINE_TAG)
+    while(!xmlReader->isEndElement() && xmlReader->name()!=STR_TABLE_TAG)
     {
         xmlReader->readNext();
 

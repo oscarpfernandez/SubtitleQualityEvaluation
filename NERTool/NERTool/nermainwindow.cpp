@@ -346,10 +346,21 @@ void NERMainWindow::openProjectSlot()
         return; //Nothing to do.
     }
 
+    ENGINE_DEBUG << "open project";
+
     xmlHandler->readProjectExportXML(xmlFileName,
                                      speakerList,
                                      transcriptionList,
-                                     nerTablesList);
+                                     nerTablesList,
+                                     mediaMngWidget,
+                                     propertiesTreeWidget);
+
+    for(int i=0; i<nerTablesList->count(); i++){
+        ENGINE_DEBUG << "Table insertion";
+
+        NERTableWidget* table = nerTablesList->at(i);
+        addTableInMdiArea(table, table->getTableName());
+    }
 
 }
 
@@ -448,10 +459,13 @@ void NERMainWindow::loadTranscriptionFileSlot()
         switch (ret) {
         case QMessageBox::No:
             return;//cancel all this...
-        default:
-            // should never be reached
+        case QMessageBox::Yes:
             propertiesTreeWidget->removeAllSubNodes();
             isSubtitlesLoaded = false;
+            break;
+        default:
+            // should never be reached
+            break;
         }
     }
 
@@ -520,7 +534,8 @@ void NERMainWindow::loadSubtitlesFileSlot(){
             continue; //proceed to next file...
         }
 
-        NERTableWidget *table = new NERTableWidget(this, mediaMngWidget, transcriptionList);
+        NERTableWidget *table = new NERTableWidget(this);
+        table->setMediaWidget(mediaMngWidget);
         table->deleteTablesContents();
         table->loadXMLData(transcriptionList);
         table->loadSubtitlesXMLData(transcriptionList, trsList);
@@ -528,25 +543,11 @@ void NERMainWindow::loadSubtitlesFileSlot(){
         //Append this loaded subtitles to the global list.
         nerTablesList->append(table);
 
-        //Add a new subwindow
-        QMdiSubWindow *subWindow = mainMdiArea->addSubWindow(table,
-                                                             /*Qt::CustomizeWindowHint
-                                                               |*/ Qt::WindowTitleHint
-                                                             | Qt::WindowMinMaxButtonsHint
-                                                             | Qt::WindowCloseButtonHint);
         QString title;
         QFileInfo info(file);
         title.append(info.baseName());
 
-        //Display new subwindow
-        subWindow->setWindowTitle(title);
-        subWindow->setMinimumSize(800,600);
-        subWindow->show();
-
-        QString s;
-
-        //Insert new item in the tree...
-        propertiesTreeWidget->insertNewSubtitle(title, subWindow, s, s);
+        addTableInMdiArea(table, title);
 
         isSubtitlesLoaded = true;
 
@@ -554,6 +555,26 @@ void NERMainWindow::loadSubtitlesFileSlot(){
         delete trsList;
         trsList = NULL;
     }
+}
+
+void NERMainWindow::addTableInMdiArea(NERTableWidget* table, QString title)
+{
+    //Add a new subwindow
+    QMdiSubWindow *subWindow = mainMdiArea->addSubWindow(table,
+                                                         /*Qt::CustomizeWindowHint
+                                                           |*/ Qt::WindowTitleHint
+                                                         | Qt::WindowMinMaxButtonsHint
+                                                         | Qt::WindowCloseButtonHint);
+
+    //Display new subwindow
+    subWindow->setWindowTitle(title);
+    subWindow->setMinimumSize(800,600);
+    subWindow->show();
+
+    QString s;
+
+    //Insert new item in the tree...
+    propertiesTreeWidget->insertNewSubtitle(title, subWindow, s, s);
 }
 
 

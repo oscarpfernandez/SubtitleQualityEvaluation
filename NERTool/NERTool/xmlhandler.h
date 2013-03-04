@@ -11,6 +11,7 @@
 #include "nercommon.h"
 #include "nertablewidget.h"
 #include "dragwidget.h"
+#include "propertiestreewidget.h"
 
 /*******************************************************************************
  * Transcriber XML tags (for import)
@@ -37,6 +38,9 @@ const QString STR_NER_PROJECT = "NERProject";
 const QString STR_NER_PROJECT_PROP_SAVEDATE = "saveTime";
 
 const QString STR_TRANSC_TAG = "Transcription";
+const QString STR_TRANSC_PROP_NAME = "tableName";
+const QString STR_TRANSC_RESPONSIBLE = "responsible";
+const QString STR_TRANSC_DESCRIPTION = "description";
 const QString STR_TRANSC_LINE_TAG = "TranscLine";
 const QString STR_TRANSC_LINE_PROP_TIMESTAMP = "timestamp";
 const QString STR_TRANSC_LINE_PROP_SPEAKER = "speakerid";
@@ -82,9 +86,11 @@ public:
                                QTreeWidgetItem *transcTreeNode,
                                QMap<QTreeWidgetItem *, QMdiSubWindow *> *subWindowsMap);
     bool readProjectExportXML(QString &xmlFileName,
-                               QList<Speaker> *speakerList,
-                               QList<BlockTRS> *transcription,
-                               QList<NERTableWidget*> *nerTablesList);
+                              QList<Speaker> *speakerList,
+                              QList<BlockTRS> *transcription,
+                              QList<NERTableWidget*> *nerTablesList,
+                              MediaMngWidget *mediaWid,
+                              PropertiesTreeWidget *treeWidget);
 
 
 private:

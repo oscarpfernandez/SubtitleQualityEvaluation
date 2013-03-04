@@ -30,6 +30,7 @@ class DragWidget : public QWidget
     Q_OBJECT
 public:
     DragWidget(QWidget *parent, QString &textBlock, int maxWidth, bool isModifiable);
+    DragWidget(QWidget *parent, QList<DragLabel*> labelList, int maxWidth, bool isModifiable);
     ~DragWidget();
     QSize getBlockSize();
     void showCommentEditor();

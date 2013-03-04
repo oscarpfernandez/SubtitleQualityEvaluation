@@ -32,10 +32,15 @@ class NERTableWidget : public QTableWidget
 Q_OBJECT
 
 public:
-    NERTableWidget(QWidget *parent,
-                   MediaMngWidget *mediaWidget,
-                   QList<BlockTRS> *transcriptionList);
+    NERTableWidget(QWidget *parent);
     ~NERTableWidget();
+    void setMediaWidget(MediaMngWidget *mediaWidget);
+    void setTableName(QString &tableName);
+    QString getTableName();
+    void setResponsible(QString &responsible);
+    QString getResponsible();
+    void setDescription(QString &desc);
+    QString getDescription();
     int insertNewTableEntry(QString &speaker,
                             QString &TimeStamp,
                             QString &text);
@@ -57,6 +62,9 @@ private:
     QHash<qlonglong,QString> *subtileDataHashedByTimestamp;
     QList<BlockTRS> *transcriptionList;
     qlonglong getTimeInMilis(QString time);
+    QString tableName;
+    QString responsible;
+    QString description;
 
 public slots:
     void columnTableResized(int column, int oldWidth, int newWidth);
@@ -67,8 +75,9 @@ class NERSubTableWidget : public QTableWidget
     Q_OBJECT
 
 public:
-    NERSubTableWidget(QWidget *parent=0, MediaMngWidget *mediaWidget=0);
+    NERSubTableWidget(QWidget *parent=0);
     ~NERSubTableWidget();
+    void setMediaWidget(MediaMngWidget *mediaWidget);
     int insertNewTableEntry(QString &timeStamp, QString &text);
     BlockTRS getSubtableRowData(int row);
 

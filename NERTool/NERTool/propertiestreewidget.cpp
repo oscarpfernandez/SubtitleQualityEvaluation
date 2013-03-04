@@ -46,6 +46,8 @@ PropertiesTreeWidget::PropertiesTreeWidget(QWidget *parent) : QWidget(parent)
     mainTreeWidget->setColumnWidth(1,150);
     mainTreeWidget->setColumnWidth(2,150);
 
+    mainTreeWidget->setSortingEnabled(true);
+
     mainTreeGroupBoxLayout->addWidget(mainTreeWidget);
     mainTreeGroupBox->setLayout(mainTreeGroupBoxLayout);
 

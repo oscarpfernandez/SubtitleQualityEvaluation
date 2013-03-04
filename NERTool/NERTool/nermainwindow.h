@@ -42,6 +42,7 @@ private:
     void createDockableWidgets();
 	void initializeMDIWindows();
     void enableActionsTransLoaded();
+    void addTableInMdiArea(NERTableWidget* table, QString title);
 
 	QMdiArea *mainMdiArea;
 	QMdiSubWindow *subWindowDiffTable;

@@ -53,6 +53,50 @@ DragWidget::DragWidget(QWidget *parent,
     installEventFilter(this);
 }
 
+
+/*******************************************************************************
+ * Dragwidget constructor used in NER XML imports
+ *
+ ******************************************************************************/
+DragWidget::DragWidget(QWidget *parent,
+                       QList<DragLabel*> labelList,
+                       int maxWidth,
+                       bool isModifiable) : QWidget(parent)
+{
+    createActions();
+
+    m_isModifiable = isModifiable;
+    m_labelsPointerList = new QList<DragLabel *>();
+    int x = 5;
+    int y = 2;
+    m_maxWidgetWidth = maxWidth;
+    m_numLines = 0;
+
+    for(int i=0; i<labelList.count(); i++) {
+        DragLabel* wordLabel = labelList.at(i);
+
+        if (wordLabel != 0) {
+            m_labelsPointerList->append(wordLabel);
+            x += wordLabel->width()+1;
+            if (x >= m_maxWidgetWidth && i-1<labelList.count()) {
+                x = 5;
+                y += wordLabel->height() + 2;
+                m_numLines++;
+            }
+        }
+    }
+
+    //White background...
+    QPalette newPalette = palette();
+    newPalette.setColor(QPalette::Window, Qt::white);
+    setPalette(newPalette);
+
+    setContextMenuPolicy(Qt::DefaultContextMenu);
+    installEventFilter(this);
+
+
+}
+
 DragWidget::~DragWidget()
 {
 

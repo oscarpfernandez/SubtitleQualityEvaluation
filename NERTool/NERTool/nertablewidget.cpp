@@ -16,9 +16,7 @@ QT_FORWARD_DECLARE_CLASS(NERSubTableWidget)
  * of the data to an XML stream.
  ******************************************************************************/
 
-NERTableWidget::NERTableWidget(QWidget *parent,
-                               MediaMngWidget *mediaWidget,
-                               QList<BlockTRS> *transcription) : QTableWidget(parent)
+NERTableWidget::NERTableWidget(QWidget *parent) : QTableWidget(parent)
 {
     setSelectionMode(QAbstractItemView::SingleSelection);
     setSelectionBehavior(QAbstractItemView::SelectRows);
@@ -50,10 +48,10 @@ NERTableWidget::NERTableWidget(QWidget *parent,
 
     connect(headerView, SIGNAL(sectionResized(int,int,int)), this, SLOT(columnTableResized(int,int,int)));
 
-    mediaMngWidget = mediaWidget;
-    transcriptionList = transcription;
+    subtileDataHashedByTimestamp = new QHash<qlonglong,QString>();
 
 }
+
 
 NERTableWidget::~NERTableWidget()
 {
@@ -61,11 +59,17 @@ NERTableWidget::~NERTableWidget()
     headerView = NULL;
 }
 
+void NERTableWidget::setMediaWidget(MediaMngWidget *mediaWid){
+    mediaMngWidget = mediaWid;
+}
+
 void NERTableWidget::loadXMLData(QList<BlockTRS> *trsBlocks){
     if(trsBlocks==0 || trsBlocks->count()==0){
         //Nothing to do...
         return;
     }
+
+    transcriptionList = trsBlocks;
 
     //Fill the table with the entries...
     for(int i=0; i<trsBlocks->count(); i++){
@@ -85,7 +89,7 @@ void NERTableWidget::loadSubtitlesXMLData(QList<BlockTRS> *transcription, QList<
 
     //Save the subtitles list...
     subtitleTableData = new QList<BlockTRS>(*subsTrsBlocks);
-    subtileDataHashedByTimestamp = new QHash<qlonglong,QString>();
+//    subtileDataHashedByTimestamp = new QHash<qlonglong,QString>();
     for(int i=0; i<subtitleTableData->count(); i++){
         BlockTRS btr = subtitleTableData->at(i);
         QStringList ls = btr.getSyncTime().split(".");
@@ -105,7 +109,8 @@ void NERTableWidget::loadSubtitlesXMLData(QList<BlockTRS> *transcription, QList<
     int i=0;
     int line=0;
     for(int j=0; j<transcription->count()-1; j++){
-        NERSubTableWidget *subTable = new NERSubTableWidget(this, mediaMngWidget);
+        NERSubTableWidget *subTable = new NERSubTableWidget(this);
+        subTable->setMediaWidget(mediaMngWidget);
         subTable->setSelectionMode(QAbstractItemView::SingleSelection);
         subTable->setSelectionBehavior(QAbstractItemView::SelectRows);
         subTable->setDragEnabled(true);
@@ -345,7 +350,7 @@ qlonglong NERTableWidget::getTimeInMilis(QString time)
  * will hold the subtitle information data. This nested structure is required
  * since the relation between transcription and subtitles is 1 to N.
  ******************************************************************************/
-NERSubTableWidget::NERSubTableWidget(QWidget *parent, MediaMngWidget *mediaWidget): QTableWidget(parent)
+NERSubTableWidget::NERSubTableWidget(QWidget *parent): QTableWidget(parent)
 {
     setSelectionMode(QAbstractItemView::SingleSelection);
     setSelectionBehavior(QAbstractItemView::SelectRows);
@@ -358,10 +363,15 @@ NERSubTableWidget::NERSubTableWidget(QWidget *parent, MediaMngWidget *mediaWidge
     verticalHeader()->setVisible(false);
     horizontalHeader()->setVisible(false);
 
-    mediaMngWidget = mediaWidget;
+
 
     connect(this, SIGNAL(cellClicked(int,int)), this, SLOT(videoSeekFromStamp(int,int)));
 
+}
+
+void NERSubTableWidget::setMediaWidget(MediaMngWidget *mediaWidget)
+{
+    mediaMngWidget = mediaWidget;
 }
 
 int NERSubTableWidget::insertNewTableEntry(QString &timeStamp, QString &text)
@@ -419,6 +429,36 @@ void NERSubTableWidget::videoSeekFromStamp(int row, int column)
 
     mediaMngWidget->seekVideo(timeMilis);
 
+}
+
+void NERTableWidget::setTableName(QString &tableNam)
+{
+    tableName = tableNam;
+}
+
+QString NERTableWidget::getTableName()
+{
+    return tableName;
+}
+
+void NERTableWidget::setResponsible(QString &resp)
+{
+    responsible = resp;
+}
+
+QString NERTableWidget::getResponsible()
+{
+    return responsible;
+}
+
+void NERTableWidget::setDescription(QString &desc)
+{
+    description = desc;
+}
+
+QString NERTableWidget::getDescription()
+{
+    return description;
 }
 
 NERSubTableWidget::~NERSubTableWidget()
