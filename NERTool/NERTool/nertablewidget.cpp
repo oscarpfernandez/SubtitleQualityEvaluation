@@ -46,7 +46,7 @@ NERTableWidget::NERTableWidget(QWidget *parent) : QTableWidget(parent)
     setColumnWidth(2,TRANSCRIPTION_COLUMN_WIDTH);
     setColumnWidth(3, SUBTITLES_COLUMN_WIDTH);
 
-    connect(headerView, SIGNAL(sectionResized(int,int,int)), this, SLOT(columnTableResized(int,int,int)));
+    //connect(headerView, SIGNAL(sectionResized(int,int,int)), this, SLOT(columnTableResized(int,int,int)));
 
     subtileDataHashedByTimestamp = new QHash<qlonglong,QString>();
 
@@ -92,17 +92,23 @@ void NERTableWidget::loadSubtitlesXMLData(QList<BlockTRS> *transcription, QList<
 //    subtileDataHashedByTimestamp = new QHash<qlonglong,QString>();
     for(int i=0; i<subtitleTableData->count(); i++){
         BlockTRS btr = subtitleTableData->at(i);
-        QStringList ls = btr.getSyncTime().split(".");
-        QString secs = ls[0];
-        QString mils = ls[1];
-        qlonglong timeMilis = (secs.toLongLong())*1000
-                + mils.toLongLong()
-                - mils.toLongLong() % SUBTITLE_CHECK_INTERVAL;
-        QString t = btr.getText();
-        subtileDataHashedByTimestamp->insert(timeMilis, t);
 
-        ENGINE_DEBUG << "Time " << QString("%1").arg(timeMilis);
-        ENGINE_DEBUG << "Text " << t;
+        QString ts = btr.getSyncTime();
+        QString text = btr.getText();
+
+        ENGINE_DEBUG << "Time " << ts;
+        ENGINE_DEBUG << "Text " << text;
+
+        insertTimeStampsHashedMap(ts, text);
+//        QStringList ls = btr.getSyncTime().split(".");
+//        QString secs = ls[0];
+//        QString mils = ls[1];
+//        qlonglong timeMilis = (secs.toLongLong())*1000
+//                + mils.toLongLong()
+//                - mils.toLongLong() % SUBTITLE_CHECK_INTERVAL;
+//        QString t = btr.getText();
+//        subtileDataHashedByTimestamp->insert(timeMilis, t);
+
     }
 
     //Merge the translation with the subtitles...
@@ -157,6 +163,18 @@ void NERTableWidget::loadSubtitlesXMLData(QList<BlockTRS> *transcription, QList<
     }
 }
 
+void NERTableWidget::insertTimeStampsHashedMap(QString &timeStamp, QString &text)
+{
+    QStringList ls = timeStamp.split(".");
+    QString secs = ls[0];
+    QString mils = ls[1];
+    qlonglong timeMilis = (secs.toLongLong())*1000
+            + mils.toLongLong()
+            - mils.toLongLong() % SUBTITLE_CHECK_INTERVAL;
+
+    subtileDataHashedByTimestamp->insert(timeMilis, text);
+}
+
 /*
  * Intercepts the signal provided by table header resized event, to adjust the contents
  * of the dragwidget. This slot then passes the event to the table
@@ -200,7 +218,9 @@ int NERTableWidget::insertNewTableEntry(QString &speaker, QString &timeStamp, QS
 
 void NERTableWidget::insertNewSubtableInLastEntry(NERSubTableWidget *subtable)
 {
-    if(rowCount()==0){
+    ENGINE_DEBUG << "----- Row count: " << rowCount();
+
+    if(rowCount()==0 || subtable==0){
         return;
     }
     setCellWidget(rowCount()-1, SUBTITLES_COLUMN_INDEX, subtable);
@@ -371,8 +391,6 @@ NERSubTableWidget::NERSubTableWidget(QWidget *parent): QTableWidget(parent)
     verticalHeader()->setVisible(false);
     horizontalHeader()->setVisible(false);
 
-
-
     connect(this, SIGNAL(cellClicked(int,int)), this, SLOT(videoSeekFromStamp(int,int)));
 
 }
@@ -402,7 +420,7 @@ int NERSubTableWidget::insertNewTableEntry(QString &timeStamp, QString &text)
     return line;
 }
 
-int NERSubTableWidget::insertNewTableEntry(QString &timeStamp, QList<DragLabel*> listItemLabels)
+int NERSubTableWidget::insertNewTableEntry(QString &timeStamp, DragWidget *wordBox)
 {
     int line = rowCount();
     insertRow(line);
@@ -414,7 +432,7 @@ int NERSubTableWidget::insertNewTableEntry(QString &timeStamp, QList<DragLabel*>
     setItem(line, SUB_TIMESTAMP_COLUMN_INDEX, tsItem);
 
     //Insert the chopped text block with the widget...
-    DragWidget *wordBox = new DragWidget(this, listItemLabels, SUBTITLES_COLUMN_WIDTH-30, true);
+//    DragWidget *wordBox = new DragWidget(this, listItemLabels, SUBTITLES_COLUMN_WIDTH-30, true);
     setRowHeight(line, wordBox->getBlockSize().height());
     setColumnWidth(SUBTITLES_COLUMN_INDEX,SUBTITLES_COLUMN_WIDTH);
     setCellWidget(line, SUB_SUBTITLES_COLUMN_INDEX, wordBox);
@@ -456,7 +474,6 @@ void NERSubTableWidget::videoSeekFromStamp(int row, int column)
     ENGINE_DEBUG << "\nTimeMilis =" << timeMilis << "\nTimeOrig =" << timeStamp;
 
     mediaMngWidget->seekVideo(timeMilis);
-
 }
 
 void NERTableWidget::setTableName(QString &tableNam)

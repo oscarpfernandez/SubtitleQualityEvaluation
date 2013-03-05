@@ -294,6 +294,8 @@ void PropertiesTreeWidget::removeSubNodeSlot()
         table->close();
         mainItemSubs->removeChild(item);
     }
+
+    subWindowsMap->clear();//just in case...
 }
 
 void PropertiesTreeWidget::removeAllSubNodes()

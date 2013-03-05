@@ -8,6 +8,7 @@
 #include <QHBoxLayout>
 #include "nercommon.h"
 #include "draglabel.h"
+#include "dragwidget.h"
 #include "mediamngwidget.h"
 
 
@@ -49,6 +50,7 @@ public:
     void loadXMLData(QList<BlockTRS> *trsBlocks);
     void loadSubtitlesXMLData(QList<BlockTRS> *transcription,
                               QList<BlockTRS> *trsBlocks);
+    void insertTimeStampsHashedMap(QString &timeStamp, QString &text);
     void insertNewSubtableInLastEntry(NERSubTableWidget* subtable);
     void deleteTablesContents();
     QHash<qlonglong,QString> getHashedSubtableData();
@@ -82,7 +84,7 @@ public:
     ~NERSubTableWidget();
     void setMediaWidget(MediaMngWidget *mediaWidget);
     int insertNewTableEntry(QString &timeStamp, QString &text);
-    int insertNewTableEntry(QString &timeStamp, QList<DragLabel*> listItemLabels);
+    int insertNewTableEntry(QString &timeStamp, DragWidget *wordBox);
     BlockTRS getSubtableRowData(int row);
 
 private:

@@ -328,11 +328,15 @@ bool XMLHandler::writeProjectExportXML(QString &xmlFileName,
     for(int i=0; i<transcription->count(); i++)
     {
         BlockTRS btr = transcription->at(i);
+        QString speaker, syncTime, sText;
+        speaker = btr.getSpeaker();
+        syncTime = btr.getSyncTime();
+        sText = btr.getText();
 
         xmlWriter->writeStartElement(STR_TRANSC_LINE_TAG);
-        xmlWriter->writeAttribute(STR_TRANSC_LINE_PROP_SPEAKER, btr.getSpeaker());
-        xmlWriter->writeAttribute(STR_TRANSC_LINE_PROP_TIMESTAMP, btr.getSyncTime());
-        xmlWriter->writeAttribute(STR_TRANSC_LINE_PROP_TEXT, btr.getText());
+        xmlWriter->writeAttribute(STR_TRANSC_LINE_PROP_SPEAKER, speaker);
+        xmlWriter->writeAttribute(STR_TRANSC_LINE_PROP_TIMESTAMP, syncTime);
+        xmlWriter->writeAttribute(STR_TRANSC_LINE_PROP_TEXT, sText);
         xmlWriter->writeEndElement();//end TranscLine tag
 
     }
@@ -348,7 +352,7 @@ bool XMLHandler::writeProjectExportXML(QString &xmlFileName,
 
     xmlWriter->writeStartElement(STR_TABLES_TAG);
 
-    QList<QTreeWidgetItem*> tableTreeNodes = subWindowsMap->keys();
+    const QList<QTreeWidgetItem*> tableTreeNodes = subWindowsMap->keys();
 
     for(int t=0; t < tableTreeNodes.count(); t++)
     {
@@ -356,22 +360,33 @@ bool XMLHandler::writeProjectExportXML(QString &xmlFileName,
 
         QTreeWidgetItem* treeItem = tableTreeNodes.at(t);
         QMdiSubWindow* subWindow = subWindowsMap->value(treeItem);
-        NERTableWidget* tableWidget = static_cast<NERTableWidget*>(subWindow->widget());
 
-        xmlWriter->writeAttribute(STR_TABLE_PROP_NAME, treeItem->text(0));
-        xmlWriter->writeAttribute(STR_TABLE_PROP_RESPONSIBLE, treeItem->text(1));
-        xmlWriter->writeAttribute(STR_TABLE_PROP_DESCRIPTION, treeItem->text(2));
+        if(treeItem==0 || subWindow==0){
+            continue;
+        }
+
+        const NERTableWidget* tableWidget = static_cast<NERTableWidget*>(subWindow->widget());
+
+
+        const QString name = treeItem->text(0);
+        const QString resp = treeItem->text(1);
+        const QString desc = treeItem->text(2);
+
+        xmlWriter->writeAttribute(STR_TABLE_PROP_NAME, name);
+        xmlWriter->writeAttribute(STR_TABLE_PROP_RESPONSIBLE, resp);
+        xmlWriter->writeAttribute(STR_TABLE_PROP_DESCRIPTION, desc);
 
         for(int row=0; row<tableWidget->rowCount(); row++)
         {
             xmlWriter->writeStartElement(STR_TABLELINE_TAG);
 
-            QString speakerS = tableWidget->item(row, SPEAKER_ID_COLUMN_INDEX)->text();
+            const QString speakerS = tableWidget->item(row, SPEAKER_ID_COLUMN_INDEX)->text();
             xmlWriter->writeAttribute(STR_TABLELINE_PROP_SID, speakerS);
-            QString timeS = tableWidget->item(row, TIMESTAMP_COLUMN_INDEX)->text();
+            const QString timeS = tableWidget->item(row, TIMESTAMP_COLUMN_INDEX)->text();
             xmlWriter->writeAttribute(STR_TABLELINE_PROP_TIMESTAMP, timeS);
             DragWidget* transWidget = static_cast<DragWidget*>(tableWidget->cellWidget(row, TRANSCRIPTION_COLUMN_INDEX));
-            xmlWriter->writeAttribute(STR_TABLELINE_PROP_TRANSCRIP, transWidget->getText());
+            const QString dwText = transWidget->getText();
+            xmlWriter->writeAttribute(STR_TABLELINE_PROP_TRANSCRIP, dwText);
 
 
             NERSubTableWidget* subTable = static_cast<NERSubTableWidget*>(tableWidget->cellWidget(row, SUBTITLES_COLUMN_INDEX));
@@ -392,11 +407,16 @@ bool XMLHandler::writeProjectExportXML(QString &xmlFileName,
 
                     xmlWriter->writeStartElement(STR_WORD_TAG);
                     DragLabel* label = dragWidget->getWordAt(z);
-                    xmlWriter->writeAttribute(STR_WORD_PROP_NAME, label->labelText());
-                    xmlWriter->writeAttribute(STR_WORD_PROP_ERROR, QString::number(label->getErrorType()));
-                    xmlWriter->writeAttribute(STR_WORD_PROP_COMMENT, label->getComment());
-                    xmlWriter->writeAttribute(STR_WORD_PROP_WEIGHT, QString::number(label->getErrorWeight()));
-                    xmlWriter->writeAttribute(STR_WORD_PROP_CLASS, QString::number(label->getErrorClass()));
+                    const QString labelText = label->labelText();
+                    xmlWriter->writeAttribute(STR_WORD_PROP_NAME, labelText);
+                    const QString errorT = QString::number(label->getErrorType());
+                    xmlWriter->writeAttribute(STR_WORD_PROP_ERROR, errorT);
+                    const QString comment = label->getComment();
+                    xmlWriter->writeAttribute(STR_WORD_PROP_COMMENT, comment);
+                    const QString errorW = QString::number(label->getErrorWeight());
+                    xmlWriter->writeAttribute(STR_WORD_PROP_WEIGHT, errorW);
+                    const QString errorC = QString::number(label->getErrorClass());
+                    xmlWriter->writeAttribute(STR_WORD_PROP_CLASS, errorC);
                     xmlWriter->writeEndElement();//STR_WORD_TAG
                 }
                 xmlWriter->writeEndElement();//STR_SUBTABLELINE_TAG
@@ -445,6 +465,7 @@ bool XMLHandler::readProjectExportXML(QString &xmlFileName,
 
     NERSubTableWidget* currentSubtable;
     QList<DragLabel*> subTableLineLabels;
+    DragWidget* currentDragWid;
     QString currentSubTabTimeStamp;
 
 
@@ -539,10 +560,6 @@ bool XMLHandler::readProjectExportXML(QString &xmlFileName,
                 continue;
             }
 
-             if(xmlReader->isEndElement() && xmlReader->name()==STR_TABLE_TAG){
-                 continue;
-             }
-
             if(xmlReader->name() == STR_TABLELINE_TAG){
                 ENGINE_DEBUG << "Table Line...";
 
@@ -553,25 +570,19 @@ bool XMLHandler::readProjectExportXML(QString &xmlFileName,
 
                 currentTable->insertNewTableEntry(speakerID, timeStamp, transcription);
 
+                currentSubtable = new NERSubTableWidget(_parent);
+                currentSubtable->setMediaWidget(mediaWid);
+
                 continue;
             }
 
             if(xmlReader->name() == STR_SUBTABLELINE_TAG){
-
-                if(currentSubtable!=0){
-                    //Add collected data from last loaded subtable...
-                    currentSubtable->insertNewTableEntry(currentSubTabTimeStamp,
-                                                         subTableLineLabels);
-
-                    currentTable->insertNewSubtableInLastEntry(currentSubtable);
-                    subTableLineLabels.clear();
-                }
-
-                currentSubtable = new NERSubTableWidget(_parent);
-                currentSubtable->setMediaWidget(mediaWid);
-
                 QXmlStreamAttributes attribs = xmlReader->attributes();
                 currentSubTabTimeStamp = attribs.value(STR_SUBTABLELINE_PROP_TIMESTAMP).toString();
+                QString s("");
+                currentTable->insertTimeStampsHashedMap(currentSubTabTimeStamp, s);
+
+                currentDragWid = new DragWidget(_parent, SUBTITLES_COLUMN_WIDTH-30, true);
 
                 continue;
             }
@@ -585,18 +596,38 @@ bool XMLHandler::readProjectExportXML(QString &xmlFileName,
                 QString classType = attribs.value(STR_WORD_PROP_CLASS).toString();
                 QString comment = attribs.value(STR_WORD_PROP_COMMENT).toString();
 
-                DragLabel* label = new DragLabel(name, _parent);
+                DragLabel* label = new DragLabel(name, currentDragWid);
                 label->setErrorWeight(weigth.toDouble());
                 label->setErrorClass(label->modificationTypeFromOrdinal(classType.toInt()));
                 label->setupLabelType(label->editionEnumFromOrdinal(errorType.toInt()));
                 label->setComment(comment);
 
                 subTableLineLabels.append(label);
+                continue;
+
+            }
+        }//Start Element
+
+
+        //Process end elements of interest.
+        if(xmlReader->isEndElement()){
+
+            if(xmlReader->name()==STR_SUBTABLELINE_TAG){
+                if(currentSubtable!=0 && currentTable!=0){
+                    //Add collected data from last loaded subtable...
+                    currentDragWid->initializeData(subTableLineLabels);
+
+                    currentSubtable->insertNewTableEntry(currentSubTabTimeStamp, currentDragWid);
+                    subTableLineLabels.clear();
+                }
+            }
+
+            if(xmlReader->name()==STR_TABLELINE_TAG){
+                currentTable->insertNewSubtableInLastEntry(currentSubtable);
             }
         }
 
     }//end while
-
 
     //Close file descriptor
     file->close();

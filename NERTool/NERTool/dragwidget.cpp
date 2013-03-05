@@ -58,33 +58,31 @@ DragWidget::DragWidget(QWidget *parent,
  * Dragwidget constructor used in NER XML imports
  *
  ******************************************************************************/
-DragWidget::DragWidget(QWidget *parent,
-                       QList<DragLabel*> labelList,
-                       int maxWidth,
-                       bool isModifiable) : QWidget(parent)
+DragWidget::DragWidget(QWidget *parent, int maxWidth, bool isModifiable)
+    : QWidget(parent)
 {
     createActions();
 
     m_isModifiable = isModifiable;
-    m_labelsPointerList = new QList<DragLabel *>();
-    int x = 5;
-    int y = 2;
     m_maxWidgetWidth = maxWidth;
-    m_numLines = 0;
+//    m_labelsPointerList = new QList<DragLabel *>();
+//    int x = 5;
+//    int y = 2;
+//    m_numLines = 0;
 
-    for(int i=0; i<labelList.count(); i++) {
-        DragLabel* wordLabel = labelList.at(i);
+//    for(int i=0; i<labelList.count(); i++) {
+//        DragLabel* wordLabel = labelList.at(i);
 
-        if (wordLabel != 0) {
-            m_labelsPointerList->append(wordLabel);
-            x += wordLabel->width()+1;
-            if (x >= m_maxWidgetWidth && i-1<labelList.count()) {
-                x = 5;
-                y += wordLabel->height() + 2;
-                m_numLines++;
-            }
-        }
-    }
+//        if (wordLabel != 0) {
+//            m_labelsPointerList->append(wordLabel);
+//            x += wordLabel->width()+1;
+//            if (x >= m_maxWidgetWidth && i-1<labelList.count()) {
+//                x = 5;
+//                y += wordLabel->height() + 2;
+//                m_numLines++;
+//            }
+//        }
+//    }
 
     //White background...
     QPalette newPalette = palette();
@@ -100,6 +98,32 @@ DragWidget::DragWidget(QWidget *parent,
 DragWidget::~DragWidget()
 {
 
+}
+
+void DragWidget::initializeData(QList<DragLabel*> labelList)
+{
+
+    m_labelsPointerList = new QList<DragLabel *>();
+    int x = 5;
+    int y = 2;
+    m_numLines = 0;
+
+    for(int i=0; i<labelList.count(); i++) {
+        DragLabel* wordLabel = labelList.at(i);
+        wordLabel->move(x, y);
+        wordLabel->show();
+        wordLabel->setAttribute(Qt::WA_DeleteOnClose);
+
+        if (wordLabel != 0) {
+            m_labelsPointerList->append(wordLabel);
+            x += wordLabel->width()+1;
+            if (x >= m_maxWidgetWidth && i-1<labelList.count()) {
+                x = 5;
+                y += wordLabel->height() + 2;
+                m_numLines++;
+            }
+        }
+    }
 }
 
 void DragWidget::createActions()
