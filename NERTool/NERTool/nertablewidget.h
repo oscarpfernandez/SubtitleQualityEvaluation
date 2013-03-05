@@ -7,6 +7,7 @@
 #include <qmdisubwindow.h>
 #include <QHBoxLayout>
 #include "nercommon.h"
+#include "draglabel.h"
 #include "mediamngwidget.h"
 
 
@@ -25,6 +26,7 @@ const int SUB_TIMESTAMP_COLUMN_INDEX = 0;
 const int SUB_SUBTITLES_COLUMN_INDEX = 1;
 
 class MediaMngWidget;
+class NERSubTableWidget;
 
 class NERTableWidget : public QTableWidget
 {
@@ -47,6 +49,7 @@ public:
     void loadXMLData(QList<BlockTRS> *trsBlocks);
     void loadSubtitlesXMLData(QList<BlockTRS> *transcription,
                               QList<BlockTRS> *trsBlocks);
+    void insertNewSubtableInLastEntry(NERSubTableWidget* subtable);
     void deleteTablesContents();
     QHash<qlonglong,QString> getHashedSubtableData();
     int computeNERStats_N();
@@ -79,6 +82,7 @@ public:
     ~NERSubTableWidget();
     void setMediaWidget(MediaMngWidget *mediaWidget);
     int insertNewTableEntry(QString &timeStamp, QString &text);
+    int insertNewTableEntry(QString &timeStamp, QList<DragLabel*> listItemLabels);
     BlockTRS getSubtableRowData(int row);
 
 private:

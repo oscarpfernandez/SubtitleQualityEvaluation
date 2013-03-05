@@ -155,6 +155,40 @@ ModificationType DragLabel::getErrorClass()
     return errorClass;
 }
 
+EditionTypeEnum DragLabel::editionEnumFromOrdinal(int value)
+{
+    switch(value)
+    {
+    case 0:
+        return NotDefinedYet;
+    case 1:
+        return CorrectEdition;
+    case 2:
+        return EditionError;
+    case 3:
+        return RecognitionError;
+    default:
+        break;
+    }
+}
+
+ModificationType DragLabel::modificationTypeFromOrdinal(int value)
+{
+    switch(value)
+    {
+    case 0:
+        return NotDefined;
+    case 1:
+        return Insertion;
+    case 2:
+        return Deletion;
+    case 3:
+        return Substitution;
+    default:
+        break;
+    }
+}
+
 
 
 

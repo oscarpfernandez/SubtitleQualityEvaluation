@@ -442,7 +442,10 @@ bool XMLHandler::readProjectExportXML(QString &xmlFileName,
 
     bool isLoadingATable = false;
     NERTableWidget* currentTable;
+
     NERSubTableWidget* currentSubtable;
+    QList<DragLabel*> subTableLineLabels;
+    QString currentSubTabTimeStamp;
 
 
     QXmlStreamReader *xmlReader = new QXmlStreamReader();
@@ -555,10 +558,41 @@ bool XMLHandler::readProjectExportXML(QString &xmlFileName,
 
             if(xmlReader->name() == STR_SUBTABLELINE_TAG){
 
+                if(currentSubtable!=0){
+                    //Add collected data from last loaded subtable...
+                    currentSubtable->insertNewTableEntry(currentSubTabTimeStamp,
+                                                         subTableLineLabels);
+
+                    currentTable->insertNewSubtableInLastEntry(currentSubtable);
+                    subTableLineLabels.clear();
+                }
+
+                currentSubtable = new NERSubTableWidget(_parent);
+                currentSubtable->setMediaWidget(mediaWid);
+
+                QXmlStreamAttributes attribs = xmlReader->attributes();
+                currentSubTabTimeStamp = attribs.value(STR_SUBTABLELINE_PROP_TIMESTAMP).toString();
+
                 continue;
             }
 
+            if(xmlReader->name()==STR_WORD_TAG){
+                //Collect all the words... when it's time addet to a subtable...
+                QXmlStreamAttributes attribs = xmlReader->attributes();
+                QString name = attribs.value(STR_WORD_PROP_NAME).toString();
+                QString errorType = attribs.value(STR_WORD_PROP_ERROR).toString();
+                QString weigth = attribs.value(STR_WORD_PROP_WEIGHT).toString();
+                QString classType = attribs.value(STR_WORD_PROP_CLASS).toString();
+                QString comment = attribs.value(STR_WORD_PROP_COMMENT).toString();
 
+                DragLabel* label = new DragLabel(name, _parent);
+                label->setErrorWeight(weigth.toDouble());
+                label->setErrorClass(label->modificationTypeFromOrdinal(classType.toInt()));
+                label->setupLabelType(label->editionEnumFromOrdinal(errorType.toInt()));
+                label->setComment(comment);
+
+                subTableLineLabels.append(label);
+            }
         }
 
     }//end while

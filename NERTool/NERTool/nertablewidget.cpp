@@ -198,6 +198,14 @@ int NERTableWidget::insertNewTableEntry(QString &speaker, QString &timeStamp, QS
 
 }
 
+void NERTableWidget::insertNewSubtableInLastEntry(NERSubTableWidget *subtable)
+{
+    if(rowCount()==0){
+        return;
+    }
+    setCellWidget(rowCount()-1, SUBTITLES_COLUMN_INDEX, subtable);
+}
+
 void NERTableWidget::deleteTablesContents(){
     clearContents();
     for(int i=0; i< rowCount(); i++){
@@ -387,6 +395,26 @@ int NERSubTableWidget::insertNewTableEntry(QString &timeStamp, QString &text)
 
     //Insert the chopped text block with the widget...
     DragWidget *wordBox = new DragWidget(this, text, SUBTITLES_COLUMN_WIDTH-30, true);
+    setRowHeight(line, wordBox->getBlockSize().height());
+    setColumnWidth(SUBTITLES_COLUMN_INDEX,SUBTITLES_COLUMN_WIDTH);
+    setCellWidget(line, SUB_SUBTITLES_COLUMN_INDEX, wordBox);
+
+    return line;
+}
+
+int NERSubTableWidget::insertNewTableEntry(QString &timeStamp, QList<DragLabel*> listItemLabels)
+{
+    int line = rowCount();
+    insertRow(line);
+
+    //Set timestamp
+    QTableWidgetItem *tsItem = new QTableWidgetItem();
+    tsItem->setText(timeStamp);
+    tsItem->setFlags(tsItem->flags() ^ Qt::ItemIsEditable);
+    setItem(line, SUB_TIMESTAMP_COLUMN_INDEX, tsItem);
+
+    //Insert the chopped text block with the widget...
+    DragWidget *wordBox = new DragWidget(this, listItemLabels, SUBTITLES_COLUMN_WIDTH-30, true);
     setRowHeight(line, wordBox->getBlockSize().height());
     setColumnWidth(SUBTITLES_COLUMN_INDEX,SUBTITLES_COLUMN_WIDTH);
     setCellWidget(line, SUB_SUBTITLES_COLUMN_INDEX, wordBox);

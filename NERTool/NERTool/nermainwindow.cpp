@@ -293,6 +293,11 @@ void NERMainWindow::saveProjectSlot()
                     tr("Save NER Project"),
                     QDir::currentPath(),
                     tr("NER Files (*.xner)"));
+
+        if(!xmlFileName.endsWith(".xner")){
+            xmlFileName.append(".xner");
+        }
+
         *projectSaveFilePath = xmlFileName;
     }
 
@@ -323,6 +328,10 @@ void NERMainWindow::saveAsProjectSlot()
         return; //Nothing to do.
     }
 
+    if(!xmlFileName.endsWith(".xner")){
+        xmlFileName.append(".xner");
+    }
+
     xmlHandler->writeProjectExportXML(xmlFileName,
                                       speakerList,
                                       transcriptionList,
@@ -348,6 +357,8 @@ void NERMainWindow::openProjectSlot()
 
     ENGINE_DEBUG << "open project";
 
+    *projectSaveFilePath = xmlFileName;
+
     xmlHandler->readProjectExportXML(xmlFileName,
                                      speakerList,
                                      transcriptionList,
@@ -370,7 +381,7 @@ void NERMainWindow::openProjectSlot()
 void NERMainWindow::closeProjectSlot()
 {
     QMessageBox box;
-    box.setInformativeText("Are you sure ?\nThis will save the current project state.");
+    box.setInformativeText("Are you sure ?\nAll modifications will be lost!");
     box.setText("Close project");
     box.setBaseSize(100,80);
     box.setIcon(QMessageBox::Question);

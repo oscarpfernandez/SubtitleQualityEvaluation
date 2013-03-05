@@ -38,6 +38,8 @@ public:
     void setErrorWeight(double w);
     void setErrorClass(ModificationType modType);
     ModificationType getErrorClass();
+    EditionTypeEnum editionEnumFromOrdinal(int value);
+    ModificationType modificationTypeFromOrdinal(int value);
 
 private:
     QString m_labelText;
