@@ -399,7 +399,7 @@ bool XMLHandler::writeProjectExportXML(QString &xmlFileName,
             for(int w=0; w < subTable->rowCount(); w++)
             {
                 xmlWriter->writeStartElement(STR_SUBTABLELINE_TAG);
-                xmlWriter->writeAttribute(STR_SUBTABLELINE_PROP_TIMESTAMP, subTable->itemAt(w,0)->text());
+                xmlWriter->writeAttribute(STR_SUBTABLELINE_PROP_TIMESTAMP, subTable->item(w,0)->text());
 
                 DragWidget* dragWidget = static_cast<DragWidget*>(subTable->cellWidget(w,1));
 
@@ -579,8 +579,6 @@ bool XMLHandler::readProjectExportXML(QString &xmlFileName,
             if(xmlReader->name() == STR_SUBTABLELINE_TAG){
                 QXmlStreamAttributes attribs = xmlReader->attributes();
                 currentSubTabTimeStamp = attribs.value(STR_SUBTABLELINE_PROP_TIMESTAMP).toString();
-                QString s("");
-                currentTable->insertTimeStampsHashedMap(currentSubTabTimeStamp, s);
 
                 currentDragWid = new DragWidget(_parent, SUBTITLES_COLUMN_WIDTH-30, true);
 
@@ -616,7 +614,8 @@ bool XMLHandler::readProjectExportXML(QString &xmlFileName,
                 if(currentSubtable!=0 && currentTable!=0){
                     //Add collected data from last loaded subtable...
                     currentDragWid->initializeData(subTableLineLabels);
-
+                    QString dText = currentDragWid->getText();
+                    currentTable->insertTimeStampsHashedMap(currentSubTabTimeStamp, dText);
                     currentSubtable->insertNewTableEntry(currentSubTabTimeStamp, currentDragWid);
                     subTableLineLabels.clear();
                 }

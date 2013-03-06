@@ -13,12 +13,14 @@ NERMainWindow::NERMainWindow(QWidget *parent) : QMainWindow(parent)
     projectSaveFilePath = new QString();
 	createGuiElements();
     createDockableWidgets();
-
+    showDockableWidgets(false);
 	createActions();
+    enableActions(false);
 	createMenus();
 	createToolBars();
 	createStatusBar();
 
+    isProjectloaded = false;
     isTranscriptionLoaded = false;
     isSubtitlesLoaded = false;
 
@@ -157,6 +159,18 @@ void NERMainWindow::createActions()
 
 }
 
+void NERMainWindow::enableActions(bool enable)
+{
+    saveProjectAction->setEnabled(enable);
+    loadSubtsXmlFile->setEnabled(enable);
+    loadTransXmlFile->setEnabled(enable);
+    saveAsProjectAction->setEnabled(enable);
+    closeProjectAction->setEnabled(enable);
+    viewPropertiesDockAction->setEnabled(enable);
+    viewVideoPlayerDockAction->setEnabled(enable);
+    showVideoAction->setEnabled(enable);
+}
+
 
 /*******************************************************************************
  * Manages application top menu handlers
@@ -241,7 +255,6 @@ void NERMainWindow::createDockableWidgets()
     projectPropertiesDockWidget->setToolTip(tr("Project Details"));
     projectPropertiesDockWidget->setFixedWidth(docksWidth);
     projectPropertiesDockWidget->setWindowIcon(QIcon(":/resources/pics/docs.png"));
-
     addDockWidget(Qt::RightDockWidgetArea, projectPropertiesDockWidget);
 
     audioWaveFormDockWidget = new QDockWidget(tr("Media Player"));
@@ -249,7 +262,6 @@ void NERMainWindow::createDockableWidgets()
     audioWaveFormDockWidget->setWidget(mediaMngWidget);
     audioWaveFormDockWidget->setAllowedAreas(Qt::BottomDockWidgetArea | Qt::TopDockWidgetArea);
     audioWaveFormDockWidget->setToolTip(tr("Media player for audio and video content..."));
-
     addDockWidget(Qt::BottomDockWidgetArea, audioWaveFormDockWidget);
 
 
@@ -266,9 +278,23 @@ void NERMainWindow::createDockableWidgets()
     QPalette bvidpalette = videoPlayerDockWidget->palette();
     bvidpalette.setColor(QPalette::Window, Qt::black);
     videoPlayerDockWidget->setPalette(bvidpalette);
-
     addDockWidget(Qt::RightDockWidgetArea, videoPlayerDockWidget);
 
+
+}
+
+void NERMainWindow::showDockableWidgets(bool enable)
+{
+    if(enable){
+        projectPropertiesDockWidget->show();
+        audioWaveFormDockWidget->show();
+        videoPlayerDockWidget->show();
+    }
+    else{
+        projectPropertiesDockWidget->hide();
+        audioWaveFormDockWidget->hide();
+        videoPlayerDockWidget->hide();
+    }
 }
 
 
@@ -277,9 +303,10 @@ void NERMainWindow::createDockableWidgets()
  ******************************************************************************/
 void NERMainWindow::newProjectSlot()
 {
-    saveProjectSlot();
+    enableActions(true);
     closeProjectSlot();
-
+    isProjectloaded = true;
+    showDockableWidgets(true);
 }
 
 /*******************************************************************************
@@ -373,6 +400,12 @@ void NERMainWindow::openProjectSlot()
         addTableInMdiArea(table, table->getTableName());
     }
 
+    loadSubtsXmlFile->setEnabled(true);
+
+    enableActions(true);
+    showDockableWidgets(true);
+    isProjectloaded=true;
+
 }
 
 /*******************************************************************************
@@ -380,10 +413,14 @@ void NERMainWindow::openProjectSlot()
  ******************************************************************************/
 void NERMainWindow::closeProjectSlot()
 {
+    if(!isProjectloaded){
+        return;
+    }
+
     QMessageBox box;
-    box.setInformativeText("Are you sure ?\nAll modifications will be lost!");
-    box.setText("Close project");
-    box.setBaseSize(100,80);
+    box.setInformativeText("Are you sure ?\nAll unsaved modifications will be lost!");
+    box.setText("Close project                                           ");
+    box.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     box.setIcon(QMessageBox::Question);
     box.setStandardButtons(QMessageBox::No | QMessageBox::Yes);
     int result = box.exec();
@@ -404,11 +441,20 @@ void NERMainWindow::closeProjectSlot()
     }
     nerTablesList->clear();
 
+    //Stop media playing...
+    mediaMngWidget->stopMediaFileSlot();
+
     //Remove tree child nodes...
     propertiesTreeWidget->clearAllTreeData();
+    propertiesTreeWidget->getTreeSubWindowsMap()->clear();
 
     isTranscriptionLoaded = false;
     isSubtitlesLoaded = false;
+    isProjectloaded = false;
+    enableActions(false);
+    showDockableWidgets(false);
+
+
 
 }
 

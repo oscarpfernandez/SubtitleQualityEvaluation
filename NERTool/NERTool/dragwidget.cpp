@@ -366,18 +366,21 @@ bool DragWidget::eventFilter(QObject *obj, QEvent *event)
                 uncheckAllErrorActions();
                 m_noErrorAction->setChecked(true);
                 child->setupLabelType(CorrectEdition);
+                propagateProperties(child);
             }
             else if(selectedItem->text() == EDITION_ERROR_STR)
             {
                 uncheckAllErrorActions();
                 m_editionErrorAction->setChecked(true);
                 child->setupLabelType(EditionError);
+                propagateProperties(child);
             }
             else if(selectedItem->text() == RECOG_ERROR_STR)
             {
                 uncheckAllErrorActions();
                 m_recognitionErrorAction->setChecked(true);
                 child->setupLabelType(RecognitionError);
+                propagateProperties(child);
             }
             else if(selectedItem->text() == EDITION_COMMENT_STR){
                 //Modify comment used in the report...
@@ -389,16 +392,19 @@ bool DragWidget::eventFilter(QObject *obj, QEvent *event)
                 uncheckAllWeightActions();
                 m_Error025Action->setChecked(true);
                 child->setErrorWeight(ERROR_WEIGHT_025);
+                propagateProperties(child);
             }
             else if(selectedItem->text() == ERROR_WEIGHT_05_STR){
                 uncheckAllWeightActions();
                 m_Error050Action->setChecked(true);
                 child->setErrorWeight(ERROR_WEIGHT_050);
+                propagateProperties(child);
             }
             else if(selectedItem->text() == ERROR_WEIGHT_1_STR){
                 uncheckAllWeightActions();
                 m_Error100Action->setChecked(true);
                 child->setErrorWeight(ERROR_WEIGHT_1);
+                propagateProperties(child);
             }
             else if(selectedItem->text() == INSERTION_STR){
                 uncheckAllTypeActions();
@@ -510,5 +516,45 @@ double DragWidget::getRecognitionErrors()
     }
 
     return globalErrorValue;
+}
+
+/*******************************************************************************
+ * Propagates properties across neighbour labels with the same EditionType error.
+ * like the weight and comment.
+ ******************************************************************************/
+void DragWidget::propagateProperties(DragLabel* label)
+{
+    if(label==0){
+        return;
+    }
+    int index = m_labelsPointerList->indexOf(label);
+
+    //propagate to the right...
+    if(index+1 < m_labelsPointerList->count()){
+        for(int i=index+1; i<m_labelsPointerList->count(); i++){
+            DragLabel* neighLab = m_labelsPointerList->at(i);
+            if(neighLab->getErrorType() != label->getErrorType()){
+                //neighbour is different
+                break;
+            }
+            neighLab->setupLabelType(label->getErrorType());
+            neighLab->setErrorWeight(label->getErrorWeight());
+            QString s(label->getComment());
+        }
+    }
+
+    //propagate to left
+    if(index-1 > 0){
+        for(int i=index-1; i>=0; i--){
+            DragLabel* neighLab = m_labelsPointerList->at(i);
+            if(neighLab->getErrorType() != label->getErrorType()){
+                //neighbour is different
+                break;
+            }
+            neighLab->setupLabelType(label->getErrorType());
+            neighLab->setErrorWeight(label->getErrorWeight());
+            QString s(label->getComment());
+        }
+    }
 }
 

@@ -193,6 +193,8 @@ void MediaMngWidget::loadMediaFileSlot()
 
     fileNameLoaded->setText(QString(fileName));
 
+    videoWindow->hide();
+    videoWindow->show();
     source = new Phonon::MediaSource(fileName);
     metaInformationResolver->setCurrentSource(*source);
     mediaObject->stop();
@@ -374,6 +376,7 @@ void MediaMngWidget::checkForSubtitleAndUpdateVideo(qlonglong timeInMilis)
         }
 
         QString ret = splitSubtitleLine(sub);
+        ENGINE_DEBUG << "Subtitle -- " << ret;
         videoSubLabel->setText(ret);
 
         subsTimeoutTimer->start(SUBTITLE_CLEAN_TIMEOUT);
@@ -456,6 +459,7 @@ void MediaMngWidget::setActivatedSubWindow(QMdiSubWindow *subwindow)
 
     NERTableWidget *table = static_cast<NERTableWidget*>(subwindow->widget());
     if(table!=0){
+        ENGINE_DEBUG << "Hashed values extracted";
         loadedMdiWinName->setText(subwindow->windowTitle());
         subtitles = table->getHashedSubtableData();
     }

@@ -36,13 +36,17 @@ public:
 private:
     void createGuiElements();
     void createActions();
+    void enableActions(bool enable);
     void createMenus();
     void createToolBars();
     void createStatusBar();
     void createDockableWidgets();
+    void showDockableWidgets(bool enable);
 	void initializeMDIWindows();
     void enableActionsTransLoaded();
     void addTableInMdiArea(NERTableWidget* table, QString title);
+
+    bool isProjectloaded;
 
 	QMdiArea *mainMdiArea;
 	QMdiSubWindow *subWindowDiffTable;

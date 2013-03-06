@@ -71,6 +71,7 @@ private:
     void uncheckAllWeightActions();
     void uncheckAllTypeActions();
     void setActionsEnabledForLabel(DragLabel* label);
+    void propagateProperties(DragLabel* label);
 
 };
 
