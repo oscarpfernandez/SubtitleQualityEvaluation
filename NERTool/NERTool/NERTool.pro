@@ -23,7 +23,8 @@ SOURCES += main.cpp\
     draglabelcomment.cpp \
     mediamngwidget.cpp \
     qcustomplot.cpp \
-    nergraphwidget.cpp
+    nergraphwidget.cpp \
+    diff_match_patch.cpp
 
 HEADERS  += nermainwindow.h \
     dragwidget.h \
@@ -39,7 +40,8 @@ HEADERS  += nermainwindow.h \
     draglabelcomment.h \
     mediamngwidget.h \
     qcustomplot.h \
-    nergraphwidget.h
+    nergraphwidget.h \
+    diff_match_patch.h
 
 RC_FILE = app.rc
 

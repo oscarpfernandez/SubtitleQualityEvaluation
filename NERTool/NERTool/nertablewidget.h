@@ -10,6 +10,7 @@
 #include "draglabel.h"
 #include "dragwidget.h"
 #include "mediamngwidget.h"
+#include "diff_match_patch.h"
 
 
 const int SPEAKER_ID_COLUMN_WIDTH = 100;
@@ -59,6 +60,11 @@ public:
     double computeNERStats_EditionErrors();
     double computeNERStats_RecognitionErrors();
     double computeNERStats_Delay();
+    QString getTableTransRowText(int row);
+    QList<DragLabel*> getTableTransRowLabels(int row);
+    void makeTableRowDiff(int row);
+    QList<Diff> reprocessdistanceOutput(QList<Diff> &diffList);
+    void applyEditionProperties(int row, QList<Diff> &diffList);
 
 private:
     MediaMngWidget *mediaMngWidget;
@@ -86,6 +92,8 @@ public:
     int insertNewTableEntry(QString &timeStamp, QString &text);
     int insertNewTableEntry(QString &timeStamp, DragWidget *wordBox);
     BlockTRS getSubtableRowData(int row);
+    QString getJointSubTableText();
+    QList<DragLabel*> getSubTableLabels();
 
 private:
     MediaMngWidget *mediaMngWidget;

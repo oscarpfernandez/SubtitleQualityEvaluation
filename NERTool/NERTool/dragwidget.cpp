@@ -140,6 +140,8 @@ void DragWidget::createActions()
     m_Error050Action->setCheckable(true);
     m_Error100Action = new QAction(ERROR_WEIGHT_1_STR, this);
     m_Error100Action->setCheckable(true);
+    m_Error0Action = new QAction(ERROR_WEIGHT_0_STR, this);
+    m_Error0Action->setCheckable(true);
 
     m_insertionAction = new QAction(INSERTION_STR, this);
     m_insertionAction->setCheckable(true);
@@ -162,6 +164,7 @@ void DragWidget::uncheckAllWeightActions()
     m_Error025Action->setChecked(false);
     m_Error050Action->setChecked(false);
     m_Error100Action->setChecked(false);
+    m_Error0Action->setChecked(false);
 }
 
 void DragWidget::uncheckAllTypeActions()
@@ -306,6 +309,7 @@ void DragWidget::setActionsEnabledForLabel(DragLabel* label)
     m_Error025Action->setChecked(errorWeight==ERROR_WEIGHT_025);
     m_Error050Action->setChecked(errorWeight==ERROR_WEIGHT_050);
     m_Error100Action->setChecked(errorWeight==ERROR_WEIGHT_1);
+    m_Error0Action->setChecked(errorWeight==ERROR_WEIGHT_0);
 
     ModificationType modType = label->getErrorClass();
     m_insertionAction->setChecked(modType==Insertion);
@@ -347,6 +351,7 @@ bool DragWidget::eventFilter(QObject *obj, QEvent *event)
         myMenu.addAction(EDITION_COMMENT_STR);
         myMenu.addSeparator();
         QMenu subMenu("Weight Error");
+        subMenu.addAction(m_Error0Action);
         subMenu.addAction(m_Error025Action);
         subMenu.addAction(m_Error050Action);
         subMenu.addAction(m_Error100Action);
@@ -404,6 +409,12 @@ bool DragWidget::eventFilter(QObject *obj, QEvent *event)
                 uncheckAllWeightActions();
                 m_Error100Action->setChecked(true);
                 child->setErrorWeight(ERROR_WEIGHT_1);
+                propagateProperties(child);
+            }
+            else if(selectedItem->text() == ERROR_WEIGHT_0_STR){
+                uncheckAllWeightActions();
+                m_Error0Action->setChecked(true);
+                child->setErrorWeight(ERROR_WEIGHT_0);
                 propagateProperties(child);
             }
             else if(selectedItem->text() == INSERTION_STR){
@@ -556,5 +567,10 @@ void DragWidget::propagateProperties(DragLabel* label)
             QString s(label->getComment());
         }
     }
+}
+
+QList<DragLabel*> DragWidget::getLabels()
+{
+    return *m_labelsPointerList;
 }
 

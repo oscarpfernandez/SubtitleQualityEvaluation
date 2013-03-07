@@ -372,6 +372,172 @@ qlonglong NERTableWidget::getTimeInMilis(QString time)
     return timeMilis;
 }
 
+QString NERTableWidget::getTableTransRowText(int row)
+{
+    QString ret;
+
+    if(row<0 || row >= rowCount()){
+        return ret;
+    }
+
+    DragWidget* dw = static_cast<DragWidget*>(cellWidget(row,TRANSCRIPTION_COLUMN_INDEX));
+    if(dw!=0){
+        ret.append(dw->getText());
+    }
+
+    return ret;
+}
+
+QList<DragLabel*> NERTableWidget::getTableTransRowLabels(int row)
+{
+    QList<DragLabel*> labels;
+
+    if(row<0 || row >= rowCount()){
+        return labels;
+    }
+
+    DragWidget* dw = static_cast<DragWidget*>(this->cellWidget(row,TRANSCRIPTION_COLUMN_INDEX));
+    if(dw!=0){
+        QList<DragLabel*> lab = dw->getLabels();
+        labels.append(lab);
+    }
+
+    return labels;
+}
+
+void NERTableWidget::makeTableRowDiff(int row)
+{
+    if(row<0 || row >= rowCount()){
+        return;
+    }
+
+    ENGINE_DEBUG << "-- Diff of line = " << row;
+
+
+    QString textTrans = getTableTransRowText(row);
+    ENGINE_DEBUG << "Raw text = " << textTrans;
+
+    NERSubTableWidget* subTable = static_cast<NERSubTableWidget*>(cellWidget(row,SUBTITLES_COLUMN_INDEX));
+    QString subText;
+    if(subTable!=0){
+        subText = subTable->getJointSubTableText();
+    }
+    ENGINE_DEBUG << "Subtable text = " << subText;
+
+    QList<Diff> newList;
+
+    if(textTrans.count()!=0 && subText.count()!=0){
+        diff_match_patch diff;
+        QList<Diff> list = diff.diff_main(textTrans, subText, true);
+
+        ENGINE_DEBUG << "Preprocessing...";
+        for(int i=0;i<list.count(); i++){
+            Diff d = list.at(i);
+            ENGINE_DEBUG << i << d.toString();
+        }
+
+        newList = reprocessdistanceOutput(list);
+
+        for(int i=0;i<newList.count(); i++){
+            Diff d = newList.at(i);
+            ENGINE_DEBUG << i << d.toString();
+        }
+    }
+
+    applyEditionProperties(row, newList);
+}
+
+QList<Diff> NERTableWidget::reprocessdistanceOutput(QList<Diff> &diffList)
+{
+    QList<Diff> preRet;
+
+    Operation lastOp;
+    QString lastString;
+    bool isNewString = true;
+
+    for(int i=0; i<diffList.count(); i++){
+        Diff d = diffList.at(i);
+        if(d.operation == DELETE){
+            //ignore.
+            continue;
+            //preRet.append(d);
+        }
+        else{
+            preRet.append(d);
+        }
+//        else if(d.text == " "){
+//            //delimiter
+//            Diff val(lastOp, lastString);
+//            preRet.append(val);
+
+//            isNewString = true;
+//            lastString.clear();
+//        }
+//        else if(d.operation == INSERT){
+//            if(isNewString){
+//                lastOp = INSERT;
+//            }
+//            lastString.append(d.text);
+//        }
+//        else if(d.operation == EQUAL){
+//            if(isNewString){
+//                lastOp = EQUAL;
+//            }
+//            lastString.append(d.text);
+//        }
+    }
+
+    QList<Diff> ret;
+
+    for(int k=0; k<preRet.count();k++){
+        Diff d = preRet.at(k);
+
+        QStringList texList = d.text.trimmed().split(" ");
+        if(texList.count()>1){
+            for(int i=0; i<texList.count(); i++){
+                Diff s(d.operation, texList.at(i));
+                ret.append(s);
+            }
+        }
+        else{
+            ret.append(d);
+        }
+    }
+
+    return ret;
+}
+
+void NERTableWidget::applyEditionProperties(int row, QList<Diff> &diffList)
+{
+    if(diffList.count()==0 || row < 0 || row >= rowCount()){
+        return;
+    }
+
+    NERSubTableWidget* subTable = static_cast<NERSubTableWidget*>(cellWidget(row, SUBTITLES_COLUMN_INDEX));
+
+    if(subTable!=0){
+        QList<DragLabel*> dragLabs = subTable->getSubTableLabels();
+
+        ENGINE_DEBUG << "Labels size = " << dragLabs.count();
+        ENGINE_DEBUG << "Diff list = " << diffList.count();
+
+        for(int i=0; i<dragLabs.count(); i++){
+            DragLabel* label = dragLabs.at(i);
+            Diff df = diffList.at(i);
+
+            if(df.operation == EQUAL){
+                label->setupLabelType(CorrectEdition);
+                label->setErrorWeight(ERROR_WEIGHT_0);
+            }
+            else{
+                label->setupLabelType(EditionError);
+                label->setErrorWeight(ERROR_WEIGHT_025);
+            }
+        }
+    }
+
+}
+
 /*******************************************************************************
  *******************************************************************************
  * NERSubTableWidget class defines the structure if each subtable entry that
@@ -505,6 +671,36 @@ QString NERTableWidget::getDescription()
 {
     return description;
 }
+
+QString NERSubTableWidget::getJointSubTableText()
+{
+    QString ret;
+
+    for(int i=0; i<rowCount(); i++){
+        DragWidget* dw = static_cast<DragWidget*>(this->cellWidget(i,1));
+        if(dw!=0){
+            ret.append(dw->getText());
+        }
+    }
+
+    return ret;
+}
+
+QList<DragLabel*> NERSubTableWidget::getSubTableLabels()
+{
+    QList<DragLabel*> labels;
+
+    for(int i=0; i<rowCount(); i++){
+        DragWidget* dw = static_cast<DragWidget*>(this->cellWidget(i,1));
+        if(dw!=0){
+            QList<DragLabel*> lab = dw->getLabels();
+            labels.append(lab);
+        }
+    }
+
+    return labels;
+}
+
 
 NERSubTableWidget::~NERSubTableWidget()
 {

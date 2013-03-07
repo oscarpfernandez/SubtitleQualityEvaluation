@@ -617,6 +617,11 @@ void NERMainWindow::loadSubtitlesFileSlot(){
 
         addTableInMdiArea(table, title);
 
+        ENGINE_DEBUG << "Table Row Count = " << table->rowCount();
+        for(int i=0; i < table->rowCount(); i++){
+            table->makeTableRowDiff(i);
+        }
+
         isSubtitlesLoaded = true;
 
 
