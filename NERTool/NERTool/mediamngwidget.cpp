@@ -364,9 +364,13 @@ void MediaMngWidget::hasVideochanged(bool hasVideoChange)
  ******************************************************************************/
 void MediaMngWidget::checkForSubtitleAndUpdateVideo(qlonglong timeInMilis)
 {
+    if(!isVideoAvailable){
+        return;
+    }
+
     qlonglong time = timeInMilis - (timeInMilis % SUBTITLE_CHECK_INTERVAL);
 
-    ENGINE_DEBUG << "Subs Chech -- " << time;
+    //ENGINE_DEBUG << "Subs Chech -- " << time;
 
     QString sub = subtitles.value(time, QString(""));
 

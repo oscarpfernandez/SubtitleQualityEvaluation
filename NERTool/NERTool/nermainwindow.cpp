@@ -28,6 +28,17 @@ NERMainWindow::NERMainWindow(QWidget *parent) : QMainWindow(parent)
 
 	initializeMDIWindows();
 
+    QString s1 = "First line of text";
+    QString s2 = "Second time line of the text";
+
+    diff_match_patch diff;
+    QList<Diff> list = diff.diff_main(s1,s2, false);
+
+    for(int i=0;i<list.count(); i++){
+        Diff d = list.at(i);
+        ENGINE_DEBUG << i << d.toString();
+    }
+
 }
 
 NERMainWindow::~NERMainWindow()

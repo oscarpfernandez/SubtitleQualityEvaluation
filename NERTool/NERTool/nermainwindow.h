@@ -17,6 +17,7 @@
 #include "propertiestreewidget.h"
 #include "nercommon.h"
 #include "mediamngwidget.h"
+#include "diff_match_patch.h"
 
 
 //QT_BEGIN_NAMESPACE
