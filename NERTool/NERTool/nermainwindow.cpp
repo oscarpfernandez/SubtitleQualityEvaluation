@@ -159,6 +159,11 @@ void NERMainWindow::createActions()
     tileSubWindowsAction->setEnabled(true);
     connect(tileSubWindowsAction, SIGNAL(triggered()), this, SLOT(tileWindowsSlot()));
 
+    computerNerStats = new QAction(tr("Calculate NER"), this);
+    computerNerStats->setStatusTip(tr("Computer the NER statistics..."));
+    computerNerStats->setEnabled(false);
+    connect(computerNerStats, SIGNAL(triggered()), this, SLOT(computerNERStatistics()));
+
     viewPropertiesDockAction = projectPropertiesDockWidget->toggleViewAction();
     viewPropertiesDockAction->setIcon(QIcon(":/resources/pics/docs.png"));
 
@@ -180,6 +185,7 @@ void NERMainWindow::enableActions(bool enable)
     viewPropertiesDockAction->setEnabled(enable);
     viewVideoPlayerDockAction->setEnabled(enable);
     showVideoAction->setEnabled(enable);
+    computerNerStats->setEnabled(enable);
 }
 
 
@@ -202,6 +208,8 @@ void NERMainWindow::createMenus()
     toolsMenu = menuBar()->addMenu(tr("&Tools"));
     toolsMenu->addAction(loadTransXmlFile);
     toolsMenu->addAction(loadSubtsXmlFile);
+    toolsMenu->addSeparator();
+    toolsMenu->addAction(computerNerStats);
 
 	windowMenu = menuBar()->addMenu(tr("&Window"));
     windowMenu->addAction(cascadeSubWindowsAction);
@@ -659,6 +667,16 @@ void NERMainWindow::cascadeWindowsSlot()
 void NERMainWindow::tileWindowsSlot()
 {
     mainMdiArea->tileSubWindows();
+}
+
+void NERMainWindow::computerNERStatistics()
+{
+    QMdiSubWindow* subWindow = mainMdiArea->activeSubWindow();
+    NERTableWidget* table = static_cast<NERTableWidget*>(subWindow->widget());
+
+    double ner = table->computeNERStats_NerValue();
+
+    ENGINE_DEBUG << "NER Value = " << ner;
 }
 
 

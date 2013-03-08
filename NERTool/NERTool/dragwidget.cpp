@@ -479,7 +479,6 @@ QSize DragWidget::getBlockSize()
 double DragWidget::getEditionErrors()
 {
     double globalErrorValue = 0;
-    double partialErrorValue = 0;
 
     EditionTypeEnum lastErrorType = NotDefinedYet;
 
@@ -491,8 +490,7 @@ double DragWidget::getEditionErrors()
         if(errorType == EditionError){
 
             if(errorType != lastErrorType){
-                globalErrorValue += partialErrorValue;
-                partialErrorValue = labelW->getErrorWeight();
+                globalErrorValue += labelW->getErrorWeight();
             }
         }
 

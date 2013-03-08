@@ -77,6 +77,7 @@ private:
     QAction *viewPropertiesDockAction;
     QAction *viewVideoPlayerDockAction;
     QAction *showVideoAction;
+    QAction *computerNerStats;
 
 
     QLabel  *statusBarLeftLabel;
@@ -113,6 +114,7 @@ private slots:
     void loadSubtitlesFileSlot();
     void cascadeWindowsSlot();
     void tileWindowsSlot();
+    void computerNERStatistics();
 
 
 

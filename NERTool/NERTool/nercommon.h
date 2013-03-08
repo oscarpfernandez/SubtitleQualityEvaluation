@@ -64,8 +64,7 @@ private:
     double  nerValue;
     double  editionErrors;
     double  recognitionErrors;
-    double  delayAcumulated;
-    int     delayCount;
+    double  avgDelay;
 public:
     int getNCount(){return NCount;}
     NERStatsData& setNCount(int n){
@@ -83,13 +82,9 @@ public:
     NERStatsData& setRecognitionErrors(double re){
         recognitionErrors=re;
         return *this;}
-    double getDelayAcumulated(){return delayAcumulated;}
-    NERStatsData& setDelayAcumulated(double delay){
-        delayAcumulated=delay;
-        return *this;}
-    int getDelayCount(){return delayCount;}
-    NERStatsData& setDelayCount(int dc){
-        delayCount=dc;
+    double getAvgDelay(){return avgDelay;}
+    NERStatsData& setAvgDelay(double delay){
+        avgDelay=delay;
         return *this;}
 };
 #endif

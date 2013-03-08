@@ -60,6 +60,7 @@ public:
     double computeNERStats_EditionErrors();
     double computeNERStats_RecognitionErrors();
     double computeNERStats_Delay();
+    NERStatsData getNERStatsValues();
     QString getTableTransRowText(int row);
     QList<DragLabel*> getTableTransRowLabels(int row);
     void makeTableRowDiff(int row);
@@ -76,6 +77,8 @@ private:
     QString tableName;
     QString responsible;
     QString description;
+
+    NERStatsData nerStatsDataValues;
 
 public slots:
     void columnTableResized(int column, int oldWidth, int newWidth);
@@ -94,6 +97,8 @@ public:
     BlockTRS getSubtableRowData(int row);
     QString getJointSubTableText();
     QList<DragLabel*> getSubTableLabels();
+    double getEditionErrors();
+    double getRecognitionErrors();
 
 private:
     MediaMngWidget *mediaMngWidget;

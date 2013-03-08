@@ -247,7 +247,7 @@ int NERTableWidget::computeNERStats_N()
     int numWords=0;
     int numPontuation=0;
 
-    if(subtileDataHashedByTimestamp==0){
+    if(subtileDataHashedByTimestamp!=0){
 
         QList<QString> subtitles = subtileDataHashedByTimestamp->values();
 
@@ -263,7 +263,15 @@ int NERTableWidget::computeNERStats_N()
         }
     }
 
-    return numWords + numPontuation;
+    //speaker transitions...
+    int transitions = 0;
+    for(int i=0; i<rowCount()-1;i++){
+        if(item(i,0)->text() != item(i+1,0)->text() ){
+            transitions++;
+        }
+    }
+
+    return numWords + numPontuation + transitions;
 }
 
 double NERTableWidget::computeNERStats_NerValue(){
@@ -274,13 +282,27 @@ double NERTableWidget::computeNERStats_NerValue(){
 
     double ner = 1.0f - (double)(re+er)/N;
 
+    double delay = computeNERStats_Delay() / 1000; //in seconds...
+
+    //saveValues
+    nerStatsDataValues.setNCount(N)
+            .setEditionErrors(er)
+            .setRecognitionErrors(re)
+            .setAvgDelay(delay)
+            .setNerValue(ner);
 
     ENGINE_DEBUG << "NER -> " << "\n\tN = " << N
                  << "\n\tEdition Errors = "<< er
                  << "\n\tRecog Errors = " << re
-                 << "\n\tNER = " << ner;
+                 << "\n\tNER = " << ner
+                 << "\n\tAvg Delay = " << delay;
 
     return ner;
+}
+
+NERStatsData NERTableWidget::getNERStatsValues()
+{
+    return nerStatsDataValues;
 }
 
 double NERTableWidget::computeNERStats_EditionErrors()
@@ -290,18 +312,10 @@ double NERTableWidget::computeNERStats_EditionErrors()
 
         NERSubTableWidget *subTable = static_cast<NERSubTableWidget*>(cellWidget(i, SUBTITLES_COLUMN_INDEX));
         if(subTable != 0){
-            for(int k=0; k<subTable->rowCount(); k++){
-
-                DragWidget *dw = static_cast<DragWidget*>(subTable->cellWidget(k, SUB_SUBTITLES_COLUMN_INDEX));
-                if(dw != 0){
-                    editionError += dw->getEditionErrors();
-                }
-            }
+            editionError += subTable->getEditionErrors();
         }
-
-        return editionError;
     }
-
+    return editionError;
 }
 
 double NERTableWidget::computeNERStats_RecognitionErrors(){
@@ -310,17 +324,10 @@ double NERTableWidget::computeNERStats_RecognitionErrors(){
 
         NERSubTableWidget *subTable = static_cast<NERSubTableWidget*>(cellWidget(i, SUBTITLES_COLUMN_INDEX));
         if(subTable != 0){
-            for(int k=0; k<subTable->rowCount(); k++){
-
-                DragWidget *dw = static_cast<DragWidget*>(subTable->cellWidget(k, SUB_SUBTITLES_COLUMN_INDEX));
-                if(dw != 0){
-                    editionError += dw->getRecognitionErrors();
-                }
-            }
+            editionError += subTable->getRecognitionErrors();
         }
-
-        return editionError;
     }
+    return editionError;
 }
 
 double NERTableWidget::computeNERStats_Delay(){
@@ -339,7 +346,7 @@ double NERTableWidget::computeNERStats_Delay(){
             {
                 BlockTRS subBtr = subtitleTableData->at(k);
 
-                if(btr.getText().compare(subBtr.getText())){
+                if(btr.getText().compare(subBtr.getText())==0){
                     qlonglong subTime = getTimeInMilis(subBtr.getSyncTime());
                     qlonglong transTime = getTimeInMilis(btr.getSyncTime());
 
@@ -701,6 +708,29 @@ QList<DragLabel*> NERSubTableWidget::getSubTableLabels()
     return labels;
 }
 
+double NERSubTableWidget::getEditionErrors()
+{
+    double edError = 0;
+
+    for(int i=0; i<rowCount(); i++){
+        DragWidget* dw = static_cast<DragWidget*>(cellWidget(i, SUB_SUBTITLES_COLUMN_INDEX));
+        if(dw!=0){
+            edError += dw->getEditionErrors();
+        }
+    }
+    return edError;
+}
+
+double NERSubTableWidget::getRecognitionErrors()
+{
+    double rError = 0;
+
+    for(int i=0; i<rowCount(); i++){
+        DragWidget* dw = static_cast<DragWidget*>(cellWidget(i, SUB_SUBTITLES_COLUMN_INDEX));
+        rError += dw->getEditionErrors();
+    }
+    return rError;
+}
 
 NERSubTableWidget::~NERSubTableWidget()
 {
