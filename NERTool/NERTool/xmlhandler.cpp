@@ -676,7 +676,188 @@ bool XMLHandler::readNERTable(QXmlStreamReader *xmlReader,
 
 }
 
+/*******************************************************************************
+ * Write project report html.
+ *
+ ******************************************************************************/
+bool XMLHandler::writeProjectReport(QString &xmlFileName,
+                        QList<NERTableWidget*> *nerTablesList,
+                        PropertiesTreeWidget *treeWidget)
+{
 
+//    QFile *file = new QFile(xmlFileName);
+
+//    if (!file->open(QIODevice::WriteOnly | QIODevice::Text)) {
+//        return false;
+//    }
+
+
+
+//    QXmlStreamWriter *xmlWriter = new QXmlStreamWriter();
+//    xmlWriter->setDevice(file);
+
+//    xmlWriter->setAutoFormatting(true);
+//    xmlWriter->writeStartDocument();
+
+//    xmlWriter->writeComment("************************************************");
+//    xmlWriter->writeComment("* NER Export File XML");
+//    xmlWriter->writeComment("************************************************");
+
+//    xmlWriter->writeStartElement(STR_NER_PROJECT);
+//    xmlWriter->writeAttribute(STR_NER_PROJECT_PROP_SAVEDATE,
+//                              QDateTime::currentDateTime().toString());
+
+//    xmlWriter->writeComment("NER Original Transcription and Speakers Block");
+
+//    xmlWriter->writeStartElement(STR_TRANSC_TAG);
+
+//    QString name, responsible, description;
+//    if(transcTreeNode!=NULL){
+//        name = transcTreeNode->text(0);
+//        responsible = transcTreeNode->text(1);
+//        description = transcTreeNode->text(2);
+//    }
+
+//    xmlWriter->writeAttribute(STR_TRANSC_PROP_NAME, name);
+//    xmlWriter->writeAttribute(STR_TRANSC_RESPONSIBLE, responsible);
+//    xmlWriter->writeAttribute(STR_TRANSC_DESCRIPTION, description);
+
+//    xmlWriter->writeStartElement(STR_SPEAKERS_TAG);
+
+//    for(int i=0; i<speakerList->count(); i++)
+//    {
+//        Speaker sp = speakerList->at(i);
+
+//        xmlWriter->writeStartElement(STR_SPEAKER_TAG);
+//        xmlWriter->writeAttribute(STR_SPEAKER_PROP_ID, sp.getId());
+//        xmlWriter->writeAttribute(STR_SPEAKER_PROP_NAME, sp.getName());
+//        xmlWriter->writeAttribute(STR_SPEAKER_PROP_TYPE, sp.getType());
+//        xmlWriter->writeEndElement();
+//    }
+//    xmlWriter->writeEndElement();//end Speaker tag
+
+//    for(int i=0; i<transcription->count(); i++)
+//    {
+//        BlockTRS btr = transcription->at(i);
+//        QString speaker, syncTime, sText;
+//        speaker = btr.getSpeaker();
+//        syncTime = btr.getSyncTime();
+//        sText = btr.getText();
+
+//        xmlWriter->writeStartElement(STR_TRANSC_LINE_TAG);
+//        xmlWriter->writeAttribute(STR_TRANSC_LINE_PROP_SPEAKER, speaker);
+//        xmlWriter->writeAttribute(STR_TRANSC_LINE_PROP_TIMESTAMP, syncTime);
+//        xmlWriter->writeAttribute(STR_TRANSC_LINE_PROP_TEXT, sText);
+//        xmlWriter->writeEndElement();//end TranscLine tag
+
+//    }
+//    xmlWriter->writeEndElement();//end Transcription block...
+
+
+//    /*********************************************
+//     * Export all the included subtitle tables...
+//     *********************************************/
+//    xmlWriter->writeComment("*******************************");
+//    xmlWriter->writeComment("* NER Comparison Tables Block *");
+//    xmlWriter->writeComment("*******************************");
+
+//    xmlWriter->writeStartElement(STR_TABLES_TAG);
+
+//    const QList<QTreeWidgetItem*> tableTreeNodes = subWindowsMap->keys();
+
+//    for(int t=0; t < tableTreeNodes.count(); t++)
+//    {
+//        xmlWriter->writeStartElement(STR_TABLE_TAG);
+
+//        QTreeWidgetItem* treeItem = tableTreeNodes.at(t);
+//        QMdiSubWindow* subWindow = subWindowsMap->value(treeItem);
+
+//        if(treeItem==0 || subWindow==0){
+//            continue;
+//        }
+
+//        const NERTableWidget* tableWidget = static_cast<NERTableWidget*>(subWindow->widget());
+
+
+//        const QString name = treeItem->text(0);
+//        const QString resp = treeItem->text(1);
+//        const QString desc = treeItem->text(2);
+
+//        xmlWriter->writeAttribute(STR_TABLE_PROP_NAME, name);
+//        xmlWriter->writeAttribute(STR_TABLE_PROP_RESPONSIBLE, resp);
+//        xmlWriter->writeAttribute(STR_TABLE_PROP_DESCRIPTION, desc);
+
+//        for(int row=0; row<tableWidget->rowCount(); row++)
+//        {
+//            xmlWriter->writeStartElement(STR_TABLELINE_TAG);
+
+//            const QString speakerS = tableWidget->item(row, SPEAKER_ID_COLUMN_INDEX)->text();
+//            xmlWriter->writeAttribute(STR_TABLELINE_PROP_SID, speakerS);
+//            const QString timeS = tableWidget->item(row, TIMESTAMP_COLUMN_INDEX)->text();
+//            xmlWriter->writeAttribute(STR_TABLELINE_PROP_TIMESTAMP, timeS);
+//            DragWidget* transWidget = static_cast<DragWidget*>(tableWidget->cellWidget(row, TRANSCRIPTION_COLUMN_INDEX));
+//            const QString dwText = transWidget->getText();
+//            xmlWriter->writeAttribute(STR_TABLELINE_PROP_TRANSCRIP, dwText);
+
+
+//            NERSubTableWidget* subTable = static_cast<NERSubTableWidget*>(tableWidget->cellWidget(row, SUBTITLES_COLUMN_INDEX));
+//            if(subTable == 0){
+//                //no subtable was stored...
+//                //proceed to next line...
+//                continue;
+//            }
+
+//            for(int w=0; w < subTable->rowCount(); w++)
+//            {
+//                xmlWriter->writeStartElement(STR_SUBTABLELINE_TAG);
+//                xmlWriter->writeAttribute(STR_SUBTABLELINE_PROP_TIMESTAMP, subTable->item(w,0)->text());
+
+//                DragWidget* dragWidget = static_cast<DragWidget*>(subTable->cellWidget(w,1));
+
+//                for(int z=0; z<dragWidget->countWords(); z++){
+
+//                    xmlWriter->writeStartElement(STR_WORD_TAG);
+//                    DragLabel* label = dragWidget->getWordAt(z);
+//                    const QString labelText = label->labelText();
+//                    xmlWriter->writeAttribute(STR_WORD_PROP_NAME, labelText);
+//                    const QString errorT = QString::number(label->getErrorType());
+//                    xmlWriter->writeAttribute(STR_WORD_PROP_ERROR, errorT);
+//                    const QString comment = label->getComment();
+//                    xmlWriter->writeAttribute(STR_WORD_PROP_COMMENT, comment);
+//                    const QString errorW = QString::number(label->getErrorWeight());
+//                    xmlWriter->writeAttribute(STR_WORD_PROP_WEIGHT, errorW);
+//                    const QString errorC = QString::number(label->getErrorClass());
+//                    xmlWriter->writeAttribute(STR_WORD_PROP_CLASS, errorC);
+//                    xmlWriter->writeEndElement();//STR_WORD_TAG
+//                }
+//                xmlWriter->writeEndElement();//STR_SUBTABLELINE_TAG
+//            }
+//            xmlWriter->writeEndElement();//STR_TABLELINE_TAG
+//        }
+//        xmlWriter->writeEndElement();//STR_TABLE_TAG
+//    }
+//    xmlWriter->writeEndElement();//STR_TABLES_TAG
+
+//    xmlWriter->writeEndElement();//end NerProject
+//    xmlWriter->writeEndDocument();
+
+//    //Close file descriptor
+//    file->close();
+//    if (file->error()) {
+//        QMessageBox warningMessage;
+//        warningMessage.setText("There was an error closing the export file.");
+//        warningMessage.setWindowTitle("Warning");
+//        warningMessage.setIcon(QMessageBox::Warning);
+//        warningMessage.exec();
+//        return false;
+//    }
+
+//    delete xmlWriter;//free mem
+//    return true;
+
+
+
+}
 
 
 

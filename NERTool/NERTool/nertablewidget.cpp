@@ -29,7 +29,7 @@ NERTableWidget::NERTableWidget(QWidget *parent) : QTableWidget(parent)
     setRowCount(0);
 
     horizontalHeader()->setResizeMode(QHeaderView::Interactive);
-    verticalHeader()->setResizeMode(QHeaderView::ResizeToContents);
+    verticalHeader()->setResizeMode(QHeaderView::Interactive);
 
     QStringList headers;
     headers << "Speaker ID"
@@ -100,44 +100,61 @@ void NERTableWidget::loadSubtitlesXMLData(QList<BlockTRS> *transcription, QList<
         ENGINE_DEBUG << "Text " << text;
 
         insertTimeStampsHashedMap(ts, text);
-//        QStringList ls = btr.getSyncTime().split(".");
-//        QString secs = ls[0];
-//        QString mils = ls[1];
-//        qlonglong timeMilis = (secs.toLongLong())*1000
-//                + mils.toLongLong()
-//                - mils.toLongLong() % SUBTITLE_CHECK_INTERVAL;
-//        QString t = btr.getText();
-//        subtileDataHashedByTimestamp->insert(timeMilis, t);
 
     }
 
     //Merge the translation with the subtitles...
     int i=0;
     int line=0;
-    for(int j=0; j<transcription->count()-1; j++){
+    for(int j=0; j<transcription->count(); j++){
         NERSubTableWidget *subTable = new NERSubTableWidget(this);
         subTable->setMediaWidget(mediaMngWidget);
         subTable->setSelectionMode(QAbstractItemView::SingleSelection);
         subTable->setSelectionBehavior(QAbstractItemView::SelectRows);
-        subTable->setDragEnabled(true);
-        subTable->viewport()->setAcceptDrops(true);
-        subTable->setDropIndicatorShown(true);
-        subTable->setDragDropMode(QAbstractItemView::DragDrop);
 
-        for( ; i< subsTrsBlocks->count(); i++){
-            BlockTRS subBtr = subsTrsBlocks->at(i);
-            BlockTRS transBtr = transcription->at(j);
-            BlockTRS transBtrNext = transcription->at(j+1);
+        if(j < transcription->count()-1){
+            for( ; i< subsTrsBlocks->count(); i++){
 
-            ENGINE_DEBUG << "TRS";
-            ENGINE_DEBUG << subBtr.toString();
-            ENGINE_DEBUG << transBtr.toString();
-            ENGINE_DEBUG << transBtrNext.toString();
+                BlockTRS subBtr = subsTrsBlocks->at(i);
+                BlockTRS transBtr = transcription->at(j);
+                BlockTRS transBtrNext = transcription->at(j+1);
+
+                ENGINE_DEBUG << "TRS";
+                ENGINE_DEBUG << subBtr.toString();
+                ENGINE_DEBUG << transBtr.toString();
+                ENGINE_DEBUG << transBtrNext.toString();
 
 
-            if(transBtr.getSyncTime().toDouble() <= subBtr.getSyncTime().toDouble()
-                    && subBtr.getSyncTime().toDouble() < transBtrNext.getSyncTime().toDouble() )
-            {
+                if(transBtr.getSyncTime().toDouble() <= subBtr.getSyncTime().toDouble()
+                        && subBtr.getSyncTime().toDouble() < transBtrNext.getSyncTime().toDouble() )
+                {
+                    QString sync = subBtr.getSyncTime();
+                    QString text = subBtr.getText();
+
+                    ENGINE_DEBUG << "New entry -> Time = " << sync << "-- Text = " << text;
+
+                    subTable->insertNewTableEntry(sync, text);
+                }
+
+                if(subBtr.getSyncTime().toDouble() >= transBtrNext.getSyncTime().toDouble()){
+                    //skip to the new transcription line...
+                    qDebug("Set cell widget...");
+                    if(subTable->height() > rowHeight(line)){
+                        //setRowHeight(line, subTable->height());
+                        verticalHeader()->resizeSection(line, 200/*subTable->height()*/);
+                    }
+
+                    setCellWidget(line++, SUBTITLES_COLUMN_INDEX, subTable);
+
+                    break;
+                }
+            }
+        }
+        //Insert the rest of the subtitles in the last transcription line
+        else if(j == transcription->count()-1){
+
+            for( ; i< subsTrsBlocks->count(); i++){
+                BlockTRS subBtr = subsTrsBlocks->at(i);
                 QString sync = subBtr.getSyncTime();
                 QString text = subBtr.getText();
 
@@ -146,19 +163,7 @@ void NERTableWidget::loadSubtitlesXMLData(QList<BlockTRS> *transcription, QList<
                 subTable->insertNewTableEntry(sync, text);
             }
 
-            if(subBtr.getSyncTime().toDouble() > transBtrNext.getSyncTime().toDouble()){
-                //skip to the new transcription line...
-                qDebug("Set cell widget...");
-                if(subTable->height() > rowHeight(line)){
-                    //setRowHeight(line, subTable->height());
-                    verticalHeader()->resizeSection(line, 200/*subTable->height()*/);
-
-                }
-
-                setCellWidget(line++, SUBTITLES_COLUMN_INDEX, subTable);
-
-                break;
-            }
+            setCellWidget(line++, SUBTITLES_COLUMN_INDEX, subTable);
         }
     }
 }
@@ -379,6 +384,113 @@ qlonglong NERTableWidget::getTimeInMilis(QString time)
     return timeMilis;
 }
 
+QList<Diff> NERTableWidget::computeDifferences(QString &transText, QString &subsText)
+{
+    QString dwDiffString = Utils::executeWordDiff(transText, subsText);
+    dwDiffString = dwDiffString.simplified();
+
+    QList<Diff> ret;
+
+    if(dwDiffString.count()==0)
+    {
+        return ret;
+    }
+
+    QStringList modifications = dwDiffString.replace("[","@@@[")
+            .replace("]","]@@@")
+            .replace("{", "@@@{")
+            .replace("}", "}@@@")
+            .split("@@@");
+
+    //split a set of strings with common operations...
+    for(int i=0; i<modifications.count(); i++)
+    {
+        QString modif = modifications.at(i);
+
+        modif.trimmed();
+
+        if(modif.isEmpty()){
+            continue;
+        }
+
+        if(modif.startsWith("{+")){// Insertion
+            modif = modif.right(modif.count()-2);//remove "{+"
+            modif.chop(2);//remove "+}"
+            ret.append( buildDiffList(INSERT, modif) );
+        }
+        else if(modif.startsWith("[-")){// Insertion
+            modif = modif.right(modif.count()-2);//remove "[-"
+            modif.chop(2);//remove "-]"
+            ret.append( buildDiffList(DELETE, modif) );
+        }
+        else{ //Equal
+            ret.append( buildDiffList(EQUAL, modif) );
+        }
+    }
+}
+
+QList<Diff> NERTableWidget::buildDiffList(Operation op, QString &text)
+{
+    QList<Diff> ret;
+
+    if(text.isEmpty()){
+        return ret;
+    }
+
+    QStringList wordsList = text.split(" ");
+
+    for(int i=0; i < wordsList.count(); i++){
+        QString s = wordsList.at(i);
+        if(!s.isEmpty()){
+            ret.append(Diff(op, s));
+        }
+    }
+
+    return ret;
+}
+
+QList<Diff> NERTableWidget::removeDeletions(QList<Diff> &list)
+{
+    QList<Diff> ret;
+
+    for(int i=0; i<list.count(); i++){
+        Diff d = list.at(i);
+        if(d.operation == DELETE){
+            continue;
+        }
+        ret.append(d);
+    }
+
+    return ret;
+}
+
+
+QString NERTableWidget::getAllTranslationText()
+{
+    QString transText;
+    for(int i=0; i < rowCount()-1; i++){
+        transText.append(getTableTransRowText(i));
+        transText.append(" ");
+    }
+    transText.append( getTableTransRowText( rowCount()-1 ) );
+
+    return transText;
+}
+
+QString NERTableWidget::getAllSubtableText()
+{
+    QString subText;
+
+    for(int i=0; i < rowCount(); i++){
+        NERSubTableWidget* subTable = static_cast<NERSubTableWidget*>(cellWidget(i,SUBTITLES_COLUMN_INDEX));
+        if(subTable!=0){
+            subText.append(subTable->getJointSubTableText());
+            subText.append(" ");
+        }
+    }
+    return subText;
+}
+
 QString NERTableWidget::getTableTransRowText(int row)
 {
     QString ret;
@@ -412,134 +524,40 @@ QList<DragLabel*> NERTableWidget::getTableTransRowLabels(int row)
     return labels;
 }
 
-void NERTableWidget::makeTableRowDiff(int row)
+QList<DragLabel*> NERTableWidget::getAllSubtableLabels()
 {
-    if(row<0 || row >= rowCount()){
-        return;
-    }
+    QList<DragLabel*> ret;
 
-    ENGINE_DEBUG << "-- Diff of line = " << row;
-
-
-    QString textTrans = getTableTransRowText(row);
-    ENGINE_DEBUG << "Raw text = " << textTrans;
-
-    NERSubTableWidget* subTable = static_cast<NERSubTableWidget*>(cellWidget(row,SUBTITLES_COLUMN_INDEX));
-    QString subText;
-    if(subTable!=0){
-        subText = subTable->getJointSubTableText();
-    }
-    ENGINE_DEBUG << "Subtable text = " << subText;
-
-    QList<Diff> newList;
-
-    if(textTrans.count()!=0 && subText.count()!=0){
-        diff_match_patch diff;
-        QList<Diff> list = diff.diff_main(textTrans, subText, true);
-
-        ENGINE_DEBUG << "Preprocessing...";
-        for(int i=0;i<list.count(); i++){
-            Diff d = list.at(i);
-            ENGINE_DEBUG << i << d.toString();
-        }
-
-        newList = reprocessdistanceOutput(list);
-
-        for(int i=0;i<newList.count(); i++){
-            Diff d = newList.at(i);
-            ENGINE_DEBUG << i << d.toString();
-        }
-    }
-
-    applyEditionProperties(row, newList);
-}
-
-QList<Diff> NERTableWidget::reprocessdistanceOutput(QList<Diff> &diffList)
-{
-    QList<Diff> preRet;
-
-    Operation lastOp;
-    QString lastString;
-    bool isNewString = true;
-
-    for(int i=0; i<diffList.count(); i++){
-        Diff d = diffList.at(i);
-        if(d.operation == DELETE){
-            //ignore.
-            continue;
-            //preRet.append(d);
-        }
-        else{
-            preRet.append(d);
-        }
-//        else if(d.text == " "){
-//            //delimiter
-//            Diff val(lastOp, lastString);
-//            preRet.append(val);
-
-//            isNewString = true;
-//            lastString.clear();
-//        }
-//        else if(d.operation == INSERT){
-//            if(isNewString){
-//                lastOp = INSERT;
-//            }
-//            lastString.append(d.text);
-//        }
-//        else if(d.operation == EQUAL){
-//            if(isNewString){
-//                lastOp = EQUAL;
-//            }
-//            lastString.append(d.text);
-//        }
-    }
-
-    QList<Diff> ret;
-
-    for(int k=0; k<preRet.count();k++){
-        Diff d = preRet.at(k);
-
-        QStringList texList = d.text.trimmed().split(" ");
-        if(texList.count()>1){
-            for(int i=0; i<texList.count(); i++){
-                Diff s(d.operation, texList.at(i));
-                ret.append(s);
-            }
-        }
-        else{
-            ret.append(d);
+    for(int i=0; i<rowCount(); i++){
+        NERSubTableWidget* subTable = static_cast<NERSubTableWidget*>(cellWidget(i, SUBTITLES_COLUMN_INDEX));
+        if(subTable!=0){
+           ret.append(subTable->getSubTableLabels());
         }
     }
 
     return ret;
 }
 
-void NERTableWidget::applyEditionProperties(int row, QList<Diff> &diffList)
+
+void NERTableWidget::applyEditionProperties(QList<Diff> &diffList)
 {
-    if(diffList.count()==0 || row < 0 || row >= rowCount()){
+    if(diffList.count()==0 ){
         return;
     }
 
-    NERSubTableWidget* subTable = static_cast<NERSubTableWidget*>(cellWidget(row, SUBTITLES_COLUMN_INDEX));
+    QList<DragLabel*> allLabels = getAllSubtableLabels();
 
-    if(subTable!=0){
-        QList<DragLabel*> dragLabs = subTable->getSubTableLabels();
+    for(int i=0; i<allLabels.count(); i++){
+        DragLabel* label = allLabels.at(i);
+        Diff df = diffList.at(i);
 
-        ENGINE_DEBUG << "Labels size = " << dragLabs.count();
-        ENGINE_DEBUG << "Diff list = " << diffList.count();
-
-        for(int i=0; i<dragLabs.count(); i++){
-            DragLabel* label = dragLabs.at(i);
-            Diff df = diffList.at(i);
-
-            if(df.operation == EQUAL){
-                label->setupLabelType(CorrectEdition);
-                label->setErrorWeight(ERROR_WEIGHT_0);
-            }
-            else{
-                label->setupLabelType(EditionError);
-                label->setErrorWeight(ERROR_WEIGHT_025);
-            }
+        if(df.operation == EQUAL){
+            label->setupLabelType(CorrectEdition);
+            label->setErrorWeight(ERROR_WEIGHT_0);
+        }
+        else{
+            label->setupLabelType(EditionError);
+            label->setErrorWeight(ERROR_WEIGHT_025);
         }
     }
 

@@ -91,6 +91,9 @@ public:
                               QList<NERTableWidget*> *nerTablesList,
                               MediaMngWidget *mediaWid,
                               PropertiesTreeWidget *treeWidget);
+    bool writeProjectReport(QString &xmlFileName,
+                            QList<NERTableWidget*> *nerTablesList,
+                            PropertiesTreeWidget *treeWidget);
 
 
 private:

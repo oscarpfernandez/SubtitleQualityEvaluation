@@ -2,6 +2,7 @@
 #define NERCOMMON_H
 
 #include <qstring.h>
+#include <QDebug>
 
 const QString NER_APP_NAME = "NER Tool";
 const int SUBTITLE_CHECK_INTERVAL = 50;

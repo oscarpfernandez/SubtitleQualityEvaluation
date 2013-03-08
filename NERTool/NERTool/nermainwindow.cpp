@@ -625,10 +625,19 @@ void NERMainWindow::loadSubtitlesFileSlot(){
 
         addTableInMdiArea(table, title);
 
-        ENGINE_DEBUG << "Table Row Count = " << table->rowCount();
-        for(int i=0; i < table->rowCount(); i++){
-            table->makeTableRowDiff(i);
-        }
+        QString transText = table->getAllTranslationText();
+        QString subsText = table->getAllSubtableText();
+
+        QList<Diff> diffList = table->computeDifferences(transText, subsText);
+        QList<Diff> noDelsList = table->removeDeletions(diffList);
+
+        QList<DragLabel*> dLabsList = table->getAllSubtableLabels();
+
+        ENGINE_DEBUG << "Labels Size" << dLabsList.count();
+        ENGINE_DEBUG << "Diffs Size = " << noDelsList.count();
+
+        table->applyEditionProperties(noDelsList);
+
 
         isSubtitlesLoaded = true;
 

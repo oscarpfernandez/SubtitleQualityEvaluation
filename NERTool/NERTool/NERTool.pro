@@ -17,14 +17,13 @@ SOURCES += main.cpp\
     about.cpp \
     xmlhandler.cpp \
     propertiestreewidget.cpp \
-    waveform.cpp \
-    utils.cpp \
     nertablewidget.cpp \
     draglabelcomment.cpp \
     mediamngwidget.cpp \
     qcustomplot.cpp \
     nergraphwidget.cpp \
-    diff_match_patch.cpp
+    diff_match_patch.cpp \
+    utils.cpp
 
 HEADERS  += nermainwindow.h \
     dragwidget.h \
@@ -33,15 +32,14 @@ HEADERS  += nermainwindow.h \
     about.h \
     xmlhandler.h \
     propertiestreewidget.h \
-    waveform.h \
-    utils.h \
     nertablewidget.h \
     nercommon.h \
     draglabelcomment.h \
     mediamngwidget.h \
     qcustomplot.h \
     nergraphwidget.h \
-    diff_match_patch.h
+    diff_match_patch.h \
+    utils.h
 
 RC_FILE = app.rc
 

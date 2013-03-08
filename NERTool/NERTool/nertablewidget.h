@@ -10,6 +10,7 @@
 #include "draglabel.h"
 #include "dragwidget.h"
 #include "mediamngwidget.h"
+#include "utils.h"
 #include "diff_match_patch.h"
 
 
@@ -55,6 +56,7 @@ public:
     void insertNewSubtableInLastEntry(NERSubTableWidget* subtable);
     void deleteTablesContents();
     QHash<qlonglong,QString> getHashedSubtableData();
+
     int computeNERStats_N();
     double computeNERStats_NerValue();
     double computeNERStats_EditionErrors();
@@ -63,9 +65,16 @@ public:
     NERStatsData getNERStatsValues();
     QString getTableTransRowText(int row);
     QList<DragLabel*> getTableTransRowLabels(int row);
-    void makeTableRowDiff(int row);
-    QList<Diff> reprocessdistanceOutput(QList<Diff> &diffList);
-    void applyEditionProperties(int row, QList<Diff> &diffList);
+
+    QString getAllTranslationText();
+    QString getAllSubtableText();
+    QList<DragLabel*> getAllSubtableLabels();
+
+    QList<Diff> computeDifferences(QString &transText, QString &subsText);
+    QList<Diff> buildDiffList(Operation op, QString &text);
+    QList<Diff> removeDeletions(QList<Diff> &list);
+
+    void applyEditionProperties(QList<Diff> &diffList);
 
 private:
     MediaMngWidget *mediaMngWidget;
