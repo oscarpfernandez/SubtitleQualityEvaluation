@@ -63,6 +63,15 @@ void NERTableWidget::setMediaWidget(MediaMngWidget *mediaWid){
     mediaMngWidget = mediaWid;
 }
 
+/*******************************************************************************
+ * Sets table main data.. used in project import
+ ******************************************************************************/
+void NERTableWidget::setMainDataList(QList<BlockTRS> *transList, QList<BlockTRS> subsList)
+{
+    transcriptionList = transList;
+    subtitleTableData = new QList<BlockTRS>(subsList);;
+}
+
 void NERTableWidget::loadXMLData(QList<BlockTRS> *trsBlocks){
     if(trsBlocks==0 || trsBlocks->count()==0){
         //Nothing to do...
@@ -134,20 +143,29 @@ void NERTableWidget::loadSubtitlesXMLData(QList<BlockTRS> *transcription, QList<
                     ENGINE_DEBUG << "New entry -> Time = " << sync << "-- Text = " << text;
 
                     subTable->insertNewTableEntry(sync, text);
+
+                    if(i == subsTrsBlocks->count()-1){
+                        //set the last subtile (for the case of #Trans >>> #subitles)
+                        setCellWidget(line++, SUBTITLES_COLUMN_INDEX, subTable);
+
+                        //Everything is loaded... os exit!
+                        return;
+                    }
                 }
 
-                if(subBtr.getSyncTime().toDouble() >= transBtrNext.getSyncTime().toDouble()){
+                else if(subBtr.getSyncTime().toDouble() >= transBtrNext.getSyncTime().toDouble()){
                     //skip to the new transcription line...
-                    qDebug("Set cell widget...");
+
                     if(subTable->height() > rowHeight(line)){
                         //setRowHeight(line, subTable->height());
                         verticalHeader()->resizeSection(line, 200/*subTable->height()*/);
                     }
 
                     setCellWidget(line++, SUBTITLES_COLUMN_INDEX, subTable);
-
                     break;
                 }
+
+                ////setCellWidget(line++, SUBTITLES_COLUMN_INDEX, subTable);
             }
         }
         //Insert the rest of the subtitles in the last transcription line
@@ -279,7 +297,8 @@ int NERTableWidget::computeNERStats_N()
     return numWords + numPontuation + transitions;
 }
 
-double NERTableWidget::computeNERStats_NerValue(){
+NERStatsData NERTableWidget::computeNERStats_NerValue(){
+
 
     int N = computeNERStats_N();
     double re = computeNERStats_RecognitionErrors();
@@ -302,7 +321,7 @@ double NERTableWidget::computeNERStats_NerValue(){
                  << "\n\tNER = " << ner
                  << "\n\tAvg Delay = " << delay;
 
-    return ner;
+    return nerStatsDataValues;
 }
 
 NERStatsData NERTableWidget::getNERStatsValues()
@@ -324,15 +343,19 @@ double NERTableWidget::computeNERStats_EditionErrors()
 }
 
 double NERTableWidget::computeNERStats_RecognitionErrors(){
-    double editionError = 0;
+    double recogError = 0;
     for(int i=0; i<rowCount(); i++){
 
         NERSubTableWidget *subTable = static_cast<NERSubTableWidget*>(cellWidget(i, SUBTITLES_COLUMN_INDEX));
         if(subTable != 0){
-            editionError += subTable->getRecognitionErrors();
+            recogError += subTable->getRecognitionErrors();
         }
     }
-    return editionError;
+    return recogError;
+}
+
+double NERTableWidget::computeNERStats_CorrectEditions(){
+
 }
 
 double NERTableWidget::computeNERStats_Delay(){
@@ -344,8 +367,9 @@ double NERTableWidget::computeNERStats_Delay(){
     for(int i=0; i<transcriptionList->count(); ++i)
     {
         BlockTRS btr = transcriptionList->at(i);
+        QString transLine = btr.getText();
 
-        if(!btr.getText().contains(" ") && !btr.getText().isEmpty()){
+        if(!transLine.contains(" ") && !transLine.isEmpty()){
             //single words.
             for(int k = latestSubtitleIndex; k<subtitleTableData->count(); ++k)
             {
@@ -364,6 +388,11 @@ double NERTableWidget::computeNERStats_Delay(){
                 }
             }
         }
+    }
+
+    if(numDelayCounts == 0){
+        //No matching at all
+        return 0;
     }
 
     return acumulatedDelay/ (double)numDelayCounts;
@@ -464,6 +493,21 @@ QList<Diff> NERTableWidget::removeDeletions(QList<Diff> &list)
     return ret;
 }
 
+QList<Diff> NERTableWidget::removeInsertions(QList<Diff> &list)
+{
+    QList<Diff> ret;
+
+    for(int i=0; i<list.count(); i++){
+        Diff d = list.at(i);
+        if(d.operation == INSERT){
+            continue;
+        }
+        ret.append(d);
+    }
+
+    return ret;
+}
+
 
 QString NERTableWidget::getAllTranslationText()
 {
@@ -538,6 +582,20 @@ QList<DragLabel*> NERTableWidget::getAllSubtableLabels()
     return ret;
 }
 
+QList<DragLabel*> NERTableWidget::getAllTranscriptionLabels()
+{
+    QList<DragLabel*> ret;
+
+    for(int i=0; i<rowCount(); i++){
+        DragWidget* dw = static_cast<DragWidget*>(cellWidget(i, TRANSCRIPTION_COLUMN_INDEX));
+        if(dw!=0){
+           ret.append(dw->getLabels());
+        }
+    }
+
+    return ret;
+}
+
 
 void NERTableWidget::applyEditionProperties(QList<Diff> &diffList)
 {
@@ -560,7 +618,27 @@ void NERTableWidget::applyEditionProperties(QList<Diff> &diffList)
             label->setErrorWeight(ERROR_WEIGHT_025);
         }
     }
+}
 
+void NERTableWidget::applyEditionPropertiesToTranscription(QList<Diff> &diffList)
+{
+    if(diffList.count()==0 ){
+        return;
+    }
+
+    QList<DragLabel*> allLabels = getAllTranscriptionLabels();
+
+    for(int i=0; i<allLabels.count(); i++){
+        DragLabel* label = allLabels.at(i);
+        Diff df = diffList.at(i);
+
+        if(df.operation == EQUAL){
+            label->setupLabelType(CorrectEdition);
+        }
+        else{ //deletion
+            label->markAsDeleted();
+        }
+    }
 }
 
 /*******************************************************************************
@@ -745,7 +823,7 @@ double NERSubTableWidget::getRecognitionErrors()
 
     for(int i=0; i<rowCount(); i++){
         DragWidget* dw = static_cast<DragWidget*>(cellWidget(i, SUB_SUBTITLES_COLUMN_INDEX));
-        rError += dw->getEditionErrors();
+        rError += dw->getRecognitionErrors();
     }
     return rError;
 }

@@ -11,7 +11,7 @@
 #include "dragwidget.h"
 #include "mediamngwidget.h"
 #include "utils.h"
-#include "diff_match_patch.h"
+#include "diff.h"
 
 
 const int SPEAKER_ID_COLUMN_WIDTH = 100;
@@ -30,6 +30,7 @@ const int SUB_SUBTITLES_COLUMN_INDEX = 1;
 
 class MediaMngWidget;
 class NERSubTableWidget;
+class Diff;
 
 class NERTableWidget : public QTableWidget
 {
@@ -41,6 +42,7 @@ public:
     ~NERTableWidget();
     void setMediaWidget(MediaMngWidget *mediaWidget);
     void setTableName(QString &tableName);
+    void setMainDataList(QList<BlockTRS> *transList, QList<BlockTRS> subsList);
     QString getTableName();
     void setResponsible(QString &responsible);
     QString getResponsible();
@@ -58,23 +60,27 @@ public:
     QHash<qlonglong,QString> getHashedSubtableData();
 
     int computeNERStats_N();
-    double computeNERStats_NerValue();
+    NERStatsData computeNERStats_NerValue();
     double computeNERStats_EditionErrors();
     double computeNERStats_RecognitionErrors();
+    double computeNERStats_CorrectEditions();
     double computeNERStats_Delay();
     NERStatsData getNERStatsValues();
     QString getTableTransRowText(int row);
     QList<DragLabel*> getTableTransRowLabels(int row);
 
     QString getAllTranslationText();
+    QList<DragLabel*> getAllTranscriptionLabels();
     QString getAllSubtableText();
     QList<DragLabel*> getAllSubtableLabels();
 
     QList<Diff> computeDifferences(QString &transText, QString &subsText);
     QList<Diff> buildDiffList(Operation op, QString &text);
     QList<Diff> removeDeletions(QList<Diff> &list);
+    QList<Diff> removeInsertions(QList<Diff> &list);
 
     void applyEditionProperties(QList<Diff> &diffList);
+    void applyEditionPropertiesToTranscription(QList<Diff> &diffList);
 
 private:
     MediaMngWidget *mediaMngWidget;

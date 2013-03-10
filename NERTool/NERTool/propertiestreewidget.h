@@ -12,6 +12,8 @@
 #include <QEvent>
 #include <QMouseEvent>
 #include <QMap>
+#include <QProgressBar>
+#include <QPushButton>
 #include "nertablewidget.h"
 
 class PropertiesTreeWidget : public QWidget
@@ -33,12 +35,30 @@ public:
     QTreeWidgetItem* getTranslationNode();
 
 private:
-    QSplitter   *splitter;
     QVBoxLayout *mainVLayout;
     QGroupBox   *mainTreeGroupBox;
     QVBoxLayout *mainTreeGroupBoxLayout;
     QGroupBox   *nerPropsGroupBox;
     QVBoxLayout *nerPropsGroupBoxLayout;
+
+    QGridLayout *nerGridLayout;
+    QHBoxLayout *nerProps_NERLayout;
+    QLabel *nerProps_NERLabel;
+    QLabel *nerValueLabel;
+    QHBoxLayout *nerPropos_RELayout;
+    QLabel *nerPropos_RELabel;
+    QProgressBar *nerPropos_RE_value_Progress;
+    QHBoxLayout *nerPropos_ERLayout;
+    QLabel *nerPropos_ERLabel;
+    QProgressBar *nerPropos_ER_value_Progress;
+    QHBoxLayout *nerPropos_CELayout;
+    QLabel *nerPropos_CELabel;
+    QProgressBar *nerPropos_CE_value_Progress;
+    QHBoxLayout *nerPropos_NLayout;
+    QLabel *nerPropos_NLabel;
+    QLabel *nerPropos_N_value_Label;
+    QPushButton *computeNERPushBotton;
+
     QTreeWidget *mainTreeWidget;
     QTreeWidgetItem *mainItemTrans;
     QTreeWidgetItem *mainItemSubs;
@@ -65,6 +85,16 @@ private slots:
     void openSubtitleWindowSlot();
     void removeSubNodeSlot();
     void renameDocumentNodeSlot(QTreeWidgetItem*item, int column);
+    void computeNERValuesSlot();
+
+public slots:
+    void setNERStatistics(int &N, double &ner,
+                          double &EdErrors,
+                          double &RecogErrors,
+                          double &correctEds, double &avgDelay);
+
+signals:
+    void computeNERValues();
     
 };
 

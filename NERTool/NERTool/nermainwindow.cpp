@@ -28,17 +28,6 @@ NERMainWindow::NERMainWindow(QWidget *parent) : QMainWindow(parent)
 
 	initializeMDIWindows();
 
-    QString s1 = "First line of text";
-    QString s2 = "Second time line of the text";
-
-    diff_match_patch diff;
-    QList<Diff> list = diff.diff_main(s1,s2, false);
-
-    for(int i=0;i<list.count(); i++){
-        Diff d = list.at(i);
-        ENGINE_DEBUG << i << d.toString();
-    }
-
 }
 
 NERMainWindow::~NERMainWindow()
@@ -62,6 +51,10 @@ void NERMainWindow::createGuiElements()
 	mainMdiArea = new QMdiArea(this);
 
     propertiesTreeWidget = new PropertiesTreeWidget(this);
+    connect(propertiesTreeWidget, SIGNAL(computeNERValues()),
+            this, SLOT(computerNERStatistics()));
+    connect(this, SIGNAL(setNERStatistics(int&,double&,double&,double&,double&,double&)),
+            propertiesTreeWidget, SLOT(setNERStatistics(int&,double&,double&,double&,double&,double&)));
 
     mediaMngWidget = new MediaMngWidget(this, mainMdiArea);
 
@@ -142,12 +135,19 @@ void NERMainWindow::createActions()
     connect(loadTransXmlFile, SIGNAL(triggered()),
             this, SLOT(loadTranscriptionFileSlot()));
 
-    loadSubtsXmlFile = new QAction(tr("Load Subtitles"), this);
+    loadSubtsXmlFile = new QAction(tr("Load TRS Subtitles"), this);
     loadSubtsXmlFile->setShortcut(QKeySequence("Ctrl+U"));
     loadSubtsXmlFile->setStatusTip("Load subtitles file...");
     loadSubtsXmlFile->setEnabled(false);
     connect(loadSubtsXmlFile, SIGNAL(triggered()),
             this, SLOT(loadSubtitlesFileSlot()));
+
+    loadSRTXmlFile = new QAction(tr("Load SRT Subtitles"), this);
+    loadSRTXmlFile->setShortcut(QKeySequence("Ctrl+U"));
+    loadSRTXmlFile->setStatusTip("Load subtitles file...");
+    loadSRTXmlFile->setEnabled(false);
+    connect(loadSRTXmlFile, SIGNAL(triggered()),
+            this, SLOT(loadSRTSubtitlesFileSlot()));
 
     cascadeSubWindowsAction = new QAction(tr("C&ascade windows"),this);
     cascadeSubWindowsAction->setStatusTip(tr("Cascade all windows"));
@@ -178,7 +178,8 @@ void NERMainWindow::createActions()
 void NERMainWindow::enableActions(bool enable)
 {
     saveProjectAction->setEnabled(enable);
-    loadSubtsXmlFile->setEnabled(enable);
+//    loadSubtsXmlFile->setEnabled(enable);
+//    loadSRTXmlFile->setEnabled(enable);
     loadTransXmlFile->setEnabled(enable);
     saveAsProjectAction->setEnabled(enable);
     closeProjectAction->setEnabled(enable);
@@ -207,7 +208,11 @@ void NERMainWindow::createMenus()
 
     toolsMenu = menuBar()->addMenu(tr("&Tools"));
     toolsMenu->addAction(loadTransXmlFile);
-    toolsMenu->addAction(loadSubtsXmlFile);
+
+    subTitlesMenu = new QMenu(tr("Load Subtitles"), this);
+    subTitlesMenu->addAction(loadSubtsXmlFile);
+    subTitlesMenu->addAction(loadSRTXmlFile);
+    toolsMenu->addMenu(subTitlesMenu);
     toolsMenu->addSeparator();
     toolsMenu->addAction(computerNerStats);
 
@@ -567,6 +572,7 @@ void NERMainWindow::loadTranscriptionFileSlot()
     QString baseName = info.baseName();
     propertiesTreeWidget->insertNewTranslation(baseName, s, s);
     loadSubtsXmlFile->setEnabled(true);
+    loadSRTXmlFile->setEnabled(true);
 
 }
 
@@ -597,7 +603,99 @@ void NERMainWindow::loadSubtitlesFileSlot(){
         if(!loaded){
             //Check if XML file is OK.
             QMessageBox box;
-            box.setWindowTitle("File loading failed!");
+            box.setWindowTitle("File loading failed!                         ");
+            QString detail;
+            detail.append("Import of ")
+                    .append(file)
+                    .append(" XML failed. This file was ignored.");
+            box.setInformativeText(detail);
+            box.setIcon(QMessageBox::Warning);
+            box.setStandardButtons(QMessageBox::Ok);
+            box.exec();
+
+            continue; //proceed to next file...
+        }
+
+        NERTableWidget *table = new NERTableWidget(this);
+        table->setMediaWidget(mediaMngWidget);
+        table->deleteTablesContents();
+        table->loadXMLData(transcriptionList);
+        table->loadSubtitlesXMLData(transcriptionList, trsList);
+
+        //Append this loaded subtitles to the global list.
+        nerTablesList->append(table);
+
+        QString title;
+        QFileInfo info(file);
+        title.append(info.baseName());
+
+        addTableInMdiArea(table, title);
+
+        computeWordDifferences(table);
+
+        isSubtitlesLoaded = true;
+
+
+        delete trsList;
+        trsList = NULL;
+    }
+}
+
+void NERMainWindow::computeWordDifferences(NERTableWidget* table)
+{
+    if(table==0){
+        return;
+    }
+
+    QString transText = table->getAllTranslationText();
+    QString subsText = table->getAllSubtableText();
+
+    //Computes the diff...
+    QList<Diff> diffList = table->computeDifferences(transText, subsText);
+    //Removes the deletions from the global comparison string.
+    QList<Diff> noDelsList = table->removeDeletions(diffList);
+
+    //Removes the deletions from the global comparison string
+    //leaving only deletion and equal.
+    QList<Diff> noInsertionsList = table->removeInsertions(diffList);
+
+    QList<DragLabel*> dsubLabsList = table->getAllSubtableLabels();
+
+    ENGINE_DEBUG << "Labels Size" << dsubLabsList.count();
+    ENGINE_DEBUG << "Diffs Size = " << noDelsList.count();
+
+    table->applyEditionProperties(noDelsList);
+    table->applyEditionPropertiesToTranscription(noInsertionsList);
+}
+
+/*******************************************************************************
+ * Loads a SRT file containing "subtitle" content.
+ ******************************************************************************/
+void NERMainWindow::loadSRTSubtitlesFileSlot()
+{
+    QStringList fileNames = QFileDialog::getOpenFileNames(
+            this,
+            tr("Open TRS File"),
+            QDir::currentPath(),
+            tr("TRS file (*.srt)") );
+
+    if(fileNames.count()==0){
+        return; //Nothing to do...
+    }
+
+
+    //Multiple file loading...
+    for(int i=0; i<fileNames.count(); i++){
+
+        //Load XML
+        QList<BlockTRS> *trsList = new QList<BlockTRS>();
+        QString file = fileNames.at(i);
+
+        bool loaded = xmlHandler->readSubtitleSRT(file, trsList);
+        if(!loaded){
+            //Check if XML file is OK.
+            QMessageBox box;
+            box.setWindowTitle("File loading failed!                         ");
             QString detail;
             detail.append("Import of ")
                     .append(file)
@@ -647,6 +745,7 @@ void NERMainWindow::loadSubtitlesFileSlot(){
     }
 }
 
+
 void NERMainWindow::addTableInMdiArea(NERTableWidget* table, QString title)
 {
     //Add a new subwindow
@@ -680,12 +779,24 @@ void NERMainWindow::tileWindowsSlot()
 
 void NERMainWindow::computerNERStatistics()
 {
+    if(mainMdiArea->subWindowList().count()==0){
+        return;
+    }
+
     QMdiSubWindow* subWindow = mainMdiArea->activeSubWindow();
     NERTableWidget* table = static_cast<NERTableWidget*>(subWindow->widget());
 
-    double ner = table->computeNERStats_NerValue();
+    NERStatsData ner = table->computeNERStats_NerValue();
+    int N = ner.getNCount();
+    double er = ner.getEditionErrors();
+    double re = ner.getRecognitionErrors();
+    double ce = ner.getCorrectEditions();
+    double delay = ner.getAvgDelay();
+    double nerVal = ner.getNerValue();
 
-    ENGINE_DEBUG << "NER Value = " << ner;
+    emit setNERStatistics(N, nerVal, er, re, ce, delay);
+
+    ENGINE_DEBUG << "NER Value = " << nerVal;
 }
 
 

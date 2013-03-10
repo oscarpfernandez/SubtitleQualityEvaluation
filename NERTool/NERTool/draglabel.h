@@ -40,6 +40,7 @@ public:
     ModificationType getErrorClass();
     EditionTypeEnum editionEnumFromOrdinal(int value);
     ModificationType modificationTypeFromOrdinal(int value);
+    void markAsDeleted();
 
 private:
     QString m_labelText;

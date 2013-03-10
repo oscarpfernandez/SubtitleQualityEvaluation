@@ -80,6 +80,8 @@ public:
                             QList<Speaker> *speakerList);
     bool readSubtitleXML(QString &xmlFileName,
                          QList<BlockTRS> *trsBlocks);
+    bool readSubtitleSRT(QString &srtFile,
+                         QList<BlockTRS> *trsBlocks);
     bool writeProjectExportXML(QString &xmlFileName,
                                QList<Speaker> *speakerList,
                                QList<BlockTRS> *transcription,
@@ -106,6 +108,7 @@ private:
                          QList<BlockTRS> *trsBlocks);
     bool readNERTable(QXmlStreamReader *xmlReader,
                       QList<NERTableWidget*> *nerTablesList);
+    QString getFormatedTime(QString &time, bool &isTimeSRTOk);
 };
 
 #endif

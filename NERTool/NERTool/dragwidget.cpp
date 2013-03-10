@@ -371,6 +371,7 @@ bool DragWidget::eventFilter(QObject *obj, QEvent *event)
                 uncheckAllErrorActions();
                 m_noErrorAction->setChecked(true);
                 child->setupLabelType(CorrectEdition);
+                child->setErrorWeight(ERROR_WEIGHT_0);
                 propagateProperties(child);
             }
             else if(selectedItem->text() == EDITION_ERROR_STR)
@@ -378,6 +379,9 @@ bool DragWidget::eventFilter(QObject *obj, QEvent *event)
                 uncheckAllErrorActions();
                 m_editionErrorAction->setChecked(true);
                 child->setupLabelType(EditionError);
+                if(child->getErrorWeight()==ERROR_WEIGHT_0){
+                    child->setErrorWeight(ERROR_WEIGHT_025);
+                }
                 propagateProperties(child);
             }
             else if(selectedItem->text() == RECOG_ERROR_STR)
@@ -385,6 +389,9 @@ bool DragWidget::eventFilter(QObject *obj, QEvent *event)
                 uncheckAllErrorActions();
                 m_recognitionErrorAction->setChecked(true);
                 child->setupLabelType(RecognitionError);
+                if(child->getErrorWeight()==ERROR_WEIGHT_0){
+                    child->setErrorWeight(ERROR_WEIGHT_025);
+                }
                 propagateProperties(child);
             }
             else if(selectedItem->text() == EDITION_COMMENT_STR){
@@ -489,7 +496,7 @@ double DragWidget::getEditionErrors()
 
         if(errorType == EditionError){
 
-            if(errorType != lastErrorType){
+            if(errorType != lastErrorType || i==0){
                 globalErrorValue += labelW->getErrorWeight();
             }
         }
@@ -503,7 +510,6 @@ double DragWidget::getEditionErrors()
 double DragWidget::getRecognitionErrors()
 {
     double globalErrorValue = 0;
-    double partialErrorValue = 0;
 
     EditionTypeEnum lastErrorType(NotDefinedYet);
     EditionTypeEnum errorType;
@@ -515,9 +521,8 @@ double DragWidget::getRecognitionErrors()
 
         if(errorType == RecognitionError){
 
-            if(errorType != lastErrorType){
-                globalErrorValue += partialErrorValue;
-                partialErrorValue = labelW->getErrorWeight();
+            if(errorType != lastErrorType || i==0){
+                globalErrorValue += labelW->getErrorWeight();
             }
         }
 

@@ -17,7 +17,7 @@
 #include "propertiestreewidget.h"
 #include "nercommon.h"
 #include "mediamngwidget.h"
-#include "diff_match_patch.h"
+
 
 
 //QT_BEGIN_NAMESPACE
@@ -46,6 +46,7 @@ private:
 	void initializeMDIWindows();
     void enableActionsTransLoaded();
     void addTableInMdiArea(NERTableWidget* table, QString title);
+    void computeWordDifferences(NERTableWidget *table);
 
     bool isProjectloaded;
 
@@ -72,6 +73,7 @@ private:
     QAction *viewPropertiesTree;
     QAction *loadTransXmlFile;
     QAction *loadSubtsXmlFile;
+    QAction *loadSRTXmlFile;
     QAction *cascadeSubWindowsAction;
     QAction *tileSubWindowsAction;
     QAction *viewPropertiesDockAction;
@@ -89,6 +91,7 @@ private:
     QMenu *fileMenu;
     QMenu *viewMenu;
     QMenu *toolsMenu;
+    QMenu *subTitlesMenu;
 	QMenu *windowMenu;
     QMenu *helpMenu;
 
@@ -112,11 +115,18 @@ private slots:
 	void aboutSlot();
     void loadTranscriptionFileSlot();
     void loadSubtitlesFileSlot();
+    void loadSRTSubtitlesFileSlot();
     void cascadeWindowsSlot();
     void tileWindowsSlot();
     void computerNERStatistics();
 
-
+signals:
+    void setNERStatistics(int &N,
+                          double &ner,
+                          double &EdErrors,
+                          double &RecogErrors,
+                          double &correctEds,
+                          double &avgDelay);
 
 
 };

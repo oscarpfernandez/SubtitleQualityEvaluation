@@ -22,8 +22,8 @@ SOURCES += main.cpp\
     mediamngwidget.cpp \
     qcustomplot.cpp \
     nergraphwidget.cpp \
-    diff_match_patch.cpp \
-    utils.cpp
+    utils.cpp \
+    diff.cpp
 
 HEADERS  += nermainwindow.h \
     dragwidget.h \
@@ -38,8 +38,8 @@ HEADERS  += nermainwindow.h \
     mediamngwidget.h \
     qcustomplot.h \
     nergraphwidget.h \
-    diff_match_patch.h \
-    utils.h
+    utils.h \
+    diff.h
 
 RC_FILE = app.rc
 

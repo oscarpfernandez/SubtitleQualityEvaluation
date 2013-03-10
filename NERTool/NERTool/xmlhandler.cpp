@@ -265,6 +265,135 @@ bool XMLHandler::loadSubtitleXML(QFile *xmlFile, QList<BlockTRS> *trsBlocks)
 }
 
 
+bool XMLHandler::readSubtitleSRT(QString &srtFile, QList<BlockTRS> *trsBlocks)
+{
+    QFile *file = new QFile(srtFile);
+    QTextStream *inTextStream = new QTextStream(file);
+    inTextStream->setCodec("UTF-8");
+
+    int index=0;//index of the SRT
+    QString line;//current read line
+    QString text;//subtitle text obtained from several reads.
+    QString startTime;
+    QString endTime;
+
+    if(!file->open(QFile::ReadOnly))
+    {
+        return false;
+    }
+
+    //Check if the file is a SRT...
+    QString line1 = inTextStream->readLine();
+    QString line2 = inTextStream->readLine();
+    bool isNumber;
+    line1.toInt(&isNumber);
+    bool hasArrow = line2.contains("-->");
+
+    if(!isNumber && !hasArrow){
+        //if first line does not contain a number and the second does not
+        //contain an "-->" its not a well formatted SRT file...
+        return false; //get out!
+    }
+
+    inTextStream->seek(0);
+
+    while(!inTextStream->atEnd()){
+        //read line from the stream
+        line = inTextStream->readLine();
+
+        //check if the line is a number
+        bool okIsNumber;
+        int valueIndex = line.toInt(&okIsNumber);
+
+
+
+        if(line.isEmpty() && index>0) {
+
+            bool isTimeSRTOk = true;
+            //Load TRS Block
+            QString timeF = startTime.simplified();
+            QString formatedTime = getFormatedTime(timeF, isTimeSRTOk);
+
+            if(!isTimeSRTOk){
+                return false; //Something's wrong with the SRT.
+            }
+
+            BlockTRS btr;
+            btr.setSyncTime(formatedTime).setText(text.simplified());
+
+            trsBlocks->append(btr);
+
+            //set start and stop time.
+            //clear the text to read a new subtitle line.
+            text.clear();
+
+            //no more verifications to do. skip to the next line...
+            continue;
+        }
+        else if(okIsNumber){
+            //is a number so clear the accumulated text buffer.
+            text.clear();
+            index = valueIndex;
+        }
+        else if(line.contains("-->"))
+        {
+            QStringList list = line.split("-->");
+            startTime = list.first();
+            endTime = list.last();
+        }
+        else{
+            //is simple text
+            text.append(line).append(" ");
+        }
+    }
+
+    file->close();
+
+    delete(inTextStream);
+    delete(file);
+
+    return true;
+}
+
+/*******************************************************************************
+ * Formats SRT file format to TRS format.
+ *
+ ******************************************************************************/
+QString XMLHandler::getFormatedTime(QString &time, bool &isTimeSRTOk)
+{
+    QString ret;
+    if(time.isEmpty()){
+        return ret;
+    }
+
+    //SRT Time example: 00:00:20,990
+    QStringList list = time.split(",");
+
+    if(list.count() != 2){
+        isTimeSRTOk = false; //badly formatted SRT
+        return ret;
+    }
+
+    QString leftTime = list.at(0);
+    QString milis = list.at(1);
+
+    QStringList list2 = leftTime.split(":");
+    if(list2.count() != 3){
+        isTimeSRTOk = false; //badly formatted SRT
+        return ret;
+    }
+
+    QString hours = list2.at(0);
+    QString minutes = list2.at(1);
+    QString second = list2.at(2);
+
+    int seconds = hours.toInt()*3600 + minutes.toInt()*60 + second.toInt();
+
+    ret.append(QString::number(seconds)).append(".").append(milis);
+
+    return ret;
+}
+
 /*******************************************************************************
  * Writes the projects XML export content
  ******************************************************************************/
@@ -468,6 +597,8 @@ bool XMLHandler::readProjectExportXML(QString &xmlFileName,
     DragWidget* currentDragWid;
     QString currentSubTabTimeStamp;
 
+    QList<BlockTRS> subitlesList;
+
 
     QXmlStreamReader *xmlReader = new QXmlStreamReader();
     xmlReader->setDevice(file);
@@ -616,9 +747,24 @@ bool XMLHandler::readProjectExportXML(QString &xmlFileName,
                     currentDragWid->initializeData(subTableLineLabels);
                     QString dText = currentDragWid->getText();
                     currentTable->insertTimeStampsHashedMap(currentSubTabTimeStamp, dText);
+
+                    //Keep subtitle line...
+                    BlockTRS btr;
+                    btr.setText(dText.simplified());
+                    btr.setSyncTime(currentSubTabTimeStamp);
+                    subitlesList.append(btr);
+
                     currentSubtable->insertNewTableEntry(currentSubTabTimeStamp, currentDragWid);
                     subTableLineLabels.clear();
                 }
+            }
+
+            if(xmlReader->name() == STR_TABLE_TAG){
+
+                currentTable->setMainDataList(transcription, subitlesList);
+
+                //clear to store subtitles of the next table...
+                subitlesList.clear();
             }
 
             if(xmlReader->name()==STR_TABLELINE_TAG){

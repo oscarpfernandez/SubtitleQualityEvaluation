@@ -65,6 +65,7 @@ private:
     double  nerValue;
     double  editionErrors;
     double  recognitionErrors;
+    double  correctEditions;
     double  avgDelay;
 public:
     int getNCount(){return NCount;}
@@ -86,6 +87,11 @@ public:
     double getAvgDelay(){return avgDelay;}
     NERStatsData& setAvgDelay(double delay){
         avgDelay=delay;
+        return *this;}
+
+    double getCorrectEditions(){return correctEditions;}
+    NERStatsData& setCorrectEditions(double ce){
+        correctEditions=ce;
         return *this;}
 };
 #endif
