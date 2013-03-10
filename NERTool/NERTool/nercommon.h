@@ -62,37 +62,141 @@ struct NERStatsData
 {
 private:
     int     NCount;
+    int     N_words;
+    int     N_ponctuation;
+    int     N_transitions;
     double  nerValue;
     double  editionErrors;
+    int     editionErrors_w000;
+    int     editionErrors_w025;
+    int     editionErrors_w050;
+    int     editionErrors_w100;
     double  recognitionErrors;
+    int     recognitionErrors_w000;
+    int     recognitionErrors_w025;
+    int     recognitionErrors_w050;
+    int     recognitionErrors_w100;
     double  correctEditions;
+    int     correctEditions_w000;
+    int     correctEditions_w025;
+    int     correctEditions_w050;
+    int     correctEditions_w100;
     double  avgDelay;
 public:
-    int getNCount(){return NCount;}
+    int getNCount(){
+        return N_words + N_ponctuation + N_transitions;}
     NERStatsData& setNCount(int n){
         NCount=n;
         return *this;}
+    NERStatsData& setN_words(int n){
+        N_words=n;
+        return *this;}
+    int getN_words(){
+        return N_words;}
+    NERStatsData& setN_ponctuation(int n){
+        N_ponctuation=n;
+        return *this;}
+    int getN_ponctuation(){
+        return N_ponctuation;}
+    NERStatsData& setN_transitions(int n){
+        N_transitions=n;
+        return *this;}
+    int getN_transitions(){
+        return N_transitions;}
     double getNerValue(){return nerValue;}
     NERStatsData& setNerValue(double ner){
         nerValue=ner;
         return *this;}
-    double getEditionErrors(){return editionErrors;}
+    //Edition Errors
+    double getEditionErrors(){
+        return editionErrors;}
     NERStatsData& setEditionErrors(double er){
         editionErrors=er;
         return *this;}
-    double getRecognitionErrors(){return recognitionErrors;}
+    NERStatsData& incEditionErrors_w000(){
+        editionErrors_w000++;
+        return *this;}
+    int getEditionErrors_w000(){
+        return editionErrors_w000;}
+    NERStatsData& incEditionErrors_w025(){
+        editionErrors_w025++;
+        return *this;}
+    int getEditionErrors_w025(){
+        return editionErrors_w025;}
+    NERStatsData& incEditionErrors_w050(){
+        editionErrors_w050++;
+        return *this;}
+    int getEditionErrors_w050(){
+        return editionErrors_w050;}
+    NERStatsData& incEditionErrors_w100(){
+        editionErrors_w100++;
+        return *this;}
+    int getEditionErrors_w100(){
+        return editionErrors_w100;}
+
+    //Recognition Errors
+    double getRecognitionErrors(){
+        return recognitionErrors;}
     NERStatsData& setRecognitionErrors(double re){
         recognitionErrors=re;
         return *this;}
+    NERStatsData& incRecognitionErrors_w000(){
+        recognitionErrors_w000++;
+        return *this;}
+    int getRecognitionErrors_w000(){
+        return recognitionErrors_w000;}
+    NERStatsData& incRecognitionErrors_w025(){
+        recognitionErrors_w025++;
+        return *this;}
+    int getRecognitionErrors_w025(){
+        return recognitionErrors_w025;}
+    NERStatsData& incRecognitionErrors_w050(){
+        recognitionErrors_w050++;
+        return *this;}
+    int getRecognitionErrors_w050(){
+        return recognitionErrors_w050;}
+    NERStatsData& incRecognitionErrors_w100(){
+        recognitionErrors_w100++;
+        return *this;}
+    int getRecognitionErrors_w100(){
+        return recognitionErrors_w100;}
+
+    //Correct Editions
+    double getCorrectEditions(){
+        return correctEditions;}
+    NERStatsData& setCorrectEditions(double ce){
+        correctEditions=ce;
+        return *this;}
+
+    //Delay
     double getAvgDelay(){return avgDelay;}
     NERStatsData& setAvgDelay(double delay){
         avgDelay=delay;
         return *this;}
 
-    double getCorrectEditions(){return correctEditions;}
-    NERStatsData& setCorrectEditions(double ce){
-        correctEditions=ce;
-        return *this;}
+    void resetDataToZero(){
+        NCount = 0;
+        N_words = 0;
+        N_ponctuation = 0;
+        N_transitions = 0;
+        nerValue = 0;
+        editionErrors = 0;
+        editionErrors_w000 = 0;
+        editionErrors_w025 = 0;
+        editionErrors_w050 = 0;
+        editionErrors_w100 = 0;
+        recognitionErrors = 0;
+        recognitionErrors_w000 = 0;
+        recognitionErrors_w025 = 0;
+        recognitionErrors_w050 = 0;
+        recognitionErrors_w100 = 0;
+        correctEditions = 0;
+        correctEditions_w000 = 0;
+        correctEditions_w025 = 0;
+        correctEditions_w050 = 0;
+        correctEditions_w100 = 0;
+        avgDelay = 0;
+    }
 };
 #endif
 

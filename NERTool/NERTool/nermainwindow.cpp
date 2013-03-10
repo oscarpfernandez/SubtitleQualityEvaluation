@@ -421,6 +421,15 @@ void NERMainWindow::openProjectSlot()
         ENGINE_DEBUG << "Table insertion";
 
         NERTableWidget* table = nerTablesList->at(i);
+
+        //Reapply differences in the translation side, since this is not saved
+        //because it can be recalculated on-the-fly.
+        QString transText = table->getAllTranslationText();
+        QString subsText = table->getAllSubtableText();
+        QList<Diff> diffList = table->computeDifferences(transText, subsText);
+        QList<Diff> noInsertionsList = table->removeInsertions(diffList);
+        table->applyEditionPropertiesToTranscription(noInsertionsList);
+
         addTableInMdiArea(table, table->getTableName());
     }
 
@@ -476,6 +485,8 @@ void NERMainWindow::closeProjectSlot()
     isSubtitlesLoaded = false;
     isProjectloaded = false;
     enableActions(false);
+    loadSubtsXmlFile->setEnabled(false);
+    loadSRTXmlFile->setEnabled(false);
     showDockableWidgets(false);
 
 
@@ -788,15 +799,45 @@ void NERMainWindow::computerNERStatistics()
 
     NERStatsData ner = table->computeNERStats_NerValue();
     int N = ner.getNCount();
+    int N_words = ner.getN_words();
+    int N_ponctuation = ner.getN_ponctuation();
+    int N_transitions = ner.getN_transitions();
+
     double er = ner.getEditionErrors();
+    int er_w0 = ner.getEditionErrors_w000();
+    int er_w025 = ner.getEditionErrors_w025();
+    int er_w050 = ner.getEditionErrors_w050();
+    int er_w1 = ner.getEditionErrors_w100();
+
     double re = ner.getRecognitionErrors();
+    int re_w0 = ner.getRecognitionErrors_w000();
+    int re_w025 = ner.getRecognitionErrors_w025();
+    int re_w050 = ner.getRecognitionErrors_w050();
+    int re_w1 = ner.getRecognitionErrors_w100();
+
     double ce = ner.getCorrectEditions();
     double delay = ner.getAvgDelay();
     double nerVal = ner.getNerValue();
 
-    emit setNERStatistics(N, nerVal, er, re, ce, delay);
+    //emit setNERStatistics(N, nerVal, er, re, ce, delay);
 
-    ENGINE_DEBUG << "NER Value = " << nerVal;
+    ENGINE_DEBUG << "NER Value = " << nerVal << "\n\t"
+                 << "Edition Error = " << er << "\n\t"
+                 << "Edition w000 = " << er_w0 << "\n\t"
+                 << "Edition w025 = " << er_w025 << "\n\t"
+                 << "Edition w050 = " << er_w050 << "\n\t"
+                 << "Edition w100 = " << er_w1 << "\n\t"
+                 << "Recognition Error = " << re << "\n\t"
+                 << "Recognition w000 = " << re_w0 << "\n\t"
+                 << "Recognition w025 = " << re_w025 << "\n\t"
+                 << "Recognition w050 = " << re_w050 << "\n\t"
+                 << "Recognition w100 = " << re_w1 << "\n\t"
+                 << "Avg Delay =" << delay << "\n\t"
+                 << "N = " << ner.getNCount() << "\n\t"
+                 << "N_words = " << ner.getN_words() << "\n\t"
+                 << "N_ponct = " << ner.getN_ponctuation() << "\n\t"
+                 << "N_trans = " << ner.getN_transitions();
+
 }
 
 

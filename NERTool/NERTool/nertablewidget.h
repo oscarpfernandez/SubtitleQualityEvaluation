@@ -112,8 +112,8 @@ public:
     BlockTRS getSubtableRowData(int row);
     QString getJointSubTableText();
     QList<DragLabel*> getSubTableLabels();
-    double getEditionErrors();
-    double getRecognitionErrors();
+    double getEditionErrors(NERStatsData &nerStats);
+    double getRecognitionErrors(NERStatsData &nerStats);
 
 private:
     MediaMngWidget *mediaMngWidget;

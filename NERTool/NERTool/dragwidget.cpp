@@ -483,7 +483,7 @@ QSize DragWidget::getBlockSize()
 }
 
 
-double DragWidget::getEditionErrors()
+double DragWidget::getEditionErrors(NERStatsData &nerStats)
 {
     double globalErrorValue = 0;
 
@@ -497,7 +497,22 @@ double DragWidget::getEditionErrors()
         if(errorType == EditionError){
 
             if(errorType != lastErrorType || i==0){
-                globalErrorValue += labelW->getErrorWeight();
+                double weight = labelW->getErrorWeight();
+                globalErrorValue += weight;
+
+                //Save wichweight type
+                if(weight == ERROR_WEIGHT_0){
+                    nerStats.incEditionErrors_w000();
+                }
+                else if(weight == ERROR_WEIGHT_025){
+                    nerStats.incEditionErrors_w025();
+                }
+                else if(weight == ERROR_WEIGHT_050){
+                    nerStats.incEditionErrors_w050();
+                }
+                else if(weight == ERROR_WEIGHT_1){
+                    nerStats.incEditionErrors_w100();
+                }
             }
         }
 
@@ -507,7 +522,7 @@ double DragWidget::getEditionErrors()
     return globalErrorValue;
 }
 
-double DragWidget::getRecognitionErrors()
+double DragWidget::getRecognitionErrors(NERStatsData &nerStats)
 {
     double globalErrorValue = 0;
 
@@ -522,7 +537,22 @@ double DragWidget::getRecognitionErrors()
         if(errorType == RecognitionError){
 
             if(errorType != lastErrorType || i==0){
+                double weight = labelW->getErrorWeight();
                 globalErrorValue += labelW->getErrorWeight();
+
+                //Save wichweight type
+                if(weight == ERROR_WEIGHT_0){
+                    nerStats.incRecognitionErrors_w000();
+                }
+                else if(weight == ERROR_WEIGHT_025){
+                    nerStats.incRecognitionErrors_w025();
+                }
+                else if(weight == ERROR_WEIGHT_050){
+                    nerStats.incRecognitionErrors_w050();
+                }
+                else if(weight == ERROR_WEIGHT_1){
+                    nerStats.incRecognitionErrors_w100();
+                }
             }
         }
 

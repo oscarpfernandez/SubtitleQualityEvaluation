@@ -285,6 +285,8 @@ int NERTableWidget::computeNERStats_N()
             numPontuation += str.count(",");
         }
     }
+    nerStatsDataValues.setN_ponctuation(numPontuation);
+    nerStatsDataValues.setN_words(numWords);
 
     //speaker transitions...
     int transitions = 0;
@@ -294,10 +296,14 @@ int NERTableWidget::computeNERStats_N()
         }
     }
 
+    nerStatsDataValues.setN_transitions(transitions);
+
     return numWords + numPontuation + transitions;
 }
 
 NERStatsData NERTableWidget::computeNERStats_NerValue(){
+
+    nerStatsDataValues.resetDataToZero();
 
 
     int N = computeNERStats_N();
@@ -336,7 +342,7 @@ double NERTableWidget::computeNERStats_EditionErrors()
 
         NERSubTableWidget *subTable = static_cast<NERSubTableWidget*>(cellWidget(i, SUBTITLES_COLUMN_INDEX));
         if(subTable != 0){
-            editionError += subTable->getEditionErrors();
+            editionError += subTable->getEditionErrors(nerStatsDataValues);
         }
     }
     return editionError;
@@ -348,7 +354,7 @@ double NERTableWidget::computeNERStats_RecognitionErrors(){
 
         NERSubTableWidget *subTable = static_cast<NERSubTableWidget*>(cellWidget(i, SUBTITLES_COLUMN_INDEX));
         if(subTable != 0){
-            recogError += subTable->getRecognitionErrors();
+            recogError += subTable->getRecognitionErrors(nerStatsDataValues);
         }
     }
     return recogError;
@@ -804,26 +810,26 @@ QList<DragLabel*> NERSubTableWidget::getSubTableLabels()
     return labels;
 }
 
-double NERSubTableWidget::getEditionErrors()
+double NERSubTableWidget::getEditionErrors(NERStatsData &nerStats)
 {
     double edError = 0;
 
     for(int i=0; i<rowCount(); i++){
         DragWidget* dw = static_cast<DragWidget*>(cellWidget(i, SUB_SUBTITLES_COLUMN_INDEX));
         if(dw!=0){
-            edError += dw->getEditionErrors();
+            edError += dw->getEditionErrors(nerStats);
         }
     }
     return edError;
 }
 
-double NERSubTableWidget::getRecognitionErrors()
+double NERSubTableWidget::getRecognitionErrors(NERStatsData &nerStats)
 {
     double rError = 0;
 
     for(int i=0; i<rowCount(); i++){
         DragWidget* dw = static_cast<DragWidget*>(cellWidget(i, SUB_SUBTITLES_COLUMN_INDEX));
-        rError += dw->getRecognitionErrors();
+        rError += dw->getRecognitionErrors(nerStats);
     }
     return rError;
 }

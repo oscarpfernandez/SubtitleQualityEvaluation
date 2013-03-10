@@ -4,6 +4,7 @@
 #include <QWidget>
 #include <QMap>
 #include "draglabel.h"
+#include "nercommon.h"
 
 QT_BEGIN_NAMESPACE
 class QDragEnterEvent;
@@ -40,8 +41,8 @@ public:
     int countWords();
     DragLabel* getWordAt(int pos);
     QString getText();
-    double getEditionErrors();
-    double getRecognitionErrors();
+    double getEditionErrors(NERStatsData &nerStats);
+    double getRecognitionErrors(NERStatsData &nerStats);
     QList<DragLabel*> getLabels();
 
 protected:
