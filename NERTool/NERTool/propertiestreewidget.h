@@ -58,6 +58,7 @@ private:
     QLabel *nerPropos_NLabel;
     QLabel *nerPropos_N_value_Label;
     QPushButton *computeNERPushBotton;
+    QPushButton *viewStatsDetailsButton;
 
     QTreeWidget *mainTreeWidget;
     QTreeWidgetItem *mainItemTrans;
@@ -86,15 +87,14 @@ private slots:
     void removeSubNodeSlot();
     void renameDocumentNodeSlot(QTreeWidgetItem*item, int column);
     void computeNERValuesSlot();
+    void viewStatsSlot();
 
 public slots:
-    void setNERStatistics(int &N, double &ner,
-                          double &EdErrors,
-                          double &RecogErrors,
-                          double &correctEds, double &avgDelay);
+    void setNERStatistics(double &delay, double &ner);
 
 signals:
     void computeNERValues();
+    void viewNerStats();
     
 };
 

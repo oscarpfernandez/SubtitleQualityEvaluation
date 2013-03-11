@@ -53,8 +53,13 @@ void NERMainWindow::createGuiElements()
     propertiesTreeWidget = new PropertiesTreeWidget(this);
     connect(propertiesTreeWidget, SIGNAL(computeNERValues()),
             this, SLOT(computerNERStatistics()));
-    connect(this, SIGNAL(setNERStatistics(int&,double&,double&,double&,double&,double&)),
-            propertiesTreeWidget, SLOT(setNERStatistics(int&,double&,double&,double&,double&,double&)));
+    connect(this, SIGNAL(setNERStatistics(double&,double&)),
+            propertiesTreeWidget, SLOT(setNERStatistics(double&,double&)));
+
+    connect(propertiesTreeWidget, SIGNAL(viewNerStats()), this, SLOT(showNerStatsWindow()));
+
+    nerStatsViewer = new NERStatsViewerWidget();
+    connect(nerStatsViewer, SIGNAL(refreshNERData()), this, SLOT(showNerStatsWindow()));
 
     mediaMngWidget = new MediaMngWidget(this, mainMdiArea);
 
@@ -173,6 +178,11 @@ void NERMainWindow::createActions()
     showVideoAction = videoPlayerDockWidget->toggleViewAction();
     showVideoAction->setStatusTip(tr("Show video..."));
 
+    recomputeTableDifferences = new QAction(tr("Recompute Diff"), this);
+    recomputeTableDifferences->setStatusTip(tr("Recompute table difference by performing a diff..."));
+    recomputeTableDifferences->setEnabled(false);
+    connect(recomputeTableDifferences, SIGNAL(triggered()), this, SLOT(recomputeTableDiff()));
+
 }
 
 void NERMainWindow::enableActions(bool enable)
@@ -215,6 +225,7 @@ void NERMainWindow::createMenus()
     toolsMenu->addMenu(subTitlesMenu);
     toolsMenu->addSeparator();
     toolsMenu->addAction(computerNerStats);
+    toolsMenu->addAction(recomputeTableDifferences);
 
 	windowMenu = menuBar()->addMenu(tr("&Window"));
     windowMenu->addAction(cascadeSubWindowsAction);
@@ -434,6 +445,7 @@ void NERMainWindow::openProjectSlot()
     }
 
     loadSubtsXmlFile->setEnabled(true);
+    recomputeTableDifferences->setEnabled(true);
 
     enableActions(true);
     showDockableWidgets(true);
@@ -488,6 +500,8 @@ void NERMainWindow::closeProjectSlot()
     loadSubtsXmlFile->setEnabled(false);
     loadSRTXmlFile->setEnabled(false);
     showDockableWidgets(false);
+    recomputeTableDifferences->setEnabled(false);
+    nerStatsViewer->close();
 
 
 
@@ -679,6 +693,34 @@ void NERMainWindow::computeWordDifferences(NERTableWidget* table)
     table->applyEditionPropertiesToTranscription(noInsertionsList);
 }
 
+void NERMainWindow::recomputeTableDiff()
+{
+    if(mainMdiArea->subWindowList().count()==0){
+        return;
+    }
+
+    QMdiSubWindow* subWindow = mainMdiArea->activeSubWindow();
+    NERTableWidget* table = static_cast<NERTableWidget*>(subWindow->widget());
+
+    if(table==0){
+        return;
+    }
+
+    QMessageBox box;
+    box.setInformativeText("Are you sure ?\nAll table errors and weights will be reset!");
+    box.setText("Close project                                           ");
+    box.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    box.setIcon(QMessageBox::Question);
+    box.setStandardButtons(QMessageBox::No | QMessageBox::Yes);
+    int result = box.exec();
+    switch (result){
+    case QMessageBox::No :
+        return;
+    }
+
+    computeWordDifferences(table);
+}
+
 /*******************************************************************************
  * Loads a SRT file containing "subtitle" content.
  ******************************************************************************/
@@ -747,7 +789,7 @@ void NERMainWindow::loadSRTSubtitlesFileSlot()
 
         table->applyEditionProperties(noDelsList);
 
-
+        recomputeTableDifferences->setEnabled(true);
         isSubtitlesLoaded = true;
 
 
@@ -788,6 +830,25 @@ void NERMainWindow::tileWindowsSlot()
     mainMdiArea->tileSubWindows();
 }
 
+void NERMainWindow::showNerStatsWindow()
+{
+    if(mainMdiArea->subWindowList().count()==0){
+        return;
+    }
+
+    QMdiSubWindow* subWindow = mainMdiArea->activeSubWindow();
+    NERTableWidget* table = static_cast<NERTableWidget*>(subWindow->widget());
+
+    NERStatsData ner = table->computeNERStats_NerValue();
+
+    nerStatsViewer->clearGraphsData();
+    nerStatsViewer->loadGraphsData(ner);
+    nerStatsViewer->replotGraphs();
+    nerStatsViewer->setWindowFlags(nerStatsViewer->windowFlags() | Qt::Tool);
+    nerStatsViewer->show();
+
+}
+
 void NERMainWindow::computerNERStatistics()
 {
     if(mainMdiArea->subWindowList().count()==0){
@@ -819,7 +880,7 @@ void NERMainWindow::computerNERStatistics()
     double delay = ner.getAvgDelay();
     double nerVal = ner.getNerValue();
 
-    //emit setNERStatistics(N, nerVal, er, re, ce, delay);
+    emit setNERStatistics(delay, nerVal);
 
     ENGINE_DEBUG << "NER Value = " << nerVal << "\n\t"
                  << "Edition Error = " << er << "\n\t"
@@ -837,7 +898,6 @@ void NERMainWindow::computerNERStatistics()
                  << "N_words = " << ner.getN_words() << "\n\t"
                  << "N_ponct = " << ner.getN_ponctuation() << "\n\t"
                  << "N_trans = " << ner.getN_transitions();
-
 }
 
 

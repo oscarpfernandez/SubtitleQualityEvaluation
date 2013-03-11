@@ -52,58 +52,64 @@ PropertiesTreeWidget::PropertiesTreeWidget(QWidget *parent) : QWidget(parent)
 
     //NER properties
     nerProps_NERLayout = new QHBoxLayout();
-    nerProps_NERLabel = new QLabel("NER(%): ");
+    nerProps_NERLabel = new QLabel("NER (%): ");
     nerProps_NERLabel->setMaximumWidth(75);
     nerValueLabel = new QLabel;
-    nerValueLabel->setText("Dummy!!!!!");
+    nerValueLabel->setText("0");
     nerProps_NERLayout->addWidget(nerProps_NERLabel, Qt::AlignRight);
     nerProps_NERLayout->addWidget(nerValueLabel, Qt::AlignLeft);
 
     nerPropos_NLayout = new QHBoxLayout();
-    nerPropos_NLabel = new QLabel("N:      ");
+    nerPropos_NLabel = new QLabel("Delay (s): ");
     nerPropos_NLabel->setMaximumWidth(75);
-            //resize(20, nerPropos_NLabel->sizeHint().height());
+    //resize(20, nerPropos_NLabel->sizeHint().height());
     nerPropos_N_value_Label = new QLabel;
-    nerPropos_N_value_Label->setText("Motherfucker!!!!");
+    nerPropos_N_value_Label->setText("0");
     nerPropos_NLayout->addWidget(nerPropos_NLabel, Qt::AlignRight);
     nerPropos_NLayout->addWidget(nerPropos_N_value_Label, Qt::AlignLeft);
 
-    nerPropos_RELayout = new QHBoxLayout();
-    nerPropos_RELabel = new QLabel("Edition Errors:    ");
-    nerPropos_RE_value_Progress = new QProgressBar;
-    nerPropos_RE_value_Progress->setRange(0,100);
-    nerPropos_RE_value_Progress->setValue(78);
-    nerPropos_RELayout->addWidget(nerPropos_RELabel);
-    nerPropos_RELayout->addWidget(nerPropos_RE_value_Progress);
+//    nerPropos_RELayout = new QHBoxLayout();
+//    nerPropos_RELabel = new QLabel("Edition Errors:    ");
+//    nerPropos_RE_value_Progress = new QProgressBar;
+//    nerPropos_RE_value_Progress->setRange(0,100);
+//    nerPropos_RE_value_Progress->setValue(78);
+//    nerPropos_RELayout->addWidget(nerPropos_RELabel);
+//    nerPropos_RELayout->addWidget(nerPropos_RE_value_Progress);
 
-    nerPropos_ERLayout = new QHBoxLayout();
-    nerPropos_ERLabel = new QLabel("Edition Errors:    ");
-    nerPropos_ER_value_Progress = new QProgressBar;
-    nerPropos_ER_value_Progress->setRange(0, 100);
-    nerPropos_ER_value_Progress->setOrientation(Qt::Horizontal);
-    nerPropos_ERLayout->addWidget(nerPropos_ERLabel);
-    nerPropos_ERLayout->addWidget(nerPropos_ER_value_Progress);
+//    nerPropos_ERLayout = new QHBoxLayout();
+//    nerPropos_ERLabel = new QLabel("Edition Errors:    ");
+//    nerPropos_ER_value_Progress = new QProgressBar;
+//    nerPropos_ER_value_Progress->setRange(0, 100);
+//    nerPropos_ER_value_Progress->setOrientation(Qt::Horizontal);
+//    nerPropos_ERLayout->addWidget(nerPropos_ERLabel);
+//    nerPropos_ERLayout->addWidget(nerPropos_ER_value_Progress);
 
-    nerPropos_CELayout = new QHBoxLayout();
-    nerPropos_CELabel = new QLabel("Correct Editions: ");
-    nerPropos_CE_value_Progress = new QProgressBar;
-    nerPropos_CE_value_Progress->setRange(0, 100);
-    nerPropos_CE_value_Progress->setOrientation(Qt::Horizontal);
-    nerPropos_CELayout->addWidget(nerPropos_CELabel);
-    nerPropos_CELayout->addWidget(nerPropos_CE_value_Progress);
+//    nerPropos_CELayout = new QHBoxLayout();
+//    nerPropos_CELabel = new QLabel("Correct Editions: ");
+//    nerPropos_CE_value_Progress = new QProgressBar;
+//    nerPropos_CE_value_Progress->setRange(0, 100);
+//    nerPropos_CE_value_Progress->setOrientation(Qt::Horizontal);
+//    nerPropos_CELayout->addWidget(nerPropos_CELabel);
+//    nerPropos_CELayout->addWidget(nerPropos_CE_value_Progress);
 
     computeNERPushBotton = new QPushButton("Compute NER");
     computeNERPushBotton->setMaximumWidth(250);
     connect(computeNERPushBotton, SIGNAL(clicked()), this, SLOT(computeNERValuesSlot()));
 
+    viewStatsDetailsButton = new QPushButton("NER Statistics");
+    viewStatsDetailsButton->setMaximumWidth(250);
+    connect(viewStatsDetailsButton, SIGNAL(clicked()), this, SLOT(viewStatsSlot()));
+
     nerPropsGroupBoxLayout->addLayout(nerProps_NERLayout);
     nerPropsGroupBoxLayout->addLayout(nerPropos_NLayout);
-    nerPropsGroupBoxLayout->addLayout(nerPropos_RELayout);
-    nerPropsGroupBoxLayout->addLayout(nerPropos_ERLayout);
-    nerPropsGroupBoxLayout->addLayout(nerPropos_CELayout);
+//    nerPropsGroupBoxLayout->addLayout(nerPropos_RELayout);
+//    nerPropsGroupBoxLayout->addLayout(nerPropos_ERLayout);
+//    nerPropsGroupBoxLayout->addLayout(nerPropos_CELayout);
     nerPropsGroupBoxLayout->addWidget(computeNERPushBotton, Qt::AlignCenter);
+    nerPropsGroupBoxLayout->addWidget(viewStatsDetailsButton, Qt::AlignCenter);
 
     nerPropsGroupBox->setLayout(nerPropsGroupBoxLayout);
+    nerPropsGroupBox->setMaximumHeight(nerPropsGroupBox->sizeHint().height());
 
     mainVLayout->addWidget(mainTreeGroupBox);
     mainVLayout->addWidget(nerPropsGroupBox);
@@ -375,30 +381,30 @@ void PropertiesTreeWidget::computeNERValuesSlot()
     emit computeNERValues();
 }
 
-void PropertiesTreeWidget::setNERStatistics(int &N,
-                                            double &ner,
-                                            double &EdErrors,
-                                            double &RecogErrors,
-                                            double &correctEds,
-                                            double &avgDelay)
+void PropertiesTreeWidget::viewStatsSlot()
+{
+    emit viewNerStats();
+}
+
+void PropertiesTreeWidget::setNERStatistics(double &delay, double &ner)
 {
 
     nerValueLabel->setText(QString::number(ner));
-    nerPropos_N_value_Label->setText(QString::number(N));
+    nerPropos_N_value_Label->setText(QString::number(delay));
 
-    int sum = EdErrors + RecogErrors + correctEds;
+//    int sum = EdErrors + RecogErrors + correctEds;
 
-    int re = 0;
-    int er = 0;
-    int ce = 0;
+//    int re = 0;
+//    int er = 0;
+//    int ce = 0;
 
-    if(sum!=0){
-        re = RecogErrors / sum;
-        er = EdErrors / sum;
-        ce = correctEds / sum;
-    }
+//    if(sum!=0){
+//        re = RecogErrors / sum;
+//        er = EdErrors / sum;
+//        ce = correctEds / sum;
+//    }
 
-    nerPropos_RE_value_Progress->setValue((int)re);
-    nerPropos_ER_value_Progress->setValue((int)er);
-    nerPropos_CE_value_Progress->setValue((int)ce);
+//    nerPropos_RE_value_Progress->setValue((int)re);
+//    nerPropos_ER_value_Progress->setValue((int)er);
+//    nerPropos_CE_value_Progress->setValue((int)ce);
 }

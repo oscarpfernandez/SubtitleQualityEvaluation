@@ -355,12 +355,12 @@ bool DragWidget::eventFilter(QObject *obj, QEvent *event)
         subMenu.addAction(m_Error025Action);
         subMenu.addAction(m_Error050Action);
         subMenu.addAction(m_Error100Action);
-        QMenu subMenu2("Type");
-        subMenu2.addAction(m_insertionAction);
-        subMenu2.addAction(m_delectionAction);
-        subMenu2.addAction(m_substitutionAction);
+//        QMenu subMenu2("Type");
+//        subMenu2.addAction(m_insertionAction);
+//        subMenu2.addAction(m_delectionAction);
+//        subMenu2.addAction(m_substitutionAction);
         myMenu.addMenu(&subMenu);
-        myMenu.addMenu(&subMenu2);
+//        myMenu.addMenu(&subMenu2);
 
         // ...
 

@@ -44,7 +44,7 @@ NERTableWidget::NERTableWidget(QWidget *parent) : QTableWidget(parent)
     setColumnWidth(0,SPEAKER_ID_COLUMN_WIDTH);
     setColumnWidth(1,TIMESTAMP_COLUMN_WIDTH);
     setColumnWidth(2,TRANSCRIPTION_COLUMN_WIDTH);
-    setColumnWidth(3, SUBTITLES_COLUMN_WIDTH);
+    setColumnWidth(3, SUBTITLES_COLUMN_WIDTH+250);
 
     //connect(headerView, SIGNAL(sectionResized(int,int,int)), this, SLOT(columnTableResized(int,int,int)));
 
@@ -98,7 +98,7 @@ void NERTableWidget::loadSubtitlesXMLData(QList<BlockTRS> *transcription, QList<
 
     //Save the subtitles list...
     subtitleTableData = new QList<BlockTRS>(*subsTrsBlocks);
-//    subtileDataHashedByTimestamp = new QHash<qlonglong,QString>();
+
     for(int i=0; i<subtitleTableData->count(); i++){
         BlockTRS btr = subtitleTableData->at(i);
 
@@ -326,6 +326,7 @@ NERStatsData NERTableWidget::computeNERStats_NerValue(){
                  << "\n\tRecog Errors = " << re
                  << "\n\tNER = " << ner
                  << "\n\tAvg Delay = " << delay;
+
 
     return nerStatsDataValues;
 }

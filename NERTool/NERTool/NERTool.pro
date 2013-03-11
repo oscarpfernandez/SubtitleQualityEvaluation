@@ -23,7 +23,8 @@ SOURCES += main.cpp\
     qcustomplot.cpp \
     nergraphwidget.cpp \
     utils.cpp \
-    diff.cpp
+    diff.cpp \
+    nerstatsviewerwidget.cpp
 
 HEADERS  += nermainwindow.h \
     dragwidget.h \
@@ -39,7 +40,8 @@ HEADERS  += nermainwindow.h \
     qcustomplot.h \
     nergraphwidget.h \
     utils.h \
-    diff.h
+    diff.h \
+    nerstatsviewerwidget.h
 
 RC_FILE = app.rc
 

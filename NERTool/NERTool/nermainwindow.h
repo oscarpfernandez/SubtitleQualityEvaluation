@@ -17,6 +17,7 @@
 #include "propertiestreewidget.h"
 #include "nercommon.h"
 #include "mediamngwidget.h"
+#include "nerstatsviewerwidget.h"
 
 
 
@@ -80,6 +81,8 @@ private:
     QAction *viewVideoPlayerDockAction;
     QAction *showVideoAction;
     QAction *computerNerStats;
+    QAction *recomputeTableDifferences;
+
 
 
     QLabel  *statusBarLeftLabel;
@@ -102,6 +105,8 @@ private:
     bool isTranscriptionLoaded;
     bool isSubtitlesLoaded;
 
+    NERStatsViewerWidget *nerStatsViewer;
+
 
 private slots:
     void newProjectSlot();
@@ -119,14 +124,11 @@ private slots:
     void cascadeWindowsSlot();
     void tileWindowsSlot();
     void computerNERStatistics();
+    void showNerStatsWindow();
+    void recomputeTableDiff();
 
 signals:
-    void setNERStatistics(int &N,
-                          double &ner,
-                          double &EdErrors,
-                          double &RecogErrors,
-                          double &correctEds,
-                          double &avgDelay);
+    void setNERStatistics(double &N, double &ner);
 
 
 };
