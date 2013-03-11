@@ -445,6 +445,7 @@ void NERMainWindow::openProjectSlot()
     }
 
     loadSubtsXmlFile->setEnabled(true);
+    loadSRTXmlFile->setEnabled(true);
     recomputeTableDifferences->setEnabled(true);
 
     enableActions(true);
@@ -787,7 +788,7 @@ void NERMainWindow::loadSRTSubtitlesFileSlot()
         ENGINE_DEBUG << "Labels Size" << dLabsList.count();
         ENGINE_DEBUG << "Diffs Size = " << noDelsList.count();
 
-        table->applyEditionProperties(noDelsList);
+        computeWordDifferences(table);
 
         recomputeTableDifferences->setEnabled(true);
         isSubtitlesLoaded = true;
