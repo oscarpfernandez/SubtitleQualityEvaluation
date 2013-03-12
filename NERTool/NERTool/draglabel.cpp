@@ -64,7 +64,6 @@ void DragLabel::setupLabelType(EditionTypeEnum ete)
         painter.drawText(QRect(QPoint(3, 3), size), Qt::AlignCenter, m_labelText);
         painter.end();
     }
-
     else if(ete == CorrectEdition){
         QString s = QString::number(size.width());
         qDebug(s.toAscii());
@@ -111,7 +110,21 @@ void DragLabel::setupLabelType(EditionTypeEnum ete)
         painter.setBrush(Qt::black);
         painter.drawText(QRect(QPoint(3, 3), size), Qt::AlignCenter, m_labelText);
         painter.end();
+    }
+    else if(ete == TrancriptionDeletion){
+        gradient.setColorAt(0.0, Qt::white);
+        gradient.setColorAt(0.2, QColor(15, 180, 245));
+        gradient.setColorAt(0.8, QColor(10, 185, 250));
+        gradient.setColorAt(1.0, QColor(0, 191, 255));
 
+        painter.begin(&image);
+        painter.setRenderHint(QPainter::Antialiasing);
+        painter.setBrush(gradient);
+        painter.drawRect(QRectF(0.1, 0.1, image.width()-1, image.height()-1));
+        painter.setFont(font);
+        painter.setBrush(Qt::white);
+        painter.drawText(QRect(QPoint(3, 3), size), Qt::AlignCenter, m_labelText);
+        painter.end();
     }
     setPixmap(QPixmap::fromImage(image));
 }
@@ -149,6 +162,8 @@ void DragLabel::markAsDeleted()
     painter.drawText(QRect(QPoint(3, 3), size), Qt::AlignCenter, m_labelText);
     painter.end();
     setPixmap(QPixmap::fromImage(image));
+
+    setupLabelType(TrancriptionDeletion);
 }
 
 EditionTypeEnum DragLabel::getErrorType()

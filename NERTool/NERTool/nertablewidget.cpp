@@ -189,11 +189,21 @@ void NERTableWidget::loadSubtitlesXMLData(QList<BlockTRS> *transcription, QList<
 void NERTableWidget::insertTimeStampsHashedMap(QString &timeStamp, QString &text)
 {
     QStringList ls = timeStamp.split(".");
-    QString secs = ls[0];
-    QString mils = ls[1];
-    qlonglong timeMilis = (secs.toLongLong())*1000
-            + mils.toLongLong()
-            - mils.toLongLong() % SUBTITLE_CHECK_INTERVAL;
+    QString secs;
+    QString mils;
+
+    qlonglong timeMilis;
+
+    if(ls.count()==2){
+        secs = ls[0];
+        mils = ls[1];
+        timeMilis = (secs.toLongLong())*1000
+                + mils.toLongLong()
+                - mils.toLongLong() % SUBTITLE_CHECK_INTERVAL;
+    }
+    else if(ls.count()==1){
+        timeMilis = (secs.toLongLong())*1000;
+    }
 
     subtileDataHashedByTimestamp->insert(timeMilis, text);
 }
@@ -230,7 +240,7 @@ int NERTableWidget::insertNewTableEntry(QString &speaker, QString &timeStamp, QS
     setItem(line, TIMESTAMP_COLUMN_INDEX, tsItem);
 
     //Insert the chopped text block with the widget...
-    DragWidget *wordBox = new DragWidget(this, text, TRANSCRIPTION_COLUMN_WIDTH, false);
+    DragWidget *wordBox = new DragWidget(this, text, TRANSCRIPTION_COLUMN_WIDTH, true);
     setRowHeight(line, wordBox->getBlockSize().height());
     setColumnWidth(2,wordBox->getBlockSize().width());
     setCellWidget(line, TRANSCRIPTION_COLUMN_INDEX, wordBox);
@@ -309,6 +319,9 @@ NERStatsData NERTableWidget::computeNERStats_NerValue(){
     int N = computeNERStats_N();
     double re = computeNERStats_RecognitionErrors();
     double er = computeNERStats_EditionErrors();
+    int ins = computeInsertions();
+    int del = computeDeletions();
+    int subs = computeSubstitutions();
 
     double ner = 1.0f - (double)(re+er)/N;
 
@@ -325,7 +338,10 @@ NERStatsData NERTableWidget::computeNERStats_NerValue(){
                  << "\n\tEdition Errors = "<< er
                  << "\n\tRecog Errors = " << re
                  << "\n\tNER = " << ner
-                 << "\n\tAvg Delay = " << delay;
+                 << "\n\tAvg Delay = " << delay
+                 << "\n\tInsertions = " << ins
+                 << "\n\tDeletions = " << del
+                 << "\n\tSubstitutions = " << subs;
 
 
     return nerStatsDataValues;
@@ -341,9 +357,16 @@ double NERTableWidget::computeNERStats_EditionErrors()
     double editionError = 0;
     for(int i=0; i<rowCount(); i++){
 
+        //Get the Recog Errors from the subtable...
         NERSubTableWidget *subTable = static_cast<NERSubTableWidget*>(cellWidget(i, SUBTITLES_COLUMN_INDEX));
         if(subTable != 0){
             editionError += subTable->getEditionErrors(nerStatsDataValues);
+        }
+
+        //Get the recognition value from the transcription table line...
+        DragWidget* drag = static_cast<DragWidget*>(cellWidget(i, TRANSCRIPTION_COLUMN_INDEX));
+        if(drag !=0){
+            editionError += drag->getEditionErrors(nerStatsDataValues);
         }
     }
     return editionError;
@@ -353,9 +376,16 @@ double NERTableWidget::computeNERStats_RecognitionErrors(){
     double recogError = 0;
     for(int i=0; i<rowCount(); i++){
 
+        //Get the Recog Errors from the subtable...
         NERSubTableWidget *subTable = static_cast<NERSubTableWidget*>(cellWidget(i, SUBTITLES_COLUMN_INDEX));
         if(subTable != 0){
             recogError += subTable->getRecognitionErrors(nerStatsDataValues);
+        }
+
+        //Get the recognition value from the transcription table line...
+        DragWidget* drag = static_cast<DragWidget*>(cellWidget(i, TRANSCRIPTION_COLUMN_INDEX));
+        if(drag !=0){
+            recogError += drag->getRecognitionErrors(nerStatsDataValues);
         }
     }
     return recogError;
@@ -363,6 +393,63 @@ double NERTableWidget::computeNERStats_RecognitionErrors(){
 
 double NERTableWidget::computeNERStats_CorrectEditions(){
 
+}
+
+double NERTableWidget::computeInsertions()
+{
+    double insertions = 0;
+    for(int i=0; i<rowCount(); i++){
+
+        NERSubTableWidget *subTable = static_cast<NERSubTableWidget*>(cellWidget(i, SUBTITLES_COLUMN_INDEX));
+        if(subTable != 0){
+            insertions += subTable->getInsertions(nerStatsDataValues);
+        }
+
+        //Get the recognition value from the transcription table line...
+        DragWidget* drag = static_cast<DragWidget*>(cellWidget(i, TRANSCRIPTION_COLUMN_INDEX));
+        if(drag !=0){
+            insertions += drag->getInsertions(nerStatsDataValues);
+        }
+    }
+    return insertions;
+}
+
+double NERTableWidget::computeDeletions()
+{
+    double deletions = 0;
+    for(int i=0; i<rowCount(); i++){
+
+        NERSubTableWidget *subTable = static_cast<NERSubTableWidget*>(cellWidget(i, SUBTITLES_COLUMN_INDEX));
+        if(subTable != 0){
+            deletions += subTable->getDeletions(nerStatsDataValues);
+        }
+
+        //Get the recognition value from the transcription table line...
+        DragWidget* drag = static_cast<DragWidget*>(cellWidget(i, TRANSCRIPTION_COLUMN_INDEX));
+        if(drag !=0){
+            deletions += drag->getDeletions(nerStatsDataValues);
+        }
+    }
+    return deletions;
+}
+
+double NERTableWidget::computeSubstitutions()
+{
+    double substitutions = 0;
+    for(int i=0; i<rowCount(); i++){
+
+        NERSubTableWidget *subTable = static_cast<NERSubTableWidget*>(cellWidget(i, SUBTITLES_COLUMN_INDEX));
+        if(subTable != 0){
+            substitutions += subTable->getSubstitutions(nerStatsDataValues);
+        }
+
+        //Get the recognition value from the transcription table line...
+        DragWidget* drag = static_cast<DragWidget*>(cellWidget(i, TRANSCRIPTION_COLUMN_INDEX));
+        if(drag !=0){
+            substitutions += drag->getSubstitutions(nerStatsDataValues);
+        }
+    }
+    return substitutions;
 }
 
 double NERTableWidget::computeNERStats_Delay(){
@@ -618,11 +705,13 @@ void NERTableWidget::applyEditionProperties(QList<Diff> &diffList)
 
         if(df.operation == EQUAL){
             label->setupLabelType(CorrectEdition);
+            label->setErrorClass(NotDefined);
             label->setErrorWeight(ERROR_WEIGHT_0);
         }
         else{
             label->setupLabelType(EditionError);
             label->setErrorWeight(ERROR_WEIGHT_025);
+            label->setErrorClass(NotDefined);
         }
     }
 }
@@ -641,9 +730,13 @@ void NERTableWidget::applyEditionPropertiesToTranscription(QList<Diff> &diffList
 
         if(df.operation == EQUAL){
             label->setupLabelType(CorrectEdition);
+            label->setErrorClass(NotDefined);
+            label->setErrorWeight(ERROR_WEIGHT_0);
         }
         else{ //deletion
-            label->markAsDeleted();
+            label->setupLabelType(TrancriptionDeletion);
+            label->setErrorClass(NotDefined);
+            label->setErrorWeight(ERROR_WEIGHT_0);
         }
     }
 }
@@ -656,7 +749,7 @@ void NERTableWidget::applyEditionPropertiesToTranscription(QList<Diff> &diffList
  ******************************************************************************/
 NERSubTableWidget::NERSubTableWidget(QWidget *parent): QTableWidget(parent)
 {
-    setSelectionMode(QAbstractItemView::SingleSelection);
+    setSelectionMode(QAbstractItemView::NoSelection);
     setSelectionBehavior(QAbstractItemView::SelectRows);
     setSortingEnabled(false);
     setColumnCount(2);
@@ -833,6 +926,39 @@ double NERSubTableWidget::getRecognitionErrors(NERStatsData &nerStats)
         rError += dw->getRecognitionErrors(nerStats);
     }
     return rError;
+}
+
+double NERSubTableWidget::getInsertions(NERStatsData &nerStats)
+{
+    double insertions = 0;
+
+    for(int i=0; i<rowCount(); i++){
+        DragWidget* dw = static_cast<DragWidget*>(cellWidget(i, SUB_SUBTITLES_COLUMN_INDEX));
+        insertions += dw->getInsertions(nerStats);
+    }
+    return insertions;
+}
+
+double NERSubTableWidget::getDeletions(NERStatsData &nerStats)
+{
+    double deletions = 0;
+
+    for(int i=0; i<rowCount(); i++){
+        DragWidget* dw = static_cast<DragWidget*>(cellWidget(i, SUB_SUBTITLES_COLUMN_INDEX));
+        deletions += dw->getDeletions(nerStats);
+    }
+    return deletions;
+}
+
+double NERSubTableWidget::getSubstitutions(NERStatsData &nerStats)
+{
+    double substitutions = 0;
+
+    for(int i=0; i<rowCount(); i++){
+        DragWidget* dw = static_cast<DragWidget*>(cellWidget(i, SUB_SUBTITLES_COLUMN_INDEX));
+        substitutions += dw->getSubstitutions(nerStats);
+    }
+    return substitutions;
 }
 
 NERSubTableWidget::~NERSubTableWidget()

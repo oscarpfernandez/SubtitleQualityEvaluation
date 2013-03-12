@@ -674,7 +674,26 @@ void NERMainWindow::computeWordDifferences(NERTableWidget* table)
     }
 
     QString transText = table->getAllTranslationText();
+    transText.remove(".");
+    transText.remove(",");
+    transText.remove("!");
+    transText.remove("¡");
+    transText.remove("?");
+    transText.remove("¿");
+    transText.remove(";");
+    transText.remove(":");
+    transText = transText.toLower();
+
     QString subsText = table->getAllSubtableText();
+    subsText.remove(".");
+    subsText.remove(",");
+    subsText.remove("!");
+    subsText.remove("¡");
+    subsText.remove("?");
+    subsText.remove("¿");
+    subsText.remove(";");
+    subsText.remove(":");
+    subsText = subsText.toLower();
 
     //Computes the diff...
     QList<Diff> diffList = table->computeDifferences(transText, subsText);

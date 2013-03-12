@@ -14,7 +14,8 @@ enum EditionTypeEnum {
     NotDefinedYet=0,
     CorrectEdition=1,
     EditionError=2,
-    RecognitionError=3
+    RecognitionError=3,
+    TrancriptionDeletion=4
 };
 
 enum ModificationType {

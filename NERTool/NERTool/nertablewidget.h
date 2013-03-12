@@ -65,6 +65,9 @@ public:
     double computeNERStats_RecognitionErrors();
     double computeNERStats_CorrectEditions();
     double computeNERStats_Delay();
+    double computeInsertions();
+    double computeDeletions();
+    double computeSubstitutions();
     NERStatsData getNERStatsValues();
     QString getTableTransRowText(int row);
     QList<DragLabel*> getTableTransRowLabels(int row);
@@ -114,6 +117,9 @@ public:
     QList<DragLabel*> getSubTableLabels();
     double getEditionErrors(NERStatsData &nerStats);
     double getRecognitionErrors(NERStatsData &nerStats);
+    double getInsertions(NERStatsData &nerStats);
+    double getDeletions(NERStatsData &nerStats);
+    double getSubstitutions(NERStatsData &nerStats);
 
 private:
     MediaMngWidget *mediaMngWidget;

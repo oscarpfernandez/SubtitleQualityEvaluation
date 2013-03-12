@@ -65,24 +65,6 @@ DragWidget::DragWidget(QWidget *parent, int maxWidth, bool isModifiable)
 
     m_isModifiable = isModifiable;
     m_maxWidgetWidth = maxWidth;
-//    m_labelsPointerList = new QList<DragLabel *>();
-//    int x = 5;
-//    int y = 2;
-//    m_numLines = 0;
-
-//    for(int i=0; i<labelList.count(); i++) {
-//        DragLabel* wordLabel = labelList.at(i);
-
-//        if (wordLabel != 0) {
-//            m_labelsPointerList->append(wordLabel);
-//            x += wordLabel->width()+1;
-//            if (x >= m_maxWidgetWidth && i-1<labelList.count()) {
-//                x = 5;
-//                y += wordLabel->height() + 2;
-//                m_numLines++;
-//            }
-//        }
-//    }
 
     //White background...
     QPalette newPalette = palette();
@@ -91,7 +73,6 @@ DragWidget::DragWidget(QWidget *parent, int maxWidth, bool isModifiable)
 
     setContextMenuPolicy(Qt::DefaultContextMenu);
     installEventFilter(this);
-
 
 }
 
@@ -182,9 +163,6 @@ int DragWidget::countWords()
     if(m_labelsPointerList->isEmpty()){
         return 0;
     }
-
-//    int c =  m_labelsPointerList->count();
-//    qDebug() << "Number of words -> "<< c;
 
     return m_labelsPointerList->count();
 }
@@ -338,6 +316,8 @@ bool DragWidget::eventFilter(QObject *obj, QEvent *event)
             return false;
         }
 
+        EditionTypeEnum previousType = child->getErrorType();
+
         QPoint hotSpot = mouseEvent->pos() - child->pos();
         QPoint globalPos = child->mapToGlobal(hotSpot);
 
@@ -355,12 +335,12 @@ bool DragWidget::eventFilter(QObject *obj, QEvent *event)
         subMenu.addAction(m_Error025Action);
         subMenu.addAction(m_Error050Action);
         subMenu.addAction(m_Error100Action);
-//        QMenu subMenu2("Type");
-//        subMenu2.addAction(m_insertionAction);
-//        subMenu2.addAction(m_delectionAction);
-//        subMenu2.addAction(m_substitutionAction);
+        QMenu subMenu2("Type");
+        subMenu2.addAction(m_insertionAction);
+        subMenu2.addAction(m_delectionAction);
+        subMenu2.addAction(m_substitutionAction);
         myMenu.addMenu(&subMenu);
-//        myMenu.addMenu(&subMenu2);
+        myMenu.addMenu(&subMenu2);
 
         // ...
 
@@ -372,7 +352,8 @@ bool DragWidget::eventFilter(QObject *obj, QEvent *event)
                 m_noErrorAction->setChecked(true);
                 child->setupLabelType(CorrectEdition);
                 child->setErrorWeight(ERROR_WEIGHT_0);
-                propagateProperties(child);
+                child->setErrorClass(NotDefined);
+                propagateProperties(child, previousType);
             }
             else if(selectedItem->text() == EDITION_ERROR_STR)
             {
@@ -382,7 +363,7 @@ bool DragWidget::eventFilter(QObject *obj, QEvent *event)
                 if(child->getErrorWeight()==ERROR_WEIGHT_0){
                     child->setErrorWeight(ERROR_WEIGHT_025);
                 }
-                propagateProperties(child);
+                propagateProperties(child, previousType);
             }
             else if(selectedItem->text() == RECOG_ERROR_STR)
             {
@@ -392,7 +373,7 @@ bool DragWidget::eventFilter(QObject *obj, QEvent *event)
                 if(child->getErrorWeight()==ERROR_WEIGHT_0){
                     child->setErrorWeight(ERROR_WEIGHT_025);
                 }
-                propagateProperties(child);
+                propagateProperties(child, previousType);
             }
             else if(selectedItem->text() == EDITION_COMMENT_STR){
                 //Modify comment used in the report...
@@ -404,40 +385,43 @@ bool DragWidget::eventFilter(QObject *obj, QEvent *event)
                 uncheckAllWeightActions();
                 m_Error025Action->setChecked(true);
                 child->setErrorWeight(ERROR_WEIGHT_025);
-                propagateProperties(child);
+                propagateProperties(child, previousType);
             }
             else if(selectedItem->text() == ERROR_WEIGHT_05_STR){
                 uncheckAllWeightActions();
                 m_Error050Action->setChecked(true);
                 child->setErrorWeight(ERROR_WEIGHT_050);
-                propagateProperties(child);
+                propagateProperties(child, previousType);
             }
             else if(selectedItem->text() == ERROR_WEIGHT_1_STR){
                 uncheckAllWeightActions();
                 m_Error100Action->setChecked(true);
                 child->setErrorWeight(ERROR_WEIGHT_1);
-                propagateProperties(child);
+                propagateProperties(child, previousType);
             }
             else if(selectedItem->text() == ERROR_WEIGHT_0_STR){
                 uncheckAllWeightActions();
                 m_Error0Action->setChecked(true);
                 child->setErrorWeight(ERROR_WEIGHT_0);
-                propagateProperties(child);
+                propagateProperties(child, previousType);
             }
             else if(selectedItem->text() == INSERTION_STR){
                 uncheckAllTypeActions();
                 child->setErrorClass(Insertion);
                 m_insertionAction->setChecked(true);
+                propagateModificationProperties(child);
             }
             else if(selectedItem->text() == SUBSTITUTION_STR){
                 uncheckAllTypeActions();
                 child->setErrorClass(Substitution);
                 m_substitutionAction->setChecked(true);
+                propagateModificationProperties(child);
             }
             else if(selectedItem->text() == DELETION_STR){
                 uncheckAllTypeActions();
                 child->setErrorClass(Deletion);
                 m_delectionAction->setChecked(true);
+                propagateModificationProperties(child);
             }
 
         }
@@ -562,11 +546,153 @@ double DragWidget::getRecognitionErrors(NERStatsData &nerStats)
     return globalErrorValue;
 }
 
+double DragWidget::getInsertions(NERStatsData &nerStats)
+{
+    double globalInsertions = 0;
+
+    ModificationType lastModification(NotDefined);
+    ModificationType modificationType;
+
+    for(int i=0; i<m_labelsPointerList->count(); ++i){
+        DragLabel *labelW = m_labelsPointerList->at(i);
+
+         modificationType = labelW->getErrorClass();
+
+        if(modificationType == Insertion){
+
+            if(modificationType != lastModification || i==0){
+                if(labelW->getErrorType()==EditionError){
+                    nerStats.incEdErrorInsertions();
+                    globalInsertions +=nerStats.getEdErrorInsertions();
+                }
+                else if(labelW->getErrorType()==RecognitionError){
+                    nerStats.incRecogErrorInsertions();
+                    globalInsertions +=nerStats.getRecogErrorInsertions();
+                }
+            }
+        }
+
+        lastModification = modificationType;
+    }
+
+    return globalInsertions;
+}
+
+double DragWidget::getDeletions(NERStatsData &nerStats)
+{
+    double globalInsertions = 0;
+
+    ModificationType lastModification(NotDefined);
+    ModificationType modificationType;
+
+    for(int i=0; i<m_labelsPointerList->count(); ++i){
+        DragLabel *labelW = m_labelsPointerList->at(i);
+
+         modificationType = labelW->getErrorClass();
+
+        if(modificationType == Deletion){
+
+            if(modificationType != lastModification || i==0){
+                if(labelW->getErrorType()==EditionError){
+                    nerStats.incEdErrorDeletions();
+                    globalInsertions +=nerStats.getEdErrorDeletions();
+                }
+                else if(labelW->getErrorType()==RecognitionError){
+                    nerStats.incRecogErrorDeletions();
+                    globalInsertions +=nerStats.getRecogErrorDeletions();
+                }
+            }
+        }
+
+        lastModification = modificationType;
+    }
+
+    return globalInsertions;
+}
+
+double DragWidget::getSubstitutions(NERStatsData &nerStats)
+{
+    double globalSubstitutions = 0;
+
+    ModificationType lastModification(NotDefined);
+    ModificationType modificationType;
+
+    for(int i=0; i<m_labelsPointerList->count(); ++i){
+        DragLabel *labelW = m_labelsPointerList->at(i);
+
+         modificationType = labelW->getErrorClass();
+
+        if(modificationType == Substitution){
+
+            if(modificationType != lastModification || i==0){
+                if(labelW->getErrorType()==EditionError){
+                    nerStats.incEdErrorSubstitutions();
+                    globalSubstitutions +=nerStats.getEdErrorSubstitutions();
+                }
+                else if(labelW->getErrorType()==RecognitionError){
+                    nerStats.incRecogErrorSubstitutions();
+                    globalSubstitutions +=nerStats.getRecogErrorSubstitutions();
+                }
+            }
+        }
+
+        lastModification = modificationType;
+    }
+
+    return globalSubstitutions;
+}
+
 /*******************************************************************************
  * Propagates properties across neighbour labels with the same EditionType error.
  * like the weight and comment.
  ******************************************************************************/
-void DragWidget::propagateProperties(DragLabel* label)
+void DragWidget::propagateProperties(DragLabel* label, EditionTypeEnum previousType)
+{
+    if(label==0){
+        return;
+    }
+    int index = m_labelsPointerList->indexOf(label);
+
+    EditionTypeEnum errorType = label->getErrorType();
+
+    //propagate to the right...
+    if(index+1 < m_labelsPointerList->count()){
+        for(int i=index+1; i<m_labelsPointerList->count(); i++){
+            DragLabel* neighLab = m_labelsPointerList->at(i);
+            if(previousType==TrancriptionDeletion && previousType==neighLab->getErrorType()){
+                //Transcription case... propagate the labels type...
+                neighLab->setupLabelType(label->getErrorType());
+            }
+            else if(neighLab->getErrorType() != label->getErrorType()){
+                //neighbour is different
+                break;
+            }
+            neighLab->setupLabelType(label->getErrorType());
+            neighLab->setErrorWeight(label->getErrorWeight());
+            QString s(label->getComment());
+        }
+    }
+
+    //propagate to left
+    if(index-1 > 0){
+        for(int i=index-1; i>=0; i--){
+            DragLabel* neighLab = m_labelsPointerList->at(i);
+            if(previousType==TrancriptionDeletion && previousType==neighLab->getErrorType()){
+                //Transcription case... propagate the labels type...
+                neighLab->setupLabelType(label->getErrorType());
+            }
+            else if(neighLab->getErrorType() != label->getErrorType()){
+                //neighbour is different
+                break;
+            }
+            neighLab->setupLabelType(label->getErrorType());
+            neighLab->setErrorWeight(label->getErrorWeight());
+            QString s(label->getComment());
+        }
+    }
+}
+
+void DragWidget::propagateModificationProperties(DragLabel* label)
 {
     if(label==0){
         return;
@@ -581,9 +707,7 @@ void DragWidget::propagateProperties(DragLabel* label)
                 //neighbour is different
                 break;
             }
-            neighLab->setupLabelType(label->getErrorType());
-            neighLab->setErrorWeight(label->getErrorWeight());
-            QString s(label->getComment());
+            neighLab->setErrorClass(label->getErrorClass());
         }
     }
 
@@ -595,9 +719,7 @@ void DragWidget::propagateProperties(DragLabel* label)
                 //neighbour is different
                 break;
             }
-            neighLab->setupLabelType(label->getErrorType());
-            neighLab->setErrorWeight(label->getErrorWeight());
-            QString s(label->getComment());
+            neighLab->setErrorClass(label->getErrorClass());
         }
     }
 }

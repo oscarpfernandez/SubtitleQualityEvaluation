@@ -17,7 +17,6 @@ NERStatsViewerWidget::NERStatsViewerWidget(QWidget *parent) : QWidget(parent)
 void NERStatsViewerWidget::createElements()
 {
     mainLayout = new QVBoxLayout;
-    plotsLayout = new QHBoxLayout;
 
     mainNerGroupBoxLayout = new QVBoxLayout;
 
@@ -168,6 +167,8 @@ void NERStatsViewerWidget::createElements()
     subBoxesLayout->addWidget(recogErrorPropGroupbox);
     subBoxesLayout->addWidget(editionErrorPropGroupbox);
 
+
+
     mainNerGroupBoxLayout->addLayout(nerValuesLayout);
     mainNerGroupBoxLayout->addLayout(subBoxesLayout);
 
@@ -179,14 +180,29 @@ void NERStatsViewerWidget::createElements()
     editionErrorPlot = new QCustomPlot();
     recognitionErrorPlot = new QCustomPlot();
     crossErrorPlot = new QCustomPlot();
+    editionErrorsModifTypePlot = new QCustomPlot();
+    recogErrorsModifTypePlot = new QCustomPlot();
+    recogErrorsCrossModifTypePlot = new QCustomPlot();
 
-    plotsLayout->addWidget(crossErrorPlot);
-    plotsLayout->addWidget(recognitionErrorPlot);
-    plotsLayout->addWidget(editionErrorPlot);
+    plotsLayout = new QVBoxLayout;
+    subBoxesInsDelsSubsLayout = new QHBoxLayout;
+    subBoxesEdErrorrecogError = new QHBoxLayout;
+
+    subBoxesInsDelsSubsLayout->addWidget(recogErrorsCrossModifTypePlot);
+    subBoxesInsDelsSubsLayout->addWidget(recogErrorsModifTypePlot);
+    subBoxesInsDelsSubsLayout->addWidget(editionErrorsModifTypePlot);
+
+
+    plotsLayout->addLayout(subBoxesEdErrorrecogError);
+    plotsLayout->addLayout(subBoxesInsDelsSubsLayout);
+
+    subBoxesEdErrorrecogError->addWidget(crossErrorPlot);
+    subBoxesEdErrorrecogError->addWidget(recognitionErrorPlot);
+    subBoxesEdErrorrecogError->addWidget(editionErrorPlot);
 
     plotsGroupBox = new QGroupBox("NER Statistics Plots", this);
     plotsGroupBox->setLayout(plotsLayout);
-    plotsGroupBox->setMinimumSize(QSize(900,300));
+    plotsGroupBox->setMinimumSize(QSize(950,550));
 
     refreshButton = new QPushButton("Refresh", this);
     refreshButton->setMaximumWidth(100);
@@ -214,6 +230,9 @@ void NERStatsViewerWidget::replotGraphs()
     editionErrorPlot->replot();
     recognitionErrorPlot->replot();
     crossErrorPlot->replot();
+    editionErrorsModifTypePlot->replot();
+    recogErrorsModifTypePlot->replot();
+    recogErrorsCrossModifTypePlot->replot();
 }
 
 void NERStatsViewerWidget::clearGraphsData()
@@ -221,6 +240,9 @@ void NERStatsViewerWidget::clearGraphsData()
     editionErrorPlot->clearPlottables();
     recognitionErrorPlot->clearPlottables();
     crossErrorPlot->clearPlottables();
+    editionErrorsModifTypePlot->clearPlottables();
+    recogErrorsModifTypePlot->clearPlottables();
+    recogErrorsCrossModifTypePlot->clearPlottables();
 }
 
 void NERStatsViewerWidget::loadGraphsData(NERStatsData &nerStatsData)
@@ -228,6 +250,9 @@ void NERStatsViewerWidget::loadGraphsData(NERStatsData &nerStatsData)
     setupBarChartDemo(editionErrorPlot, nerStatsData, EditionErrorsGraph);
     setupBarChartDemo(recognitionErrorPlot, nerStatsData, RecognitionErrorGraph);
     setupBarChartCrossError(crossErrorPlot, nerStatsData);
+    setupBarChartModifTypes(editionErrorsModifTypePlot, nerStatsData, EditionInsDelSubsGraph);
+    setupBarChartModifTypes(recogErrorsModifTypePlot,   nerStatsData, RecognitionInsDelSubsGraph);
+    setupBarChartCrossModifTypes(recogErrorsCrossModifTypePlot, nerStatsData);
 
     setPropertiesData(nerStatsData);
 }
@@ -308,9 +333,9 @@ void NERStatsViewerWidget::setupBarChartDemo(QCustomPlot *customPlot,
     else if(graphType == RecognitionErrorGraph){
         customPlot->yAxis->setLabel("Recognition Error");
     }
-    else if(graphType == CrossErrorGraph){
-        customPlot->yAxis->setLabel("Edition Error vs Recognition Error");
-    }
+//    else if(graphType == CrossErrorGraph){
+//        customPlot->yAxis->setLabel("Edition Error vs Recognition Error");
+//    }
     customPlot->yAxis->setSubGrid(true);
     QPen gridPen;
     gridPen.setStyle(Qt::SolidLine);
@@ -476,3 +501,223 @@ void NERStatsViewerWidget::setupBarChartCrossError(QCustomPlot *customPlot,
 
 }
 
+void NERStatsViewerWidget::setupBarChartModifTypes(QCustomPlot *customPlot,
+                                                   NERStatsData &nerStatsData,
+                                                   GraphType graphType)
+{
+    // create empty bar chart objects:
+    QCPBars *inserton_Bar = new QCPBars(customPlot->xAxis, customPlot->yAxis);
+    QCPBars *deletion_Bar = new QCPBars(customPlot->xAxis, customPlot->yAxis);
+    QCPBars *substitution_Bar = new QCPBars(customPlot->xAxis, customPlot->yAxis);
+
+    customPlot->addPlottable(inserton_Bar);
+    customPlot->addPlottable(deletion_Bar);
+    customPlot->addPlottable(substitution_Bar);
+
+    // set names and colors:
+    QPen pen;
+    pen.setWidthF(1.2);
+    inserton_Bar->setName("Insertion");
+    pen.setColor(QColor(255, 131, 0));
+    inserton_Bar->setPen(pen);
+    inserton_Bar->setBrush(QColor(255, 131, 0, 50));
+    deletion_Bar->setName("Deletion");
+    pen.setColor(QColor(1, 92, 191));
+    deletion_Bar->setPen(pen);
+    deletion_Bar->setBrush(QColor(1, 92, 191, 50));
+    substitution_Bar->setName("Substitution");
+    pen.setColor(QColor(150, 222, 0));
+    substitution_Bar->setPen(pen);
+    substitution_Bar->setBrush(QColor(150, 222, 0, 70));
+
+
+    // prepare x axis with country labels:
+    QVector<double> ticks;
+    QVector<QString> labels;
+    ticks << 1 << 2 << 3;
+    labels << "Ins" << "Del" << "Subs";
+    customPlot->xAxis->setAutoTicks(false);
+    customPlot->xAxis->setAutoTickLabels(false);
+    customPlot->xAxis->setTickVector(ticks);
+    customPlot->xAxis->setTickVectorLabels(labels);
+    customPlot->xAxis->setTickLabelRotation(0);
+    customPlot->xAxis->setSubTickCount(0);
+    customPlot->xAxis->setTickLength(0, 4);
+    customPlot->xAxis->setGrid(false);
+    customPlot->xAxis->setRange(0, 4);
+
+    // prepare y axis:
+    customPlot->yAxis->setRange(0, 101); // Y-Axis in percentage!!!;
+    customPlot->yAxis->setPadding(5); // a bit more space to the left border
+    if(graphType == EditionInsDelSubsGraph){
+        customPlot->yAxis->setLabel("Edition Error");
+    }
+    else if(graphType == RecognitionInsDelSubsGraph){
+        customPlot->yAxis->setLabel("Recognition Error");
+    }
+
+    customPlot->yAxis->setSubGrid(true);
+    QPen gridPen;
+    gridPen.setStyle(Qt::SolidLine);
+    gridPen.setColor(QColor(0, 0, 0, 25));
+    customPlot->yAxis->setGridPen(gridPen);
+    gridPen.setStyle(Qt::DotLine);
+    customPlot->yAxis->setSubGridPen(gridPen);
+
+
+    //Extract stats data...
+    QVector<double> insData, delData, subsData;
+
+    double ins_percent = 0;
+    double dels_percent = 0;
+    double subs_percent = 0;
+
+    if(graphType == EditionInsDelSubsGraph)
+    {
+        double ins = nerStatsData.getEdErrorInsertions();
+        double dels = nerStatsData.getEdErrorDeletions();
+        double subs = nerStatsData.getEdErrorSubstitutions();
+
+
+        double sum = ins + dels + subs;
+
+        if(sum !=0){
+            ins_percent = (ins / sum) * 100;
+            dels_percent = (dels / sum) * 100;
+            subs_percent = (subs / sum) * 100;
+        }
+    }
+    else if(graphType == RecognitionInsDelSubsGraph)
+    {
+        double ins  = nerStatsData.getRecogErrorInsertions();
+        double dels = nerStatsData.getRecogErrorDeletions();
+        double subs = nerStatsData.getRecogErrorSubstitutions();
+
+        double sum = ins + dels + subs;
+
+        if(sum !=0){
+            ins_percent = (ins / sum) * 100;
+            dels_percent = (dels / sum) * 100;
+            subs_percent = (subs / sum) * 100;
+        }
+    }
+
+    insData   << ins_percent << 0 << 0;
+    delData   << 0 << dels_percent << 0;
+    subsData   << 0 << 0 << subs_percent;
+
+    inserton_Bar->setData(ticks, insData);
+    deletion_Bar->setData(ticks, delData);
+    substitution_Bar->setData(ticks, subsData);
+
+    // setup legend:
+    customPlot->legend->setVisible(false);
+    customPlot->legend->setPositionStyle(QCPLegend::psTop);
+    customPlot->legend->setBrush(QColor(255, 255, 255, 200));
+    QPen legendPen;
+    legendPen.setColor(QColor(130, 130, 130, 200));
+    customPlot->legend->setBorderPen(legendPen);
+    QFont legendFont = font();
+    legendFont.setPointSize(8);
+    customPlot->legend->setFont(legendFont);
+}
+
+void NERStatsViewerWidget::setupBarChartCrossModifTypes(QCustomPlot *customPlot,
+                                                        NERStatsData &nerStatsData)
+{
+    // create empty bar chart objects:
+    QCPBars *inserton_Bar = new QCPBars(customPlot->xAxis, customPlot->yAxis);
+    QCPBars *deletion_Bar = new QCPBars(customPlot->xAxis, customPlot->yAxis);
+    QCPBars *substitution_Bar = new QCPBars(customPlot->xAxis, customPlot->yAxis);
+
+    customPlot->addPlottable(inserton_Bar);
+    customPlot->addPlottable(deletion_Bar);
+    customPlot->addPlottable(substitution_Bar);
+
+    // set names and colors:
+    QPen pen;
+    pen.setWidthF(1.2);
+    inserton_Bar->setName("Insertion");
+    pen.setColor(QColor(255, 131, 0));
+    inserton_Bar->setPen(pen);
+    inserton_Bar->setBrush(QColor(255, 131, 0, 50));
+    deletion_Bar->setName("Deletion");
+    pen.setColor(QColor(1, 92, 191));
+    deletion_Bar->setPen(pen);
+    deletion_Bar->setBrush(QColor(1, 92, 191, 50));
+    substitution_Bar->setName("Substitution");
+    pen.setColor(QColor(150, 222, 0));
+    substitution_Bar->setPen(pen);
+    substitution_Bar->setBrush(QColor(150, 222, 0, 70));
+
+
+    // prepare x axis with country labels:
+    QVector<double> ticks;
+    QVector<QString> labels;
+    ticks << 1 << 2 << 3;
+    labels << "Ins" << "Del" << "Subs";
+    customPlot->xAxis->setAutoTicks(false);
+    customPlot->xAxis->setAutoTickLabels(false);
+    customPlot->xAxis->setTickVector(ticks);
+    customPlot->xAxis->setTickVectorLabels(labels);
+    customPlot->xAxis->setTickLabelRotation(0);
+    customPlot->xAxis->setSubTickCount(0);
+    customPlot->xAxis->setTickLength(0, 4);
+    customPlot->xAxis->setGrid(false);
+    customPlot->xAxis->setRange(0, 4);
+
+    // prepare y axis:
+    customPlot->yAxis->setRange(0, 101); // Y-Axis in percentage!!!;
+    customPlot->yAxis->setPadding(5); // a bit more space to the left border
+    customPlot->yAxis->setLabel("Ins vs Del vs Subs");
+
+    customPlot->yAxis->setSubGrid(true);
+    QPen gridPen;
+    gridPen.setStyle(Qt::SolidLine);
+    gridPen.setColor(QColor(0, 0, 0, 25));
+    customPlot->yAxis->setGridPen(gridPen);
+    gridPen.setStyle(Qt::DotLine);
+    customPlot->yAxis->setSubGridPen(gridPen);
+
+
+    //Extract stats data...
+    QVector<double> insData, delData, subsData;
+
+    double ins_percent = 0;
+    double dels_percent = 0;
+    double subs_percent = 0;
+
+    double ins = nerStatsData.getEdErrorInsertions() + nerStatsData.getRecogErrorInsertions();
+    double dels = nerStatsData.getEdErrorDeletions() + nerStatsData.getRecogErrorDeletions();
+    double subs = nerStatsData.getEdErrorSubstitutions() + nerStatsData.getRecogErrorSubstitutions();
+
+
+    double sum = ins + dels + subs;
+
+    if(sum !=0){
+        ins_percent = (ins / sum) * 100;
+        dels_percent = (dels / sum) * 100;
+        subs_percent = (subs / sum) * 100;
+    }
+
+    insData   << ins_percent << 0 << 0;
+    delData   << 0 << dels_percent << 0;
+    subsData   << 0 << 0 << subs_percent;
+
+    inserton_Bar->setData(ticks, insData);
+    deletion_Bar->setData(ticks, delData);
+    substitution_Bar->setData(ticks, subsData);
+
+
+    // setup legend:
+    customPlot->legend->setVisible(false);
+    customPlot->legend->setPositionStyle(QCPLegend::psTop);
+    customPlot->legend->setBrush(QColor(255, 255, 255, 200));
+    QPen legendPen;
+    legendPen.setColor(QColor(130, 130, 130, 200));
+    customPlot->legend->setBorderPen(legendPen);
+    QFont legendFont = font();
+    legendFont.setPointSize(8);
+    customPlot->legend->setFont(legendFont);
+
+}

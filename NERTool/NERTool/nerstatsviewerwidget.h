@@ -13,7 +13,8 @@
 enum GraphType {
     EditionErrorsGraph=0,
     RecognitionErrorGraph=1,
-    CrossErrorGraph=2
+    EditionInsDelSubsGraph=2,
+    RecognitionInsDelSubsGraph=3
 };
 
 class NERStatsViewerWidget : public QWidget
@@ -87,10 +88,16 @@ private:
     QCustomPlot *editionErrorPlot;
     QCustomPlot *recognitionErrorPlot;
     QCustomPlot *crossErrorPlot;
+    QCustomPlot *editionErrorsModifTypePlot;
+    QCustomPlot *recogErrorsModifTypePlot;
+    QCustomPlot *recogErrorsCrossModifTypePlot;
     QVBoxLayout *mainLayout;
 
     QGroupBox *plotsGroupBox;
-    QHBoxLayout *plotsLayout;
+
+    QHBoxLayout *subBoxesEdErrorrecogError;
+    QHBoxLayout *subBoxesInsDelsSubsLayout;
+    QVBoxLayout *plotsLayout;
 
     void createElements();
     void createActions();
@@ -98,6 +105,11 @@ private:
                            NERStatsData &nerStatsData,
                            GraphType graphType);
     void setupBarChartCrossError(QCustomPlot *customPlot,
+                                 NERStatsData &nerStatsData);
+    void setupBarChartModifTypes(QCustomPlot *customPlot,
+                                 NERStatsData &nerStatsData,
+                                 GraphType graphType);
+    void setupBarChartCrossModifTypes(QCustomPlot *customPlot,
                                  NERStatsData &nerStatsData);
 
 private slots:

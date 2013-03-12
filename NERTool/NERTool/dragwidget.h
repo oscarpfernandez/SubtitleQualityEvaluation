@@ -43,6 +43,9 @@ public:
     QString getText();
     double getEditionErrors(NERStatsData &nerStats);
     double getRecognitionErrors(NERStatsData &nerStats);
+    double getInsertions(NERStatsData &nerStats);
+    double getDeletions(NERStatsData &nerStats);
+    double getSubstitutions(NERStatsData &nerStats);
     QList<DragLabel*> getLabels();
 
 protected:
@@ -76,7 +79,8 @@ private:
     void uncheckAllWeightActions();
     void uncheckAllTypeActions();
     void setActionsEnabledForLabel(DragLabel* label);
-    void propagateProperties(DragLabel* label);
+    void propagateProperties(DragLabel* label, EditionTypeEnum previousType);
+    void propagateModificationProperties(DragLabel* label);
 
 };
 

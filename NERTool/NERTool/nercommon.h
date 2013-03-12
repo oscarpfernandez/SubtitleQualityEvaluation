@@ -82,6 +82,13 @@ private:
     int     correctEditions_w050;
     int     correctEditions_w100;
     double  avgDelay;
+    int     editionErrorInsertions;
+    int     editionErrorDeletions;
+    int     editionErrorSubstitutions;
+    int     recogErrorInsertions;
+    int     recogErrorDeletions;
+    int     recogErrorSubstitutions;
+
 public:
     int getNCount(){
         return N_words + N_ponctuation + N_transitions;}
@@ -173,6 +180,43 @@ public:
     NERStatsData& setAvgDelay(double delay){
         avgDelay=delay;
         return *this;}
+    //Insertions
+    int getEdErrorInsertions(){
+        return editionErrorInsertions;}
+    NERStatsData& incEdErrorInsertions(){
+        editionErrorInsertions++;
+        return *this;}
+    int getRecogErrorInsertions(){
+        return recogErrorInsertions;}
+    NERStatsData& incRecogErrorInsertions(){
+        recogErrorInsertions++;
+        return *this;}
+
+    //Deletions
+    int getEdErrorDeletions(){
+        return editionErrorDeletions;}
+    NERStatsData& incEdErrorDeletions(){
+        editionErrorDeletions++;
+        return *this;}
+
+    int getRecogErrorDeletions(){
+        return recogErrorDeletions;}
+    NERStatsData& incRecogErrorDeletions(){
+        recogErrorDeletions++;
+        return *this;}
+
+    //Substitutions
+    int getEdErrorSubstitutions(){
+        return editionErrorSubstitutions;}
+    NERStatsData& incEdErrorSubstitutions(){
+        editionErrorSubstitutions++;
+        return *this;}
+
+    int getRecogErrorSubstitutions(){
+        return recogErrorSubstitutions;}
+    NERStatsData& incRecogErrorSubstitutions(){
+        recogErrorSubstitutions++;
+        return *this;}
 
     void resetDataToZero(){
         NCount = 0;
@@ -196,6 +240,12 @@ public:
         correctEditions_w050 = 0;
         correctEditions_w100 = 0;
         avgDelay = 0;
+        editionErrorInsertions = 0;
+        editionErrorDeletions = 0;
+        editionErrorSubstitutions = 0;
+        recogErrorInsertions = 0;
+        recogErrorDeletions = 0;
+        recogErrorSubstitutions = 0;
     }
 };
 #endif
