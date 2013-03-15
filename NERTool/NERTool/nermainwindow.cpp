@@ -879,45 +879,28 @@ void NERMainWindow::computerNERStatistics()
     NERTableWidget* table = static_cast<NERTableWidget*>(subWindow->widget());
 
     NERStatsData ner = table->computeNERStats_NerValue();
-    int N = ner.getNCount();
-    int N_words = ner.getN_words();
-    int N_ponctuation = ner.getN_ponctuation();
-    int N_transitions = ner.getN_transitions();
 
-    double er = ner.getEditionErrors();
-    int er_w0 = ner.getEditionErrors_w000();
-    int er_w025 = ner.getEditionErrors_w025();
-    int er_w050 = ner.getEditionErrors_w050();
-    int er_w1 = ner.getEditionErrors_w100();
-
-    double re = ner.getRecognitionErrors();
-    int re_w0 = ner.getRecognitionErrors_w000();
-    int re_w025 = ner.getRecognitionErrors_w025();
-    int re_w050 = ner.getRecognitionErrors_w050();
-    int re_w1 = ner.getRecognitionErrors_w100();
-
-    double ce = ner.getCorrectEditions();
+    double nerValue = ner.getNerValue();
     double delay = ner.getAvgDelay();
-    double nerVal = ner.getNerValue();
 
-    emit setNERStatistics(delay, nerVal);
+    emit setNERStatistics(delay, nerValue);
 
-    ENGINE_DEBUG << "NER Value = " << nerVal << "\n\t"
-                 << "Edition Error = " << er << "\n\t"
-                 << "Edition w000 = " << er_w0 << "\n\t"
-                 << "Edition w025 = " << er_w025 << "\n\t"
-                 << "Edition w050 = " << er_w050 << "\n\t"
-                 << "Edition w100 = " << er_w1 << "\n\t"
-                 << "Recognition Error = " << re << "\n\t"
-                 << "Recognition w000 = " << re_w0 << "\n\t"
-                 << "Recognition w025 = " << re_w025 << "\n\t"
-                 << "Recognition w050 = " << re_w050 << "\n\t"
-                 << "Recognition w100 = " << re_w1 << "\n\t"
-                 << "Avg Delay =" << delay << "\n\t"
-                 << "N = " << ner.getNCount() << "\n\t"
-                 << "N_words = " << ner.getN_words() << "\n\t"
-                 << "N_ponct = " << ner.getN_ponctuation() << "\n\t"
-                 << "N_trans = " << ner.getN_transitions();
+    ENGINE_DEBUG << "NER Value = "          << ner.getNerValue() << "\n\t"
+                 << "Edition Error = "      << ner.getEditionErrors() << "\n\t"
+                 << "Edition w000 = "       << ner.getEditionErrors_w000() << "\n\t"
+                 << "Edition w025 = "       << ner.getEditionErrors_w025() << "\n\t"
+                 << "Edition w050 = "       << ner.getEditionErrors_w050() << "\n\t"
+                 << "Edition w100 = "       << ner.getEditionErrors_w100() << "\n\t"
+                 << "Recognition Error = "  << ner.getRecognitionErrors() << "\n\t"
+                 << "Recognition w000 = "   << ner.getRecognitionErrors_w000() << "\n\t"
+                 << "Recognition w025 = "   << ner.getRecognitionErrors_w025() << "\n\t"
+                 << "Recognition w050 = "   << ner.getRecognitionErrors_w050() << "\n\t"
+                 << "Recognition w100 = "   << ner.getRecognitionErrors_w100() << "\n\t"
+                 << "Avg Delay ="           << ner.getAvgDelay() << "\n\t"
+                 << "N = "                  << ner.getNCount() << "\n\t"
+                 << "N_words = "            << ner.getN_words() << "\n\t"
+                 << "N_ponct = "            << ner.getN_ponctuation() << "\n\t"
+                 << "N_trans = "            << ner.getN_transitions();
 }
 
 

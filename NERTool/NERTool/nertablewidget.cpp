@@ -391,10 +391,6 @@ double NERTableWidget::computeNERStats_RecognitionErrors(){
     return recogError;
 }
 
-double NERTableWidget::computeNERStats_CorrectEditions(){
-
-}
-
 double NERTableWidget::computeInsertions()
 {
     double insertions = 0;

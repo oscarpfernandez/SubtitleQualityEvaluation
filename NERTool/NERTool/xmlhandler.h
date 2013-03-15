@@ -106,8 +106,6 @@ private:
 
     bool loadSubtitleXML(QFile *xmlFile,
                          QList<BlockTRS> *trsBlocks);
-    bool readNERTable(QXmlStreamReader *xmlReader,
-                      QList<NERTableWidget*> *nerTablesList);
     QString getFormatedTime(QString &time, bool &isTimeSRTOk);
 };
 

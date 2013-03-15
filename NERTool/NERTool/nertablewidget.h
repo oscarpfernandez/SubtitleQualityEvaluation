@@ -63,7 +63,6 @@ public:
     NERStatsData computeNERStats_NerValue();
     double computeNERStats_EditionErrors();
     double computeNERStats_RecognitionErrors();
-    double computeNERStats_CorrectEditions();
     double computeNERStats_Delay();
     double computeInsertions();
     double computeDeletions();

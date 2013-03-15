@@ -790,38 +790,6 @@ bool XMLHandler::readProjectExportXML(QString &xmlFileName,
 }
 
 
-bool XMLHandler::readNERTable(QXmlStreamReader *xmlReader,
-                              QList<NERTableWidget *> *nerTablesList)
-{
-    NERTableWidget *table = new NERTableWidget(_parent);
-
-    while(!xmlReader->isEndElement() && xmlReader->name()!=STR_TABLE_TAG)
-    {
-        xmlReader->readNext();
-
-        QXmlStreamAttributes attribs = xmlReader->attributes();
-        QString speaker = attribs.value(STR_TABLELINE_PROP_SID).toString();
-        QString timeStamp = attribs.value(STR_TABLELINE_PROP_TIMESTAMP).toString();
-        QString text = attribs.value(STR_TABLELINE_PROP_TRANSCRIP).toString();
-        //table->insertNewTableEntry(speaker, timeStamp, text);
-
-        //Read all the sub words;
-        xmlReader->readNext();
-
-        while(xmlReader->name()==STR_WORD_TAG){
-
-            QXmlStreamAttributes attributes = xmlReader->attributes();
-            const QString name = attributes.value(STR_WORD_PROP_NAME).toString();
-            const QString error = attributes.value(STR_WORD_PROP_ERROR).toString();
-            const QString comment = attributes.value(STR_WORD_PROP_COMMENT).toString();
-
-            xmlReader->readNext();
-        }//while...
-
-    }//while...
-
-}
-
 /*******************************************************************************
  * Write project report html.
  *
@@ -1001,7 +969,7 @@ bool XMLHandler::writeProjectReport(QString &xmlFileName,
 //    delete xmlWriter;//free mem
 //    return true;
 
-
+    return true;
 
 }
 
