@@ -663,7 +663,7 @@ void DragWidget::propagateProperties(DragLabel* label, EditionTypeEnum previousT
                 //Transcription case... propagate the labels type...
                 neighLab->setupLabelType(label->getErrorType());
             }
-            else if(neighLab->getErrorType() != label->getErrorType()){
+            else if(neighLab->getErrorType() != label->getErrorType() || neighLab->getErrorType()!=TrancriptionDeletion){
                 //neighbour is different
                 break;
             }
@@ -681,7 +681,7 @@ void DragWidget::propagateProperties(DragLabel* label, EditionTypeEnum previousT
                 //Transcription case... propagate the labels type...
                 neighLab->setupLabelType(label->getErrorType());
             }
-            else if(neighLab->getErrorType() != label->getErrorType()){
+            else if(neighLab->getErrorType() != label->getErrorType() || neighLab->getErrorType()!=TrancriptionDeletion){
                 //neighbour is different
                 break;
             }
