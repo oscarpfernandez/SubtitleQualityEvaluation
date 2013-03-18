@@ -13,10 +13,12 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp\
-        mainwindow.cpp
+        mainwindow.cpp \
+    utils.cpp
 
 HEADERS  += mainwindow.h \
-    common.h
+    common.h \
+    utils.h
 
 RC_FILE = app.rc
 
