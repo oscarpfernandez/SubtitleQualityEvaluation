@@ -12,6 +12,7 @@
 #include <QPushButton>
 #include <QMessageBox>
 #include <QFileDialog>
+#include <QTextEdit>
 #include "utils.h"
 
 namespace Ui {
@@ -35,6 +36,7 @@ private:
     QWidget *keyWidget;
     QVBoxLayout *mainKeyGenLayout;
 
+
     QGridLayout *genKeyLayout;
     QGroupBox *genKeyGroupBox;
     QLabel *userLabel;
@@ -43,6 +45,9 @@ private:
     QLineEdit *orgValueLabel;
     QLabel *macLabel;
     QLineEdit *macValueLabel;
+
+    QVBoxLayout *keyReaderLayout;
+    QGroupBox *readerKeyGroupBox;
 
     QCalendarWidget *calendarWidgetStart;
     QCalendarWidget *calendarWidgetFinish;
@@ -54,6 +59,9 @@ private:
     QDateEdit *finishTimeValueLabel;
 
     QPushButton *generateKey;
+    QPushButton *readKey;
+
+    QTextEdit *keyTextEdit;
 
     QTabWidget *tabs;
 
@@ -69,6 +77,7 @@ private slots:
     void setStartDateSlot(QDate d);
     void setFinishDateSlot(QDate d);
     void generateKeySlot();
+    void loadKeySlot();
 
 };
 

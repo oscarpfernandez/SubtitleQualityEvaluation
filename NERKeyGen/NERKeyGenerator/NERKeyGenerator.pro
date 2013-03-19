@@ -14,11 +14,13 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    utils.cpp
+    utils.cpp \
+    simplecrypt.cpp
 
 HEADERS  += mainwindow.h \
     common.h \
-    utils.h
+    utils.h \
+    simplecrypt.h
 
 RC_FILE = app.rc
 

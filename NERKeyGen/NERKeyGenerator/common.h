@@ -2,6 +2,7 @@
 #define COMMON_H
 
 #include <QtCore>
+#include <QDebug>
 
 const QString APP_NAME = "NER Key Generator";
 
