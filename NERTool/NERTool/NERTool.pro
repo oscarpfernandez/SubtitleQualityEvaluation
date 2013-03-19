@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui phonon multimedia
+QT       += core gui phonon multimedia network
 
 TARGET = NERTool
 TEMPLATE = app
@@ -24,7 +24,10 @@ SOURCES += main.cpp\
     nergraphwidget.cpp \
     utils.cpp \
     diff.cpp \
-    nerstatsviewerwidget.cpp
+    nerstatsviewerwidget.cpp \
+    licencemanager.cpp \
+    NtpReply.cpp \
+    NtpClient.cpp
 
 HEADERS  += nermainwindow.h \
     dragwidget.h \
@@ -41,7 +44,14 @@ HEADERS  += nermainwindow.h \
     nergraphwidget.h \
     utils.h \
     diff.h \
-    nerstatsviewerwidget.h
+    nerstatsviewerwidget.h \
+    licencemanager.h \
+    NtpTimestamp.h \
+    NtpReply_p.h \
+    NtpReply.h \
+    NtpPacket.h \
+    NtpClient.h \
+    config.h
 
 RC_FILE = app.rc
 
