@@ -45,7 +45,7 @@ void LicenceManager::installNewLicence(QString &filePath)
 
     //copy the new licence file to the default destination
     if(isLicFileAvailable){
-        QFile::rename(nerLicFile, nerLicFile.append(".old"));
+        QFile::remove(nerLicFile);
     }
 
     QFile::copy(filePath, nerLicFile);//new licence installed

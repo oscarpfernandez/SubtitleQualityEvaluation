@@ -912,9 +912,9 @@ void NERMainWindow::computerNERStatistics()
 
 void NERMainWindow::checkLicence()
 {
-    bool isLicOK = licenceMng->checkLicence();
+    LIC_ERROR_TYPE isLicOK = licenceMng->checkLicence();
 
-    if(!isLicOK)
+    if(isLicOK != LIC_NO_ERROR)
     {
         QMessageBox box;
         box.setInformativeText("The tool's licence is not installed or not longer valid!\nInstall a new licence file ?");
@@ -925,7 +925,7 @@ void NERMainWindow::checkLicence()
         int result = box.exec();
         switch (result){
         case QMessageBox::No :
-            QApplication::exit(0);
+            QCoreApplication::exit(0);
         }
 
         QString licFilePath = QFileDialog::getOpenFileName(
