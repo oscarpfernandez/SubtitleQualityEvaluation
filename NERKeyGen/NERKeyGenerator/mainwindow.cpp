@@ -50,7 +50,7 @@ void MainWindow::createElements()
     QDate currentDate = QDate::currentDate();
     startTimeValueLabel = new QDateEdit();
     startTimeValueLabel->setMaximumWidth(100);
-    startTimeValueLabel->setDate(QDate::fromString( currentDate.toString("dd/MM/yyyy"), "dd/MM/yyyy"  ));
+    startTimeValueLabel->setDate(QDate::fromString( currentDate.toString(Qt::ISODate), Qt::ISODate  ));
 
     startDateButton = new QPushButton("...");
     connect(startDateButton, SIGNAL(clicked()), this, SLOT(showCalendarStart()));
@@ -59,7 +59,7 @@ void MainWindow::createElements()
 
     finishTimeLabel = new QLabel(QString("Finish Date:"));
     finishTimeValueLabel = new QDateEdit();
-    finishTimeValueLabel->setDate(QDate::fromString( currentDate.toString("dd/MM/yyyy"), "dd/MM/yyyy"  ));
+    finishTimeValueLabel->setDate(QDate::fromString( currentDate.toString(Qt::ISODate), Qt::ISODate  ));
     finishTimeValueLabel->setDate(QDate(currentDate.year()+1, currentDate.month(), currentDate.day()));
     finishTimeValueLabel->setMaximumWidth(100);
 

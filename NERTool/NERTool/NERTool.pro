@@ -27,7 +27,8 @@ SOURCES += main.cpp\
     nerstatsviewerwidget.cpp \
     licencemanager.cpp \
     NtpReply.cpp \
-    NtpClient.cpp
+    NtpClient.cpp \
+    simplecrypt.cpp
 
 HEADERS  += nermainwindow.h \
     dragwidget.h \
@@ -51,7 +52,8 @@ HEADERS  += nermainwindow.h \
     NtpReply.h \
     NtpPacket.h \
     NtpClient.h \
-    config.h
+    config.h \
+    simplecrypt.h
 
 RC_FILE = app.rc
 

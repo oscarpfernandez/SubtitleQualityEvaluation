@@ -3,10 +3,24 @@
 
 #include <qstring.h>
 #include <QDebug>
+#include <QDate>
 
 const QString NER_APP_NAME = "NER Tool";
 const int SUBTITLE_CHECK_INTERVAL = 50;
 const int SUBTITLE_CLEAN_TIMEOUT = 2500;
+
+#ifndef LICENCE_DATA
+#define LICENCE_DATA
+struct LicenceData
+{
+public:
+    QString user;
+    QString org;
+    QString mac;
+    QDate startDate;
+    QDate finishDate;
+};
+#endif
 
 /*
  * Struct to hold each line contained on the TRS XML file.

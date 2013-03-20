@@ -3,6 +3,14 @@
 LicenceManager::LicenceManager(QObject *parent) :
     QObject(parent)
 {
+//    ntpClient = new NtpClient();
+//    connect(ntpClient, SIGNAL(replyReceived(QHostAddress,quint16,NtpReply)),
+//                              this, SLOT(replyReceived(QHostAddress,quint16,NtpReply)));
+}
+
+LicenceManager::~LicenceManager()
+{
+    delete ntpClient;
 }
 
 
@@ -41,5 +49,68 @@ void LicenceManager::installNewLicence(QString &filePath)
     }
 
     QFile::copy(filePath, nerLicFile);//new licence installed
+
+}
+
+LIC_ERROR_TYPE LicenceManager::checkLicence()
+{
+    //home location...
+    QString path = QDesktopServices::storageLocation(QDesktopServices::HomeLocation);
+
+    QString licPath = QString(path).append("/").append(STR_LIC_FOLDER)
+            .append("/").append(STR_LIC_FILE);
+
+
+    if(!QFile::exists(licPath)){
+        return LIC_UND_ERROR;
+    }
+
+    QString xml = Utils::readLicenceFile(licPath);
+
+    if(xml.isEmpty()){
+        return LIC_INVALID_FILE;
+    }
+
+    QString user, org, macAddress;
+    QDate startDate, finishDate;
+    Utils::fromXML(xml, user, org, macAddress, startDate, finishDate);
+
+    licenceData.user = user;
+    licenceData.org = org;
+    licenceData.mac = macAddress;
+    licenceData.startDate = startDate;
+    licenceData.finishDate = finishDate;
+
+
+    /*
+     *QHostInfo addInfo = QHostInfo::fromName("46.16.60.129");
+
+    QList<QHostAddress> list = addInfo.addresses();
+    if(list.count()==0){
+        return false;
+    }
+
+    QHostAddress ntpAddress("46.16.60.129");
+    ntpClient = new NtpClient(ntpAddress,(qint16)123 );
+    connect(ntpClient, SIGNAL(replyReceived(QHostAddress,quint16,NtpReply)),
+                              this, SLOT(replyReceived(QHostAddress,quint16,NtpReply)));
+    ntpClient->sendRequest(ntpAddress, (qint16)123);
+    */
+
+    QList<QString> macs = Utils::getMachinesMACAddresses();
+
+    if(!macs.contains(macAddress.toLower().replace("-",":"))){
+        return LIC_MAC_ADDRESS;
+    }
+
+    return LIC_NO_ERROR;
+
+}
+
+void LicenceManager::replyReceived(QHostAddress add,quint16 port, NtpReply reply)
+{
+    qDebug() << "NTP Address: " << add.toString() << endl
+             << "port: " << port << endl
+                << reply.transmitTime().toString();
 
 }

@@ -18,6 +18,9 @@
 #include "nercommon.h"
 #include "mediamngwidget.h"
 #include "nerstatsviewerwidget.h"
+#include "nergraphwidget.h"
+#include "utils.h"
+#include "licencemanager.h"
 
 
 
@@ -36,6 +39,7 @@ public:
     ~NERMainWindow();
 
 private:
+    void checkLicence();
     void createGuiElements();
     void createActions();
     void enableActions(bool enable);
@@ -48,6 +52,9 @@ private:
     void enableActionsTransLoaded();
     void addTableInMdiArea(NERTableWidget* table, QString title);
     void computeWordDifferences(NERTableWidget *table);
+
+    LicenceManager *licenceMng;
+
 
     bool isProjectloaded;
 

@@ -58,3 +58,98 @@ QString Utils::executeWordDiff(QString &textTrans, QString &textSubs)
 
     return strOut;
 }
+
+QString Utils::readLicenceFile(QString &licenceFile)
+{
+    QFile file(licenceFile);
+    file.open(QIODevice::ReadOnly);
+    QDataStream in(&file);
+
+    qint32 magic;
+    int version;
+    int xmlCount;
+    QString xmlEncrypted;
+
+    in >> magic;
+    in >> version;
+    in >> xmlCount;
+    in >> xmlEncrypted;
+
+    file.close();
+
+    QString xml;
+    if(magic != (qint32)0xAABBCCDD){
+        //not our lic file!
+        return xml;
+    }
+
+    //qDebug() << magic << endl << version << endl << xmlCount << endl << xmlEncrypted;
+
+    SimpleCrypt crypto(Q_UINT64_C(0x0c7ad7b4acb8f723)); //some random number
+    xml = crypto.decryptToString(xmlEncrypted);
+
+    return xml;
+}
+
+bool Utils::fromXML(QString &xml,
+                    QString &user,
+                    QString &org,
+                    QString &macAddress,
+                    QDate &startDate,
+                    QDate &finishdate)
+{
+    QXmlStreamReader xmlReader(xml);
+
+    while(!xmlReader.atEnd() && !xmlReader.hasError())
+    {
+        /* Read next element.*/
+        xmlReader.readNext();
+
+        if(xmlReader.name() == STR_NER_DOC){
+            continue;
+        }
+        else if(xmlReader.name() == STR_NER_USER){
+            user = xmlReader.readElementText();
+        }
+        else if(xmlReader.name() == STR_NER_ORG){
+            org = xmlReader.readElementText();
+        }
+        else if(xmlReader.name() == STR_NER_MAC){
+            macAddress = xmlReader.readElementText();
+        }
+        else if(xmlReader.name() == STR_NER_START_DATE){
+            startDate = QDate::fromString(xmlReader.readElementText(), Qt::ISODate);
+        }
+        else if(xmlReader.name() == STR_NER_END_DATE){
+            finishdate = QDate::fromString(xmlReader.readElementText(), Qt::ISODate);
+        }
+    }
+
+    if(xmlReader.hasError()){
+        return false;
+    }
+
+    return true;
+}
+
+QList<QString> Utils::getMachinesMACAddresses()
+{
+    QList<QString> ret;
+
+    foreach(QNetworkInterface interface, QNetworkInterface::allInterfaces())
+    {
+        if (interface.flags().testFlag(QNetworkInterface::IsRunning)){
+
+            foreach (QNetworkAddressEntry entry, interface.addressEntries())
+
+            {
+                QString mac = interface.hardwareAddress().toLower().replace("-",":");
+                if ( mac != "00:00:00:00:00:00")
+                {
+                    ret.append(mac);
+                }
+            }
+        }
+    }
+    return ret;
+}

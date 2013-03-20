@@ -1,6 +1,6 @@
 #include "nermainwindow.h"
 #include "ui_nermainwindow.h"
-#include "nergraphwidget.h"
+
 
 /*******************************************************************************
  * NER Main Application Window
@@ -9,6 +9,8 @@ NERMainWindow::NERMainWindow(QWidget *parent) : QMainWindow(parent)
 {
 	resize(1024,768);
     setWindowTitle(NER_APP_NAME);
+
+    licenceMng = new LicenceManager(parent);
 
     projectSaveFilePath = new QString();
 	createGuiElements();
@@ -27,6 +29,10 @@ NERMainWindow::NERMainWindow(QWidget *parent) : QMainWindow(parent)
 	setCentralWidget(mainMdiArea);
 
 	initializeMDIWindows();
+
+    checkLicence();
+
+
 
 }
 
@@ -904,7 +910,39 @@ void NERMainWindow::computerNERStatistics()
 }
 
 
+void NERMainWindow::checkLicence()
+{
+    bool isLicOK = licenceMng->checkLicence();
 
+    if(!isLicOK)
+    {
+        QMessageBox box;
+        box.setInformativeText("The tool's licence is not installed or not longer valid!\nInstall a new licence file ?");
+        box.setText("Licence check failed                                      ");
+        box.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+        box.setIcon(QMessageBox::Question);
+        box.setStandardButtons(QMessageBox::No | QMessageBox::Yes);
+        int result = box.exec();
+        switch (result){
+        case QMessageBox::No :
+            QApplication::exit(0);
+        }
+
+        QString licFilePath = QFileDialog::getOpenFileName(
+                this,
+                tr("NER licence file"),
+                QDir::currentPath(),
+                tr("NER Licence file (*.lic)"));
+
+        if(licFilePath.isEmpty())
+        {
+             QApplication::exit(0);
+        }
+
+        licenceMng->installNewLicence(licFilePath);
+    }
+
+}
 
 
 

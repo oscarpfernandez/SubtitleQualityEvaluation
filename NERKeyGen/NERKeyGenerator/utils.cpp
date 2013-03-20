@@ -20,7 +20,7 @@ void Utils::generateLicenceFile(QString &licenceFile,
 
     // Write a header with a "magic number" and a version
     out << (quint32)0xAABBCCDD;
-    out << (qint32)23;
+    out << (qint32)10;
 
     out.setVersion(QDataStream::Qt_4_8);
 
@@ -45,7 +45,7 @@ QString Utils::readLicenceFile(QString &licenceFile)
     file.open(QIODevice::ReadOnly);
     QDataStream in(&file);
 
-    int magic;
+    qint32 magic;
     int version;
     int xmlCount;
     QString xmlEncrypted;
@@ -57,13 +57,18 @@ QString Utils::readLicenceFile(QString &licenceFile)
 
     file.close();
 
+    QString xml;
+    if(magic != (qint32)0xAABBCCDD){
+        //not our lic file!
+        return xml;
+    }
+
     //qDebug() << magic << endl << version << endl << xmlCount << endl << xmlEncrypted;
 
     SimpleCrypt crypto(Q_UINT64_C(0x0c7ad7b4acb8f723)); //some random number
-    QString xml = crypto.decryptToString(xmlEncrypted);
+    xml = crypto.decryptToString(xmlEncrypted);
 
     return xml;
-
 
 }
 
@@ -98,12 +103,12 @@ QString Utils::getXML(QString &user,
 
 
     xmlWriter.writeStartElement(STR_NER_START_DATE);
-    xmlWriter.writeCharacters(startDate.toString());
+    xmlWriter.writeCharacters(startDate.toString(Qt::ISODate));
     xmlWriter.writeEndElement();
 
 
     xmlWriter.writeStartElement(STR_NER_END_DATE);
-    xmlWriter.writeCharacters(finishDate.toString());
+    xmlWriter.writeCharacters(finishDate.toString(Qt::ISODate));
     xmlWriter.writeEndElement();
 
     xmlWriter.writeEndElement();
