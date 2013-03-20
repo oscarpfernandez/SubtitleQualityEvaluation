@@ -36,10 +36,11 @@ class NERMainWindow : public QMainWindow
 
 public:
     explicit NERMainWindow(QWidget *parent = 0);
+    LIC_ERROR_TYPE checkLicence();
     ~NERMainWindow();
 
 private:
-    void checkLicence();
+//    void checkLicence();
     void createGuiElements();
     void createActions();
     void enableActions(bool enable);

@@ -30,7 +30,7 @@ NERMainWindow::NERMainWindow(QWidget *parent) : QMainWindow(parent)
 
 	initializeMDIWindows();
 
-    checkLicence();
+//    checkLicence();
 
 
 
@@ -910,7 +910,7 @@ void NERMainWindow::computerNERStatistics()
 }
 
 
-void NERMainWindow::checkLicence()
+LIC_ERROR_TYPE NERMainWindow::checkLicence()
 {
     LIC_ERROR_TYPE isLicOK = licenceMng->checkLicence();
 
@@ -923,9 +923,14 @@ void NERMainWindow::checkLicence()
         box.setIcon(QMessageBox::Question);
         box.setStandardButtons(QMessageBox::No | QMessageBox::Yes);
         int result = box.exec();
+        bool exitApp = false;
         switch (result){
         case QMessageBox::No :
-            QCoreApplication::exit(0);
+            exitApp = true;
+        }
+
+        if(exitApp){
+            return LIC_UND_ERROR;
         }
 
         QString licFilePath = QFileDialog::getOpenFileName(
@@ -936,11 +941,15 @@ void NERMainWindow::checkLicence()
 
         if(licFilePath.isEmpty())
         {
-             QApplication::exit(0);
+             return LIC_UND_ERROR;
         }
 
         licenceMng->installNewLicence(licFilePath);
+
+        return LIC_NO_ERROR;
     }
+
+    return LIC_NO_ERROR;
 
 }
 

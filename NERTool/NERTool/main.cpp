@@ -24,7 +24,13 @@ int main(int argc, char *argv[])
     Sleeper::sleep(2000);
 
     mainWin.showMaximized();
-
     splash->finish(&mainWin);
+
+    //Check if the licence is still OK!
+    LIC_ERROR_TYPE error = mainWin.checkLicence();
+    if(error != LIC_NO_ERROR){
+        return 0;//No licence, no show!
+    }
+
     return app.exec();
 }
