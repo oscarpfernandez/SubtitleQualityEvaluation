@@ -13,6 +13,8 @@
 #include <QMessageBox>
 #include <QFileDialog>
 #include <QTextEdit>
+#include <QComboBox>
+#include <QDesktopServices>
 #include "utils.h"
 
 namespace Ui {
@@ -36,6 +38,7 @@ private:
     QWidget *keyWidget;
     QVBoxLayout *mainKeyGenLayout;
 
+    QList<QString> macAddressofVM;
 
     QGridLayout *genKeyLayout;
     QGroupBox *genKeyGroupBox;
@@ -45,6 +48,9 @@ private:
     QLineEdit *orgValueLabel;
     QLabel *macLabel;
     QLineEdit *macValueLabel;
+
+    QLabel *allowVMLabel;
+    QComboBox *allowVMCombo;
 
     QVBoxLayout *keyReaderLayout;
     QGroupBox *readerKeyGroupBox;
@@ -66,10 +72,10 @@ private:
     QTabWidget *tabs;
 
     void createElements();
-    void createActions();
-    void createMenus();
     void createToolBars();
     void createStatusBar();
+    void initBannedMacAdresses();
+    bool isBannedMac(QString mac);
 
 private slots:
     void showCalendarStart();

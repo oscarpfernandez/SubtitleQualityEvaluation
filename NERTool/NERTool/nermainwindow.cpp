@@ -918,7 +918,7 @@ LIC_ERROR_TYPE NERMainWindow::checkLicence()
     {
         QMessageBox box;
         box.setInformativeText("The tool's licence is not installed or not longer valid!\nInstall a new licence file ?");
-        box.setText("Licence check failed                                      ");
+        box.setText("Licence check failed                                                        ");
         box.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
         box.setIcon(QMessageBox::Question);
         box.setStandardButtons(QMessageBox::No | QMessageBox::Yes);
@@ -930,7 +930,7 @@ LIC_ERROR_TYPE NERMainWindow::checkLicence()
         }
 
         if(exitApp){
-            return LIC_UND_ERROR;
+            return LIC_UNDEF_ERROR;
         }
 
         QString licFilePath = QFileDialog::getOpenFileName(
@@ -941,15 +941,46 @@ LIC_ERROR_TYPE NERMainWindow::checkLicence()
 
         if(licFilePath.isEmpty())
         {
-             return LIC_UND_ERROR;
+             return LIC_UNDEF_ERROR;
         }
 
         licenceMng->installNewLicence(licFilePath);
 
-        return LIC_NO_ERROR;
+        return licenceMng->checkLicence(); //recheck after install...
     }
 
     return LIC_NO_ERROR;
+}
+
+void NERMainWindow::displayErrorMessage(LIC_ERROR_TYPE errorType)
+{
+    QString msg;
+
+    switch(errorType){
+    case LIC_INVALID_TIME:
+        msg = "The licence has expired";
+
+        break;
+    case LIC_INVALID_MAC_ADDRESS:
+        msg = "The MAC address of this machine is inconsistent with the licence";
+        break;
+    case LIC_INVALID_FILE:
+        msg = "The licence file is corrupted";
+        break;
+    case LIC_UNDEF_ERROR:
+        msg = "The licence file could not be verified";
+        break;
+    default:
+        break;
+    }
+
+    QMessageBox box;
+    box.setText("Licence error                                                                ");
+    box.setInformativeText(msg);
+    box.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    box.setIcon(QMessageBox::Question);
+    box.setStandardButtons(QMessageBox::Ok);
+    box.exec();
 
 }
 

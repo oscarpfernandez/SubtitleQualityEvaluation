@@ -62,7 +62,7 @@ LIC_ERROR_TYPE LicenceManager::checkLicence()
 
 
     if(!QFile::exists(licPath)){
-        return LIC_UND_ERROR;
+        return LIC_UNDEF_ERROR;
     }
 
     QString xml = Utils::readLicenceFile(licPath);
@@ -96,11 +96,17 @@ LIC_ERROR_TYPE LicenceManager::checkLicence()
                               this, SLOT(replyReceived(QHostAddress,quint16,NtpReply)));
     ntpClient->sendRequest(ntpAddress, (qint16)123);
     */
+    QDate currentDate = QDate::currentDate();
+    if(!(currentDate>=startDate && currentDate<=finishDate)){
+        return LIC_INVALID_TIME;
+    }
+
+
 
     QList<QString> macs = Utils::getMachinesMACAddresses();
 
     if(!macs.contains(macAddress.toLower().replace("-",":"))){
-        return LIC_MAC_ADDRESS;
+        return LIC_INVALID_MAC_ADDRESS;
     }
 
     return LIC_NO_ERROR;

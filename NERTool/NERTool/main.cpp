@@ -29,6 +29,7 @@ int main(int argc, char *argv[])
     //Check if the licence is still OK!
     LIC_ERROR_TYPE error = mainWin.checkLicence();
     if(error != LIC_NO_ERROR){
+        mainWin.displayErrorMessage(error);
         return 0;//No licence, no show!
     }
 

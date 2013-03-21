@@ -37,6 +37,7 @@ class NERMainWindow : public QMainWindow
 public:
     explicit NERMainWindow(QWidget *parent = 0);
     LIC_ERROR_TYPE checkLicence();
+    void displayErrorMessage(LIC_ERROR_TYPE errorType);
     ~NERMainWindow();
 
 private:
