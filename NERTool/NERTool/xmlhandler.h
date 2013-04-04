@@ -45,6 +45,8 @@ const QString STR_TRANSC_LINE_TAG = "TranscLine";
 const QString STR_TRANSC_LINE_PROP_TIMESTAMP = "timestamp";
 const QString STR_TRANSC_LINE_PROP_SPEAKER = "speakerid";
 const QString STR_TRANSC_LINE_PROP_TEXT = "text";
+const QString STR_TRANSC_LINE_WORDS = "TranscWords";
+const QString STR_TRANSC_LINE_WORD = "TranscWord";
 
 const QString STR_SPEAKERS_TAG = "Speakers";
 const QString STR_SPEAKER_TAG = "Speaker";

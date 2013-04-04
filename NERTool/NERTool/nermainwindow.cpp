@@ -28,12 +28,6 @@ NERMainWindow::NERMainWindow(QWidget *parent) : QMainWindow(parent)
 
 	setCentralWidget(mainMdiArea);
 
-	initializeMDIWindows();
-
-//    checkLicence();
-
-
-
 }
 
 NERMainWindow::~NERMainWindow()
@@ -137,8 +131,8 @@ void NERMainWindow::createActions()
     viewPropertiesTree->setShortcut(QKeySequence("Ctrl+P"));
     viewPropertiesTree->setIcon(QIcon(":/resources/pics/properties.png"));
     viewPropertiesTree->setStatusTip("Project Properties");
-    connect(viewPropertiesTree, SIGNAL(triggered()),
-            this, SLOT(viewProjectPropertiesSlot()));
+//    connect(viewPropertiesTree, SIGNAL(triggered()),
+//            this, SLOT(viewProjectPropertiesSlot()));
 
     loadTransXmlFile = new QAction(tr("Load Transcription"), this);
     loadTransXmlFile->setShortcut(QKeySequence("Ctrl+T"));
@@ -194,8 +188,6 @@ void NERMainWindow::createActions()
 void NERMainWindow::enableActions(bool enable)
 {
     saveProjectAction->setEnabled(enable);
-//    loadSubtsXmlFile->setEnabled(enable);
-//    loadSRTXmlFile->setEnabled(enable);
     loadTransXmlFile->setEnabled(enable);
     saveAsProjectAction->setEnabled(enable);
     closeProjectAction->setEnabled(enable);
@@ -434,21 +426,23 @@ void NERMainWindow::openProjectSlot()
                                      mediaMngWidget,
                                      propertiesTreeWidget);
 
-    for(int i=0; i<nerTablesList->count(); i++){
+
+     for(int i=0; i<nerTablesList->count(); i++){
         ENGINE_DEBUG << "Table insertion";
 
         NERTableWidget* table = nerTablesList->at(i);
 
-        //Reapply differences in the translation side, since this is not saved
-        //because it can be recalculated on-the-fly.
-        QString transText = table->getAllTranslationText();
-        QString subsText = table->getAllSubtableText();
-        QList<Diff> diffList = table->computeDifferences(transText, subsText);
-        QList<Diff> noInsertionsList = table->removeInsertions(diffList);
-        table->applyEditionPropertiesToTranscription(noInsertionsList);
+//        //Reapply differences in the translation side, since this is not saved
+//        //because it can be recalculated on-the-fly.
+//        QString transText = table->getAllTranslationText();
+//        QString subsText = table->getAllSubtableText();
+//        QList<Diff> diffList = table->computeDifferences(transText, subsText);
+//        QList<Diff> noInsertionsList = table->removeInsertions(diffList);
+//        table->applyEditionPropertiesToTranscription(noInsertionsList);
 
         addTableInMdiArea(table, table->getTableName());
     }
+
 
     loadSubtsXmlFile->setEnabled(true);
     loadSRTXmlFile->setEnabled(true);
@@ -540,19 +534,6 @@ void NERMainWindow::aboutSlot()
 	aboutDialog->show();
 }
 
-void NERMainWindow::initializeMDIWindows()
-{
-
-}
-
-void NERMainWindow::viewProjectPropertiesSlot()
-{
-
-}
-
-void NERMainWindow::enableActionsTransLoaded(){
-
-}
 
 /*******************************************************************************
  * Loads a "transcriber" XML file importing it to NER table.
@@ -664,6 +645,8 @@ void NERMainWindow::loadSubtitlesFileSlot(){
         addTableInMdiArea(table, title);
 
         computeWordDifferences(table);
+
+        recomputeTableDifferences->setEnabled(true);
 
         isSubtitlesLoaded = true;
 

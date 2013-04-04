@@ -26,8 +26,6 @@ SOURCES += main.cpp\
     diff.cpp \
     nerstatsviewerwidget.cpp \
     licencemanager.cpp \
-    NtpReply.cpp \
-    NtpClient.cpp \
     simplecrypt.cpp
 
 HEADERS  += nermainwindow.h \
@@ -47,11 +45,6 @@ HEADERS  += nermainwindow.h \
     diff.h \
     nerstatsviewerwidget.h \
     licencemanager.h \
-    NtpTimestamp.h \
-    NtpReply_p.h \
-    NtpReply.h \
-    NtpPacket.h \
-    NtpClient.h \
     config.h \
     simplecrypt.h
 

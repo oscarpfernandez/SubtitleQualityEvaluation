@@ -517,6 +517,33 @@ bool XMLHandler::writeProjectExportXML(QString &xmlFileName,
             const QString dwText = transWidget->getText();
             xmlWriter->writeAttribute(STR_TABLELINE_PROP_TRANSCRIP, dwText);
 
+            //Save the transcription annotations and weights...
+            xmlWriter->writeStartElement(STR_TRANSC_LINE_WORDS);
+
+            QList<DragLabel*> transLabList = transWidget->getLabels();
+            for(int m=0; m<transLabList.count(); m++)
+            {
+                DragLabel* label = transLabList.at(m);
+
+                xmlWriter->writeStartElement(STR_TRANSC_LINE_WORD);
+
+                const QString labelText = label->labelText();
+                xmlWriter->writeAttribute(STR_WORD_PROP_NAME, labelText);
+                const QString errorT = QString::number(label->getErrorType());
+                xmlWriter->writeAttribute(STR_WORD_PROP_ERROR, errorT);
+                const QString comment = label->getComment();
+                xmlWriter->writeAttribute(STR_WORD_PROP_COMMENT, comment);
+                const QString errorW = QString::number(label->getErrorWeight());
+                xmlWriter->writeAttribute(STR_WORD_PROP_WEIGHT, errorW);
+                const QString errorC = QString::number(label->getErrorClass());
+                xmlWriter->writeAttribute(STR_WORD_PROP_CLASS, errorC);
+
+                xmlWriter->writeEndElement();//STR_TRANSC_LINE_WORD
+            }
+
+
+            xmlWriter->writeEndElement();
+
 
             NERSubTableWidget* subTable = static_cast<NERSubTableWidget*>(tableWidget->cellWidget(row, SUBTITLES_COLUMN_INDEX));
             if(subTable == 0){
@@ -594,7 +621,10 @@ bool XMLHandler::readProjectExportXML(QString &xmlFileName,
 
     NERSubTableWidget* currentSubtable;
     QList<DragLabel*> subTableLineLabels;
+    QList<DragLabel*> currentTransLineLabels;
+    DragWidget* currentTransLineDragWid;
     DragWidget* currentDragWid;
+
     QString currentSubTabTimeStamp;
 
     QList<BlockTRS> subitlesList;
@@ -662,8 +692,8 @@ bool XMLHandler::readProjectExportXML(QString &xmlFileName,
                 ENGINE_DEBUG << ">>> Tables Tag";
 
                 continue;
-
             }
+
             if(xmlReader->name()==STR_TABLE_TAG){
                 ENGINE_DEBUG << ">>> A table...";
 
@@ -697,9 +727,11 @@ bool XMLHandler::readProjectExportXML(QString &xmlFileName,
                 QXmlStreamAttributes attribs = xmlReader->attributes();
                 QString speakerID = attribs.value(STR_TABLELINE_PROP_SID).toString();
                 QString timeStamp = attribs.value(STR_TABLELINE_PROP_TIMESTAMP).toString();
-                QString transcription = attribs.value(STR_TABLELINE_PROP_TRANSCRIP).toString();
+                QString transcription = attribs.value(STR_TABLELINE_PROP_TRANSCRIP).toString();//Check if needed...
 
-                currentTable->insertNewTableEntry(speakerID, timeStamp, transcription);
+                currentTable->insertNewTableEntry(speakerID, timeStamp);
+
+                currentTransLineDragWid = new DragWidget(_parent, TRANSCRIPTION_COLUMN_WIDTH, true);
 
                 currentSubtable = new NERSubTableWidget(_parent);
                 currentSubtable->setMediaWidget(mediaWid);
@@ -733,8 +765,31 @@ bool XMLHandler::readProjectExportXML(QString &xmlFileName,
 
                 subTableLineLabels.append(label);
                 continue;
-
             }
+
+            if(xmlReader->name()==STR_TRANSC_LINE_WORDS){
+                currentTransLineLabels.clear();
+            }
+
+            if(xmlReader->name()==STR_TRANSC_LINE_WORD){
+                //Collect all the words of a transcription line...
+                QXmlStreamAttributes attribs = xmlReader->attributes();
+                QString name = attribs.value(STR_WORD_PROP_NAME).toString();
+                QString errorType = attribs.value(STR_WORD_PROP_ERROR).toString();
+                QString weigth = attribs.value(STR_WORD_PROP_WEIGHT).toString();
+                QString classType = attribs.value(STR_WORD_PROP_CLASS).toString();
+                QString comment = attribs.value(STR_WORD_PROP_COMMENT).toString();
+
+                DragLabel* label = new DragLabel(name, currentTransLineDragWid);
+                label->setErrorWeight(weigth.toDouble());
+                label->setErrorClass(label->modificationTypeFromOrdinal(classType.toInt()));
+                label->setupLabelType(label->editionEnumFromOrdinal(errorType.toInt()));
+                label->setComment(comment);
+
+                currentTransLineLabels.append(label);
+                continue;
+            }
+
         }//Start Element
 
 
@@ -745,6 +800,7 @@ bool XMLHandler::readProjectExportXML(QString &xmlFileName,
                 if(currentSubtable!=0 && currentTable!=0){
                     //Add collected data from last loaded subtable...
                     currentDragWid->initializeData(subTableLineLabels);
+
                     QString dText = currentDragWid->getText();
                     currentTable->insertTimeStampsHashedMap(currentSubTabTimeStamp, dText);
 
@@ -759,7 +815,7 @@ bool XMLHandler::readProjectExportXML(QString &xmlFileName,
                 }
             }
 
-            if(xmlReader->name() == STR_TABLE_TAG){
+            if(xmlReader->name()==STR_TABLE_TAG){
 
                 currentTable->setMainDataList(transcription, subitlesList);
 
@@ -769,6 +825,11 @@ bool XMLHandler::readProjectExportXML(QString &xmlFileName,
 
             if(xmlReader->name()==STR_TABLELINE_TAG){
                 currentTable->insertNewSubtableInLastEntry(currentSubtable);
+            }
+
+            if(xmlReader->name()==STR_TRANSC_LINE_WORDS){
+                currentTransLineDragWid->initializeData(currentTransLineLabels);
+                currentTable->insertTranscriptionLabelInLastEntry(currentTransLineDragWid);
             }
         }
 

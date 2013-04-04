@@ -7,8 +7,6 @@
 #include <QHostAddress>
 #include <QHostInfo>
 #include "utils.h"
-#include "NtpClient.h"
-#include "NtpReply.h"
 
 const QString STR_LIC_FILE = "ner_licence.lic";
 const QString STR_LIC_FOLDER = ".nertool";
@@ -31,13 +29,7 @@ public:
     LIC_ERROR_TYPE checkLicence();
 
 private:
-    NtpClient *ntpClient;
     LicenceData licenceData;
-
-private slots:
-    void replyReceived(QHostAddress add,
-                       quint16 port,
-                       NtpReply reply);
 
     
 };

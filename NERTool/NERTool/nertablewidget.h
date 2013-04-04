@@ -51,6 +51,9 @@ public:
     int insertNewTableEntry(QString &speaker,
                             QString &TimeStamp,
                             QString &text);
+    int insertNewTableEntry(QString &speaker,
+                            QString &TimeStamp);
+    int insertTranscriptionLabelInLastEntry(DragWidget *dw);
     void loadXMLData(QList<BlockTRS> *trsBlocks);
     void loadSubtitlesXMLData(QList<BlockTRS> *transcription,
                               QList<BlockTRS> *trsBlocks);

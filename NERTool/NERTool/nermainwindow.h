@@ -50,8 +50,6 @@ private:
     void createStatusBar();
     void createDockableWidgets();
     void showDockableWidgets(bool enable);
-	void initializeMDIWindows();
-    void enableActionsTransLoaded();
     void addTableInMdiArea(NERTableWidget* table, QString title);
     void computeWordDifferences(NERTableWidget *table);
 
@@ -124,7 +122,6 @@ private slots:
     void openProjectSlot();
     void closeProjectSlot();
 	void closeApplicationSlot();
-    void viewProjectPropertiesSlot();
 	void aboutQTSlot();
 	void aboutSlot();
     void loadTranscriptionFileSlot();

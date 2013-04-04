@@ -662,12 +662,17 @@ void DragWidget::propagateProperties(DragLabel* label, EditionTypeEnum previousT
             if(previousType==TrancriptionDeletion && previousType==neighLab->getErrorType()){
                 //Transcription case... propagate the labels type...
                 neighLab->setupLabelType(label->getErrorType());
+                neighLab->setErrorWeight(label->getErrorWeight());
+                QString s(label->getComment());
+                neighLab->setComment(s);
             }
-            else if(neighLab->getErrorType() != label->getErrorType() || neighLab->getErrorType()!=TrancriptionDeletion){
+
+            else if(neighLab->getErrorType() != label->getErrorType()
+                    || (neighLab->getErrorType()!=TrancriptionDeletion && previousType==TrancriptionDeletion))
+            {
                 //neighbour is different
                 break;
             }
-            neighLab->setupLabelType(label->getErrorType());
             neighLab->setErrorWeight(label->getErrorWeight());
             QString s(label->getComment());
         }
@@ -677,15 +682,20 @@ void DragWidget::propagateProperties(DragLabel* label, EditionTypeEnum previousT
     if(index-1 > 0){
         for(int i=index-1; i>=0; i--){
             DragLabel* neighLab = m_labelsPointerList->at(i);
+
             if(previousType==TrancriptionDeletion && previousType==neighLab->getErrorType()){
                 //Transcription case... propagate the labels type...
                 neighLab->setupLabelType(label->getErrorType());
+                neighLab->setErrorWeight(label->getErrorWeight());
+                QString s(label->getComment());
+                neighLab->setComment(s);
             }
-            else if(neighLab->getErrorType() != label->getErrorType() || neighLab->getErrorType()!=TrancriptionDeletion){
+            else if(neighLab->getErrorType() != label->getErrorType() ||
+                    (neighLab->getErrorType()!=TrancriptionDeletion && previousType==TrancriptionDeletion))
+            {
                 //neighbour is different
                 break;
             }
-            neighLab->setupLabelType(label->getErrorType());
             neighLab->setErrorWeight(label->getErrorWeight());
             QString s(label->getComment());
         }

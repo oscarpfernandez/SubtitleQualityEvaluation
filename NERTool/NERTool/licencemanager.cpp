@@ -10,7 +10,6 @@ LicenceManager::LicenceManager(QObject *parent) :
 
 LicenceManager::~LicenceManager()
 {
-    delete ntpClient;
 }
 
 
@@ -113,10 +112,8 @@ LIC_ERROR_TYPE LicenceManager::checkLicence()
 
 }
 
-void LicenceManager::replyReceived(QHostAddress add,quint16 port, NtpReply reply)
-{
-    qDebug() << "NTP Address: " << add.toString() << endl
-             << "port: " << port << endl
-                << reply.transmitTime().toString();
 
+LicenceData LicenceManager::getLicenceInfo()
+{
+    return licenceData;
 }

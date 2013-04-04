@@ -249,6 +249,47 @@ int NERTableWidget::insertNewTableEntry(QString &speaker, QString &timeStamp, QS
 
 }
 
+int NERTableWidget::insertNewTableEntry(QString &speaker, QString &timeStamp)
+{
+
+    int line = rowCount();
+    insertRow(line);
+    //Set Speaker
+    QTableWidgetItem *speakerItem = new QTableWidgetItem();
+    speakerItem->setText(speaker);
+    speakerItem->setFlags(speakerItem->flags() ^ Qt::ItemIsEditable);
+    setItem(line, SPEAKER_ID_COLUMN_INDEX, speakerItem);
+
+    //Set timestamp
+    QTableWidgetItem *tsItem = new QTableWidgetItem();
+    tsItem->setText(timeStamp);
+    tsItem->setFlags(tsItem->flags() ^ Qt::ItemIsEditable);
+    setItem(line, TIMESTAMP_COLUMN_INDEX, tsItem);
+
+    //Insert the chopped text block with the widget...
+//    DragWidget *wordBox = new DragWidget(this, text, TRANSCRIPTION_COLUMN_WIDTH, true);
+//    setRowHeight(line, wordBox->getBlockSize().height());
+//    setColumnWidth(2,wordBox->getBlockSize().width());
+//    setCellWidget(line, TRANSCRIPTION_COLUMN_INDEX, wordBox);
+
+    return line;
+}
+
+int NERTableWidget::insertTranscriptionLabelInLastEntry(DragWidget *wordBox)
+{
+    if(rowCount()==0 || wordBox==0)
+    {
+        return -1;
+    }
+    int line = rowCount()-1;
+
+    setRowHeight(line, wordBox->getBlockSize().height());
+    setColumnWidth(2,wordBox->getBlockSize().width());
+    setCellWidget(line, TRANSCRIPTION_COLUMN_INDEX, wordBox);
+}
+
+
+
 void NERTableWidget::insertNewSubtableInLastEntry(NERSubTableWidget *subtable)
 {
     ENGINE_DEBUG << "----- Row count: " << rowCount();
@@ -709,6 +750,8 @@ void NERTableWidget::applyEditionProperties(QList<Diff> &diffList)
             label->setErrorWeight(ERROR_WEIGHT_025);
             label->setErrorClass(NotDefined);
         }
+        QString s("");
+        label->setComment(s);
     }
 }
 
@@ -734,6 +777,8 @@ void NERTableWidget::applyEditionPropertiesToTranscription(QList<Diff> &diffList
             label->setErrorClass(NotDefined);
             label->setErrorWeight(ERROR_WEIGHT_0);
         }
+        QString s("");
+        label->setComment(s);
     }
 }
 
