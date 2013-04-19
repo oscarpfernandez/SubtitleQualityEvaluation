@@ -102,6 +102,7 @@ private:
     int     recogErrorInsertions;
     int     recogErrorDeletions;
     int     recogErrorSubstitutions;
+    int     reductionValue;
 
 public:
     int getNCount(){
@@ -232,6 +233,12 @@ public:
         recogErrorSubstitutions++;
         return *this;}
 
+    int getReduction(){
+        return recogErrorSubstitutions;}
+    NERStatsData& setReduction(double reduct){
+        reductionValue = reduct;
+        return *this;}
+
     void resetDataToZero(){
         NCount = 0;
         N_words = 0;
@@ -260,6 +267,7 @@ public:
         recogErrorInsertions = 0;
         recogErrorDeletions = 0;
         recogErrorSubstitutions = 0;
+        reductionValue = 0;
     }
 };
 #endif
@@ -276,7 +284,7 @@ public:
 
 inline NullDebug nullDebug() { return NullDebug(); }
 
-#define DEBUG_ENABLED //Comment this to disable debug information...
+//#define DEBUG_ENABLED //Comment this to disable debug information...
 
 #ifdef DEBUG_ENABLED
 #   define ENGINE_DEBUG qDebug() //business as usual...

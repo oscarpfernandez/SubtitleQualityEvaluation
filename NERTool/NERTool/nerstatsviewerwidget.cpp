@@ -167,11 +167,8 @@ void NERStatsViewerWidget::createElements()
     subBoxesLayout->addWidget(recogErrorPropGroupbox);
     subBoxesLayout->addWidget(editionErrorPropGroupbox);
 
-
-
     mainNerGroupBoxLayout->addLayout(nerValuesLayout);
     mainNerGroupBoxLayout->addLayout(subBoxesLayout);
-
 
     nerValuesGroupBox->setLayout(mainNerGroupBoxLayout);
 

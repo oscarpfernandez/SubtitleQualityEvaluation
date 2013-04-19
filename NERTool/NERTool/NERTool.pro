@@ -26,7 +26,8 @@ SOURCES += main.cpp\
     diff.cpp \
     nerstatsviewerwidget.cpp \
     licencemanager.cpp \
-    simplecrypt.cpp
+    simplecrypt.cpp \
+    nersummarywidget.cpp
 
 HEADERS  += nermainwindow.h \
     dragwidget.h \
@@ -46,7 +47,8 @@ HEADERS  += nermainwindow.h \
     nerstatsviewerwidget.h \
     licencemanager.h \
     config.h \
-    simplecrypt.h
+    simplecrypt.h \
+    nersummarywidget.h
 
 RC_FILE = app.rc
 

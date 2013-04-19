@@ -24,9 +24,16 @@ private:
     QHBoxLayout *buttonHBoxLayout;
     QLabel      *imageLabel;
     QTextEdit   *textEdit;
+    QTextEdit   *creditsTextEdit;
+    QPushButton *button;
+    QPushButton *buttonCredits;
+    QDialog     *creditsDiag;
+    QVBoxLayout *creditsLayout;
+    QLabel      *creditsLabel;
 
 private slots:
     void closeDialog();
+    void showCredits();
 };
 
 #endif // ABOUT_H

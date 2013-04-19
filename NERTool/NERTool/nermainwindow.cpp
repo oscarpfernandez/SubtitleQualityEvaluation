@@ -34,7 +34,6 @@ NERMainWindow::~NERMainWindow()
 {
     delete transcriptionList;
     delete xmlHandler;
-
 }
 
 
@@ -51,12 +50,13 @@ void NERMainWindow::createGuiElements()
 	mainMdiArea = new QMdiArea(this);
 
     propertiesTreeWidget = new PropertiesTreeWidget(this);
-    connect(propertiesTreeWidget, SIGNAL(computeNERValues()),
+
+    nerSummary = new NERSummaryWidget(this);
+    connect(nerSummary, SIGNAL(computeNERValues()),
             this, SLOT(computerNERStatistics()));
     connect(this, SIGNAL(setNERStatistics(double&,double&)),
-            propertiesTreeWidget, SLOT(setNERStatistics(double&,double&)));
-
-    connect(propertiesTreeWidget, SIGNAL(viewNerStats()), this, SLOT(showNerStatsWindow()));
+            nerSummary, SLOT(setNERStatistics(double&,double&)));
+    connect(nerSummary, SIGNAL(viewNerStats()), this, SLOT(showNerStatsWindow()));
 
     nerStatsViewer = new NERStatsViewerWidget();
     connect(nerStatsViewer, SIGNAL(refreshNERData()), this, SLOT(showNerStatsWindow()));
@@ -177,6 +177,11 @@ void NERMainWindow::createActions()
 
     showVideoAction = videoPlayerDockWidget->toggleViewAction();
     showVideoAction->setStatusTip(tr("Show video..."));
+    showVideoAction->setIcon(QIcon(":/resources/pics/video_display.png"));
+
+    showNerSummaryAction = nerStatsDockWidget->toggleViewAction();
+    showNerSummaryAction->setStatusTip(tr("Show a NER statistics summary."));
+    showNerSummaryAction->setIcon(QIcon(":/resources/pics/stats.png"));
 
     recomputeTableDifferences = new QAction(tr("Recompute Diff"), this);
     recomputeTableDifferences->setStatusTip(tr("Recompute table difference by performing a diff..."));
@@ -195,6 +200,7 @@ void NERMainWindow::enableActions(bool enable)
     viewVideoPlayerDockAction->setEnabled(enable);
     showVideoAction->setEnabled(enable);
     computerNerStats->setEnabled(enable);
+    showNerSummaryAction->setEnabled(enable);
 }
 
 
@@ -248,8 +254,9 @@ void NERMainWindow::createToolBars()
     fileToolbar->addAction(saveProjectAction);
     fileToolbar->addAction(closeProjectAction);
     fileToolbar->addAction(viewVideoPlayerDockAction);
-    fileToolbar->addAction(viewPropertiesDockAction);
     fileToolbar->addAction(showVideoAction);
+    fileToolbar->addAction(viewPropertiesDockAction);
+    fileToolbar->addAction(showNerSummaryAction);
 	fileToolbar->addAction(aboutAction);
 }
 
@@ -304,6 +311,7 @@ void NERMainWindow::createDockableWidgets()
     videoPlayerDockWidget->setAllowedAreas(Qt::LeftDockWidgetArea
                                            | Qt::RightDockWidgetArea
                                            | Qt::TopDockWidgetArea);
+
     videoPlayerDockWidget->setToolTip(tr("Video window..."));
     videoPlayerDockWidget->setFixedWidth(docksWidth);
     videoPlayerDockWidget->setFixedHeight(0.75*docksWidth);
@@ -313,6 +321,11 @@ void NERMainWindow::createDockableWidgets()
     videoPlayerDockWidget->setPalette(bvidpalette);
     addDockWidget(Qt::RightDockWidgetArea, videoPlayerDockWidget);
 
+    nerStatsDockWidget = new QDockWidget("NER Stats Summary");
+    nerStatsDockWidget->setWidget(nerSummary);
+    nerStatsDockWidget->setAllowedAreas(Qt::BottomDockWidgetArea | Qt::TopDockWidgetArea);
+    nerStatsDockWidget->setWindowIcon(QIcon(":/resources/pics/stats.png"));
+    addDockWidget(Qt::TopDockWidgetArea, nerStatsDockWidget);
 
 }
 
@@ -322,11 +335,13 @@ void NERMainWindow::showDockableWidgets(bool enable)
         projectPropertiesDockWidget->show();
         audioWaveFormDockWidget->show();
         videoPlayerDockWidget->show();
+        nerStatsDockWidget->show();
     }
     else{
         projectPropertiesDockWidget->hide();
         audioWaveFormDockWidget->hide();
         videoPlayerDockWidget->hide();
+        nerStatsDockWidget->hide();
     }
 }
 
@@ -405,6 +420,10 @@ void NERMainWindow::saveAsProjectSlot()
  ******************************************************************************/
 void NERMainWindow::openProjectSlot()
 {
+    if(isProjectloaded){
+        closeProjectSlot();
+    }
+
     QString xmlFileName = QFileDialog::getOpenFileName(
             this,
             tr("Open NER Project"),
@@ -891,7 +910,6 @@ void NERMainWindow::computerNERStatistics()
                  << "N_ponct = "            << ner.getN_ponctuation() << "\n\t"
                  << "N_trans = "            << ner.getN_transitions();
 }
-
 
 LIC_ERROR_TYPE NERMainWindow::checkLicence()
 {

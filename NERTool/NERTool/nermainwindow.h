@@ -20,6 +20,7 @@
 #include "nerstatsviewerwidget.h"
 #include "nergraphwidget.h"
 #include "utils.h"
+#include "nersummarywidget.h"
 #include "licencemanager.h"
 
 
@@ -63,12 +64,14 @@ private:
 
     QList<NERTableWidget *> *nerTablesList;
     PropertiesTreeWidget *propertiesTreeWidget;
+    NERSummaryWidget *nerSummary;
 
     MediaMngWidget *mediaMngWidget;
 
     QDockWidget *projectPropertiesDockWidget;
     QDockWidget *audioWaveFormDockWidget;
     QDockWidget *videoPlayerDockWidget;
+    QDockWidget *nerStatsDockWidget;
 
     QAction *newProjectAction;
     QAction *saveProjectAction;
@@ -89,6 +92,7 @@ private:
     QAction *showVideoAction;
     QAction *computerNerStats;
     QAction *recomputeTableDifferences;
+    QAction *showNerSummaryAction;
 
 
 

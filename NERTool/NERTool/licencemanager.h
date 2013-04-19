@@ -27,6 +27,7 @@ public:
     ~LicenceManager();
     void installNewLicence(QString &filePath);
     LIC_ERROR_TYPE checkLicence();
+    LicenceData getLicenceInfo();
 
 private:
     LicenceData licenceData;

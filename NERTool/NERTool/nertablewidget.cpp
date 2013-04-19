@@ -368,12 +368,15 @@ NERStatsData NERTableWidget::computeNERStats_NerValue(){
 
     double delay = computeNERStats_Delay() / 1000; //in seconds...
 
+    double wordReduction = computeWordReduction();
+
     //saveValues
     nerStatsDataValues.setNCount(N)
             .setEditionErrors(er)
             .setRecognitionErrors(re)
             .setAvgDelay(delay)
-            .setNerValue(ner);
+            .setNerValue(ner)
+            .setReduction(wordReduction);
 
     ENGINE_DEBUG << "NER -> " << "\n\tN = " << N
                  << "\n\tEdition Errors = "<< er
@@ -527,7 +530,34 @@ double NERTableWidget::computeNERStats_Delay(){
     }
 
     return acumulatedDelay/ (double)numDelayCounts;
+}
 
+double NERTableWidget::computeWordReduction()
+{
+    int transWords = getAllTranscriptionLabels().count();
+    int subtsWords = getAllSubtableLabels().count();
+
+    if(transWords==0){
+        return 0;
+    }
+
+    return subtsWords / transWords;
+}
+
+void NERTableWidget::getNumSubsWordsChars(int &numWords, int &numChars)
+{
+    QList<DragLabel*> subsLabels = getAllSubtableLabels();
+
+    numChars = 0;
+    numWords = subsLabels.count();
+
+    for(int i=0; i<subsLabels.count(); i++)
+    {
+        DragLabel* lab = subsLabels.at(i);
+        if(lab!=0){
+            numChars += lab->labelText().count();
+        }
+    }
 }
 
 qlonglong NERTableWidget::getTimeInMilis(QString time)

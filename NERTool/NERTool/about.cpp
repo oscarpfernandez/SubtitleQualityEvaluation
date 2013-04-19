@@ -49,12 +49,18 @@ void About::createElements()
     pal.setColor(QPalette::Base, bgColor);
     pal.setColor(QPalette::Text, fgColor);
 
-    QPushButton *button = new QPushButton();
+    button = new QPushButton(this);
     button->setText("Ok");
     button->setMaximumWidth(90);
     connect(button, SIGNAL(clicked()), this, SLOT(closeDialog()));
 
+    buttonCredits = new QPushButton(this);
+    buttonCredits->setText("Credits");
+    buttonCredits->setMaximumWidth(90);
+    connect(buttonCredits, SIGNAL(clicked()), this, SLOT(showCredits()));
+
     buttonHBoxLayout->addWidget(button);
+    buttonHBoxLayout->addWidget(buttonCredits);
 
     QString textToShow = QString();
     textToShow.append("<p>NER Evaluation Tool</p>");
@@ -69,9 +75,36 @@ void About::createElements()
     textEdit->setCurrentFont(QFont("Verdana",10, QFont::Bold));
     textEdit->setAlignment(Qt::AlignRight);
     textEdit->setPalette(pal);
+
+    QString credits;
+    credits.append("\nSoftware developed by:\n\n");
+    credits.append("Oscar Lopes <oscar.pino.lopes@gmail.com>\n");
+    credits.append("CaiaC Research - http://caiac.uab.cat\n");
+
+
+    creditsLabel = new QLabel;
+    creditsLabel->setPixmap(QPixmap(":/resources/pics/caiac_uab.png"));
+
+    creditsTextEdit = new QTextEdit(this);
+    creditsTextEdit->setText(credits);
+    creditsTextEdit->setReadOnly(true);
+    creditsTextEdit->setPalette(pal);
+    creditsTextEdit->setCurrentFont(QFont("Courier",16, QFont::Bold));
+    creditsTextEdit->setMaximumHeight(110);
+
+    creditsLayout = new QVBoxLayout;
+    creditsLayout->addWidget(creditsLabel);
+    creditsLayout->addWidget(creditsTextEdit);
+
+    creditsDiag = new QDialog(this);
+    creditsDiag->setLayout(creditsLayout);
+    creditsDiag->setMinimumSize(creditsDiag->sizeHint());
+    creditsDiag->setMaximumSize(creditsDiag->sizeHint());
+
     mainVBoxLayout->addWidget(imageLabel);
     mainVBoxLayout->addWidget(textEdit);
     mainVBoxLayout->addLayout(buttonHBoxLayout);
+
 
     QPalette palette = this->palette();
     palette.setColor(QPalette::Window, Qt::black);
@@ -81,4 +114,9 @@ void About::createElements()
 void About::closeDialog()
 {
     this->close();
+}
+
+void About::showCredits()
+{
+    creditsDiag->show();
 }

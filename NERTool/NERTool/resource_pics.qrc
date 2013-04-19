@@ -19,5 +19,8 @@
         <file>resources/pics/player_stop.png</file>
         <file>resources/pics/player_load.png</file>
         <file>resources/pics/video_player.png</file>
+        <file>resources/pics/stats.png</file>
+        <file>resources/pics/video_display.png</file>
+        <file>resources/pics/caiac_uab.png</file>
     </qresource>
 </RCC>

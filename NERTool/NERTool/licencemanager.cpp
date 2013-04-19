@@ -80,21 +80,6 @@ LIC_ERROR_TYPE LicenceManager::checkLicence()
     licenceData.startDate = startDate;
     licenceData.finishDate = finishDate;
 
-
-    /*
-     *QHostInfo addInfo = QHostInfo::fromName("46.16.60.129");
-
-    QList<QHostAddress> list = addInfo.addresses();
-    if(list.count()==0){
-        return false;
-    }
-
-    QHostAddress ntpAddress("46.16.60.129");
-    ntpClient = new NtpClient(ntpAddress,(qint16)123 );
-    connect(ntpClient, SIGNAL(replyReceived(QHostAddress,quint16,NtpReply)),
-                              this, SLOT(replyReceived(QHostAddress,quint16,NtpReply)));
-    ntpClient->sendRequest(ntpAddress, (qint16)123);
-    */
     QDate currentDate = QDate::currentDate();
     if(!(currentDate>=startDate && currentDate<=finishDate)){
         return LIC_INVALID_TIME;

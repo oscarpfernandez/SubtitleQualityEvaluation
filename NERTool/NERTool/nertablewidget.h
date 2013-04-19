@@ -70,6 +70,8 @@ public:
     double computeInsertions();
     double computeDeletions();
     double computeSubstitutions();
+    double computeWordReduction();
+
     NERStatsData getNERStatsValues();
     QString getTableTransRowText(int row);
     QList<DragLabel*> getTableTransRowLabels(int row);
@@ -99,6 +101,7 @@ private:
     QString description;
 
     NERStatsData nerStatsDataValues;
+    void getNumSubsWordsChars(int &numWords, int &numChars);
 
 public slots:
     void columnTableResized(int column, int oldWidth, int newWidth);
