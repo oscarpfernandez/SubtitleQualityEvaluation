@@ -54,8 +54,8 @@ void NERMainWindow::createGuiElements()
     nerSummary = new NERSummaryWidget(this);
     connect(nerSummary, SIGNAL(computeNERValues()),
             this, SLOT(computerNERStatistics()));
-    connect(this, SIGNAL(setNERStatistics(double&,double&)),
-            nerSummary, SLOT(setNERStatistics(double&,double&)));
+    connect(this, SIGNAL(setNERStatistics(NERStatsData&)),
+            nerSummary, SLOT(setNERStatistics(NERStatsData&)));
     connect(nerSummary, SIGNAL(viewNerStats()), this, SLOT(showNerStatsWindow()));
 
     nerStatsViewer = new NERStatsViewerWidget();
@@ -325,7 +325,7 @@ void NERMainWindow::createDockableWidgets()
     nerStatsDockWidget->setWidget(nerSummary);
     nerStatsDockWidget->setAllowedAreas(Qt::BottomDockWidgetArea | Qt::TopDockWidgetArea);
     nerStatsDockWidget->setWindowIcon(QIcon(":/resources/pics/stats.png"));
-    addDockWidget(Qt::TopDockWidgetArea, nerStatsDockWidget);
+    addDockWidget(Qt::BottomDockWidgetArea, nerStatsDockWidget);
 
 }
 
@@ -888,10 +888,7 @@ void NERMainWindow::computerNERStatistics()
 
     NERStatsData ner = table->computeNERStats_NerValue();
 
-    double nerValue = ner.getNerValue();
-    double delay = ner.getAvgDelay();
-
-    emit setNERStatistics(delay, nerValue);
+    emit setNERStatistics(ner);
 
     ENGINE_DEBUG << "NER Value = "          << ner.getNerValue() << "\n\t"
                  << "Edition Error = "      << ner.getEditionErrors() << "\n\t"

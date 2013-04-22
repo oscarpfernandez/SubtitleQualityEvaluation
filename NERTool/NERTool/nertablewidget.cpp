@@ -356,7 +356,6 @@ NERStatsData NERTableWidget::computeNERStats_NerValue(){
 
     nerStatsDataValues.resetDataToZero();
 
-
     int N = computeNERStats_N();
     double re = computeNERStats_RecognitionErrors();
     double er = computeNERStats_EditionErrors();
@@ -369,6 +368,7 @@ NERStatsData NERTableWidget::computeNERStats_NerValue(){
     double delay = computeNERStats_Delay() / 1000; //in seconds...
 
     double wordReduction = computeWordReduction();
+    int transWords = getAllTranscriptionLabels().count();
 
     //saveValues
     nerStatsDataValues.setNCount(N)
@@ -376,7 +376,8 @@ NERStatsData NERTableWidget::computeNERStats_NerValue(){
             .setRecognitionErrors(re)
             .setAvgDelay(delay)
             .setNerValue(ner)
-            .setReduction(wordReduction);
+            .setReduction(wordReduction)
+            .setTransWordCount(transWords);
 
     ENGINE_DEBUG << "NER -> " << "\n\tN = " << N
                  << "\n\tEdition Errors = "<< er
@@ -534,14 +535,14 @@ double NERTableWidget::computeNERStats_Delay(){
 
 double NERTableWidget::computeWordReduction()
 {
-    int transWords = getAllTranscriptionLabels().count();
-    int subtsWords = getAllSubtableLabels().count();
+    double transWords = getAllTranscriptionLabels().count();
+    double subtsWords = getAllSubtableLabels().count();
 
     if(transWords==0){
         return 0;
     }
 
-    return subtsWords / transWords;
+    return subtsWords/transWords;
 }
 
 void NERTableWidget::getNumSubsWordsChars(int &numWords, int &numChars)

@@ -41,7 +41,7 @@ void About::createElements()
     buttonHBoxLayout = new QHBoxLayout;
 
     imageLabel = new QLabel();
-    imageLabel->setPixmap(QPixmap(":/resources/pics/splash.png"));
+    imageLabel->setPixmap(QPixmap(":/resources/pics/splash2.png"));
 
     QPalette pal;
     QColor bgColor("black");

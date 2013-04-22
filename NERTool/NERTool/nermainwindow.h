@@ -138,7 +138,7 @@ private slots:
     void recomputeTableDiff();
 
 signals:
-    void setNERStatistics(double &N, double &ner);
+    void setNERStatistics(NERStatsData &ner);
 
 
 };

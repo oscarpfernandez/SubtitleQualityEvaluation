@@ -66,7 +66,6 @@ void DragLabel::setupLabelType(EditionTypeEnum ete)
     }
     else if(ete == CorrectEdition){
         QString s = QString::number(size.width());
-        qDebug(s.toAscii());
         gradient.setColorAt(0.0, Qt::white);
         gradient.setColorAt(0.2, QColor(169, 250, 40));
         gradient.setColorAt(0.8, QColor(170, 252, 45));

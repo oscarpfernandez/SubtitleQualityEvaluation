@@ -206,7 +206,7 @@ void NERStatsViewerWidget::createElements()
     connect(refreshButton,SIGNAL(clicked()), this, SLOT(refreshNERDataSlot()));
 
     mainLayout->addWidget(nerValuesGroupBox);
-    mainLayout->addSpacing(30);
+    mainLayout->addSpacing(10);
     mainLayout->addWidget(plotsGroupBox);
     mainLayout->addWidget(refreshButton);
 

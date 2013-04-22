@@ -102,7 +102,8 @@ private:
     int     recogErrorInsertions;
     int     recogErrorDeletions;
     int     recogErrorSubstitutions;
-    int     reductionValue;
+    double  reductionValue;
+    int     transWordsCount;
 
 public:
     int getNCount(){
@@ -232,11 +233,15 @@ public:
     NERStatsData& incRecogErrorSubstitutions(){
         recogErrorSubstitutions++;
         return *this;}
-
-    int getReduction(){
-        return recogErrorSubstitutions;}
+    double getReduction(){
+        return reductionValue;}
     NERStatsData& setReduction(double reduct){
         reductionValue = reduct;
+        return *this;}
+    double getTransWordCount(){
+        return transWordsCount;}
+    NERStatsData& setTransWordCount(int words){
+        transWordsCount = words;
         return *this;}
 
     void resetDataToZero(){
@@ -268,6 +273,7 @@ public:
         recogErrorDeletions = 0;
         recogErrorSubstitutions = 0;
         reductionValue = 0;
+        transWordsCount = 0;
     }
 };
 #endif

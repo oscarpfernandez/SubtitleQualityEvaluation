@@ -15,7 +15,7 @@ int main(int argc, char *argv[])
     NERMainWindow mainWin;
 
     QSplashScreen *splash = new QSplashScreen;
-    splash->setPixmap(QPixmap(":/resources/pics/splash.png"));
+    splash->setPixmap(QPixmap(":/resources/pics/splash2.png"));
     splash->show();
     Qt::Alignment topRight = Qt::AlignLeft | Qt::AlignTop;
     splash->showMessage(QObject::tr("Loading Application..."),

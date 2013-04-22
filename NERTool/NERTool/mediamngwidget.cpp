@@ -113,6 +113,7 @@ void MediaMngWidget::setupGUI()
     timeLcd->setAutoFillBackground(true);
     timeLcd->display("00:00:00.000");
     timeLcd->setSegmentStyle(QLCDNumber::Filled);
+    timeLcd->setMaximumSize(timeLcd->sizeHint()+=QSize(0,20));
     timeLcd->setPalette(palette);
 
     fileNameLoaded = new QLineEdit(this);
