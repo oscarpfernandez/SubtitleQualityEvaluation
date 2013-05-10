@@ -102,6 +102,7 @@ private:
 
     NERStatsData nerStatsDataValues;
     void getNumSubsWordsChars(int &numWords, int &numChars);
+    int getTotalSubsTimeInSeconds();
 
 public slots:
     void columnTableResized(int column, int oldWidth, int newWidth);

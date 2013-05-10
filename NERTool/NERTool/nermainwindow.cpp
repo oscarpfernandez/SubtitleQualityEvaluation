@@ -93,7 +93,7 @@ void NERMainWindow::createActions()
             this, SLOT(saveProjectSlot()));
 
     saveAsProjectAction = new QAction(tr("&Save as Project..."), this);
-    saveAsProjectAction->setShortcut(QKeySequence::Save);
+    saveAsProjectAction->setShortcut(QKeySequence::SaveAs);
     saveAsProjectAction->setIcon(QIcon(":/resources/pics/save.png"));
     saveAsProjectAction->setStatusTip("Save As the current project");
     connect(saveAsProjectAction, SIGNAL(triggered()),
@@ -887,6 +887,7 @@ void NERMainWindow::computerNERStatistics()
     NERTableWidget* table = static_cast<NERTableWidget*>(subWindow->widget());
 
     NERStatsData ner = table->computeNERStats_NerValue();
+
 
     emit setNERStatistics(ner);
 

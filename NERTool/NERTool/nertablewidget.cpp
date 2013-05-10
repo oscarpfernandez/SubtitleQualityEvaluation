@@ -370,6 +370,9 @@ NERStatsData NERTableWidget::computeNERStats_NerValue(){
     double wordReduction = computeWordReduction();
     int transWords = getAllTranscriptionLabels().count();
 
+    int subWords, subchars;
+    getNumSubsWordsChars(subWords, subchars);
+
     //saveValues
     nerStatsDataValues.setNCount(N)
             .setEditionErrors(er)
@@ -559,6 +562,11 @@ void NERTableWidget::getNumSubsWordsChars(int &numWords, int &numChars)
             numChars += lab->labelText().count();
         }
     }
+}
+
+int NERTableWidget::getTotalSubsTimeInSeconds()
+{
+
 }
 
 qlonglong NERTableWidget::getTimeInMilis(QString time)
