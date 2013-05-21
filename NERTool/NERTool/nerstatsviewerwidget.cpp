@@ -716,5 +716,23 @@ void NERStatsViewerWidget::setupBarChartCrossModifTypes(QCustomPlot *customPlot,
     QFont legendFont = font();
     legendFont.setPointSize(8);
     customPlot->legend->setFont(legendFont);
+}
+
+QString NERStatsViewerWidget::saveWidgetToImg(QString &filePath)
+{
+
+    const QSize imgSize(size().width(), size().height()-40);
+    QImage img(imgSize, QImage::Format_RGB32);
+    QPainter painter(&img);
+    render(&painter);
+    img.save(filePath);
+
+    QFile sourceFile(filePath);
+    sourceFile.open(QIODevice::ReadOnly);
+
+    QByteArray srcRawData = sourceFile.readAll();
+    QByteArray base64Encoded = srcRawData.toBase64();
+
+    return base64Encoded;
 
 }

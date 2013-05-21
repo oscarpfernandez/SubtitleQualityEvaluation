@@ -7,6 +7,8 @@
 #include <QGroupBox>
 #include <QLabel>
 #include <QPushButton>
+#include <QImage>
+#include <QPainter>
 #include "nercommon.h"
 #include "qcustomplot.h"
 
@@ -26,6 +28,7 @@ public:
     void setPropertiesData(NERStatsData &nerStatsData);
     void replotGraphs();
     void clearGraphsData();
+    QString saveWidgetToImg(QString &filePath);
 
 private:
 

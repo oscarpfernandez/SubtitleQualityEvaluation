@@ -216,6 +216,8 @@ EditionTypeEnum DragLabel::editionEnumFromOrdinal(int value)
         return EditionError;
     case 3:
         return RecognitionError;
+    case 4:
+        return TrancriptionDeletion;
     default:
         break;
     }

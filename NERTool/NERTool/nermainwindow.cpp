@@ -188,6 +188,11 @@ void NERMainWindow::createActions()
     recomputeTableDifferences->setEnabled(false);
     connect(recomputeTableDifferences, SIGNAL(triggered()), this, SLOT(recomputeTableDiff()));
 
+    generateNerReport = new QAction(tr("Generate Report"), this);
+    generateNerReport-> setStatusTip(tr("Generate NER final report"));
+    generateNerReport->setEnabled(false);
+    connect(generateNerReport, SIGNAL(triggered()), this, SLOT(generateNERReport()));
+
 }
 
 void NERMainWindow::enableActions(bool enable)
@@ -201,6 +206,7 @@ void NERMainWindow::enableActions(bool enable)
     showVideoAction->setEnabled(enable);
     computerNerStats->setEnabled(enable);
     showNerSummaryAction->setEnabled(enable);
+    generateNerReport->setEnabled(enable);
 }
 
 
@@ -217,8 +223,8 @@ void NERMainWindow::createMenus()
     fileMenu->addAction(closeProjectAction);
 	fileMenu->addAction(closeAppAction);
 
-    viewMenu = menuBar()->addMenu(tr("&View"));
-    viewMenu->addAction(viewPropertiesTree);
+    //viewMenu = menuBar()->addMenu(tr("&View"));
+    //viewMenu->addAction(viewPropertiesTree);
 
     toolsMenu = menuBar()->addMenu(tr("&Tools"));
     toolsMenu->addAction(loadTransXmlFile);
@@ -230,6 +236,8 @@ void NERMainWindow::createMenus()
     toolsMenu->addSeparator();
     toolsMenu->addAction(computerNerStats);
     toolsMenu->addAction(recomputeTableDifferences);
+    toolsMenu->addSeparator();
+    toolsMenu->addAction(generateNerReport);
 
 	windowMenu = menuBar()->addMenu(tr("&Window"));
     windowMenu->addAction(cascadeSubWindowsAction);
@@ -286,14 +294,18 @@ void NERMainWindow::createDockableWidgets()
 {
 
     QDesktopWidget *mydesk = QApplication::desktop();
-    int docksWidth = 0.30 * mydesk->width();
+    int valWidth = mydesk->width();
+    if(valWidth > 1024){
+        valWidth = 1024;
+    }
+    int docksWidth = 0.30 * valWidth;
 
     projectPropertiesDockWidget = new QDockWidget(tr("Project Details"));
     projectPropertiesDockWidget->setObjectName("projectTreeDockWidget");
     projectPropertiesDockWidget->setWidget(propertiesTreeWidget);
     projectPropertiesDockWidget->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
     projectPropertiesDockWidget->setToolTip(tr("Project Details"));
-    projectPropertiesDockWidget->setFixedWidth(docksWidth);
+    projectPropertiesDockWidget->setMinimumWidth(docksWidth);
     projectPropertiesDockWidget->setWindowIcon(QIcon(":/resources/pics/docs.png"));
     addDockWidget(Qt::RightDockWidgetArea, projectPropertiesDockWidget);
 
@@ -313,8 +325,8 @@ void NERMainWindow::createDockableWidgets()
                                            | Qt::TopDockWidgetArea);
 
     videoPlayerDockWidget->setToolTip(tr("Video window..."));
-    videoPlayerDockWidget->setFixedWidth(docksWidth);
-    videoPlayerDockWidget->setFixedHeight(0.75*docksWidth);
+    videoPlayerDockWidget->setMinimumWidth(docksWidth);
+    videoPlayerDockWidget->setMinimumHeight(0.75*docksWidth);
     videoPlayerDockWidget->setAutoFillBackground(true);
     QPalette bvidpalette = videoPlayerDockWidget->palette();
     bvidpalette.setColor(QPalette::Window, Qt::black);
@@ -522,6 +534,8 @@ void NERMainWindow::closeProjectSlot()
     showDockableWidgets(false);
     recomputeTableDifferences->setEnabled(false);
     nerStatsViewer->close();
+
+    projectSaveFilePath->clear();
 
 
 
@@ -747,6 +761,52 @@ void NERMainWindow::recomputeTableDiff()
     }
 
     computeWordDifferences(table);
+}
+
+void NERMainWindow::generateNERReport()
+{
+    computerNERStatistics();
+    showNerStatsWindow();
+    nerStatsViewer->hide();
+
+    if(mainMdiArea->subWindowList().count()==0){
+        return;
+    }
+
+    QMdiSubWindow* subWindow = mainMdiArea->activeSubWindow();
+    NERTableWidget* table = static_cast<NERTableWidget*>(subWindow->widget());
+
+    if(table==0){
+        return;
+    }
+
+    QString reportFileName = QFileDialog::getSaveFileName(
+                this,
+                tr("Save NER Export"),
+                QDir::currentPath(),
+                tr("NER Files (*.htm)"));
+
+    if(!reportFileName.endsWith(".htm")){
+        reportFileName.append(".htm");
+    }
+
+    QFileInfo file(reportFileName);
+    QString imgfilePath = file.path();
+    QString name = QString::number(QTime::currentTime().second()*1000 + QTime::currentTime().msec());
+    name.append(name).append(".jpg");
+
+    imgfilePath.append("/").append(name);
+
+    QString base64Img = nerStatsViewer->saveWidgetToImg(imgfilePath);
+
+    QFile::remove(imgfilePath);
+
+    ReportExport::generateExportFile(reportFileName,
+                                     base64Img,
+                                     table->getNERStatsValues(),
+                                     table->getTableName(),
+                                     table->getResponsible(),
+                                     table->getDescription());
 }
 
 /*******************************************************************************

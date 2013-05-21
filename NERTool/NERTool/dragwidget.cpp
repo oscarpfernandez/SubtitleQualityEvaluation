@@ -21,7 +21,7 @@ DragWidget::DragWidget(QWidget *parent,
     m_maxWidgetWidth = maxWidth;
     m_numLines = 0;
 
-	QStringList wordsList = textBlock.split(" ");
+    QStringList wordsList = textBlock.simplified().split(" ");
 
 	for(int i=0; i<wordsList.count(); i++) {
 		QString word = wordsList.at(i);
@@ -330,17 +330,18 @@ bool DragWidget::eventFilter(QObject *obj, QEvent *event)
         myMenu.addSeparator();
         myMenu.addAction(EDITION_COMMENT_STR);
         myMenu.addSeparator();
-        QMenu subMenu("Weight Error");
-        subMenu.addAction(m_Error0Action);
-        subMenu.addAction(m_Error025Action);
-        subMenu.addAction(m_Error050Action);
-        subMenu.addAction(m_Error100Action);
-        QMenu subMenu2("Type");
-        subMenu2.addAction(m_insertionAction);
-        subMenu2.addAction(m_delectionAction);
-        subMenu2.addAction(m_substitutionAction);
-        myMenu.addMenu(&subMenu);
-        myMenu.addMenu(&subMenu2);
+        //QMenu subMenu("Weight Error");
+        myMenu.addAction(m_Error0Action);
+        myMenu.addAction(m_Error025Action);
+        myMenu.addAction(m_Error050Action);
+        myMenu.addAction(m_Error100Action);
+        //QMenu subMenu2("Type");
+        myMenu.addSeparator();
+        myMenu.addAction(m_insertionAction);
+        myMenu.addAction(m_delectionAction);
+        myMenu.addAction(m_substitutionAction);
+        //myMenu.addMenu(&subMenu);
+        //myMenu.addMenu(&subMenu2);
 
         // ...
 

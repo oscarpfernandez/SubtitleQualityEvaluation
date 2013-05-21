@@ -28,8 +28,8 @@ NERTableWidget::NERTableWidget(QWidget *parent) : QTableWidget(parent)
 
     setRowCount(0);
 
-    horizontalHeader()->setResizeMode(QHeaderView::Interactive);
-    verticalHeader()->setResizeMode(QHeaderView::Interactive);
+//    horizontalHeader()->setResizeMode(QHeaderView::Interactive);
+//    verticalHeader()->setResizeMode(QHeaderView::ResizeToContents);
 
     QStringList headers;
     headers << "Speaker ID"
@@ -49,6 +49,8 @@ NERTableWidget::NERTableWidget(QWidget *parent) : QTableWidget(parent)
     //connect(headerView, SIGNAL(sectionResized(int,int,int)), this, SLOT(columnTableResized(int,int,int)));
 
     subtileDataHashedByTimestamp = new QHash<qlonglong,QString>();
+
+    nerStatsDataValues.resetDataToZero();
 
 }
 

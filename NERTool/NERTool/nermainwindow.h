@@ -22,6 +22,7 @@
 #include "utils.h"
 #include "nersummarywidget.h"
 #include "licencemanager.h"
+#include "reportexport.h"
 
 
 
@@ -93,6 +94,7 @@ private:
     QAction *computerNerStats;
     QAction *recomputeTableDifferences;
     QAction *showNerSummaryAction;
+    QAction *generateNerReport;
 
 
 
@@ -136,6 +138,7 @@ private slots:
     void computerNERStatistics();
     void showNerStatsWindow();
     void recomputeTableDiff();
+    void generateNERReport();
 
 signals:
     void setNERStatistics(NERStatsData &ner);
