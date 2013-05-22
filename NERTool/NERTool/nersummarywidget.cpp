@@ -97,9 +97,9 @@ void NERSummaryWidget::viewStatsSlot()
 
 void NERSummaryWidget::setNERStatistics(NERStatsData &ner)
 {
-    nerValueLabel->setText(QString::number(ner.getNerValue()));
+    nerValueLabel->setText(QString::number(ner.getNerValue()*100));
     nerPropos_N_value_Label->setText(QString::number(ner.getAvgDelay()));
-    reduct_percent_valueLabel->setText(QString::number(ner.getReduction()));
+    reduct_percent_valueLabel->setText(QString::number(ner.getReduction()*100));
     subsWordCount_valueLabel->setText(QString::number(ner.getN_words()));
     transWordCount_valueLabel->setText(QString::number(ner.getTransWordCount()));
 }

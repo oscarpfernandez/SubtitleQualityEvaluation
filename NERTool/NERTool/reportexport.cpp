@@ -43,6 +43,12 @@ void ReportExport::generateExportFile(QString &filePath,
     out << "#psdg-bottom {clear:both;margin:0;padding: 0;width: 578px;height: 48px;border-top: 2px solid #FFF;background: #e4e3e3 url(images/bottom-line.png) repeat-x left top;}" << endl;
     out << ".psdg-bottom-cell {float:left;padding: 15px 0 0 0;text-align:center;width:105px;height: 33px;border-right: 1px solid #ced9ec;color:#070707;font: 13px Arial, Helvetica, sans-serif;}" << endl;
     out << "#psdg-footer {font-size: 10px;color:#8a8a8a;margin:0;padding: 8px 0 8px 12px;width: 566px;background: #f6f6f6 url(images/center-bcg.png) repeat-y right top;}" << endl;
+
+    out << ".psdg-comment-left {float:left;margin:0;padding: 10px 0 0 24px;width: 50px;text-align: left;height: 25px;border-right: 1px solid #ced9ec;border-bottom: 1px solid #b3c1db;color:#1f3d71;font: 13px Arial, Helvetica, sans-serif;background: #e4ebf8 url(images/center-blue.png) repeat-y left top;}" << endl;
+    out << "#psdg-comment-middle {margin:0;padding: 0;width: 200px;background: #f6f6f6 url(images/center-bcg.png) repeat-y right top;}" << endl;
+    out << ".psdg-comment-right {float:left;margin:0;padding: 11px 0 0 0;width: 140px;text-align:center;height: 24px;border-right: 1px solid #ced9ec;border-bottom: 1px solid #b3c1db;}" << endl;
+
+
     out << "</STYLE>"  << endl;
 
     out << "</head>" << endl;
@@ -56,6 +62,7 @@ void ReportExport::generateExportFile(QString &filePath,
 
     out << "</div>"  << endl;
 
+    //Ner Properties...
     out << "<div align=\"center\" id=\"psdg-header\" style=\"float:left\">" << endl;
     out << "<span class=\"psdg-bold\">NER Global Stats</span>" << endl;
     out << "</div>" << endl;
@@ -69,6 +76,15 @@ void ReportExport::generateExportFile(QString &filePath,
     out << "    <div class=\"psdg-right\">" << QString::number(nerData.getReduction())  << "</div>" << endl;
     out << "</div>" << endl;
 
+    //NER Comments of table...
+    out << "<div id=\"psdg-comment-middle\">" << endl;
+    out << "    <div class=\"psdg-comment-left\">NER (&#37;)</div>" << endl;
+    out << "    <div class=\"psdg-comment-right\">" << QString::number(nerData.getNerValue()) << "</div>" << endl;
+    out << "    <div class=\"psdg-comment-left\">Average Delay (s)</div>" << endl;
+    out << "    <div class=\"psdg-comment-right\">" << QString::number(nerData.getAvgDelay())  << "</div>" << endl;
+    out << "    <div class=\"psdg-comment-left\">Text Reduction (&#37;)</div>" << endl;
+    out << "    <div class=\"psdg-comment-right\">" << QString::number(nerData.getReduction())  << "</div>" << endl;
+    out << "</div>" << endl;
 
     out << "<p align=\"left\"><img src=\"" << "data:image/jpg;base64," << imgResName << "\" ></p>" << endl;
     out << "</div>"  << endl;

@@ -107,6 +107,7 @@ private:
     QMenu *fileMenu;
     QMenu *viewMenu;
     QMenu *toolsMenu;
+    QMenu *transcMenu;
     QMenu *subTitlesMenu;
 	QMenu *windowMenu;
     QMenu *helpMenu;

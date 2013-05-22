@@ -227,11 +227,14 @@ void NERMainWindow::createMenus()
     //viewMenu->addAction(viewPropertiesTree);
 
     toolsMenu = menuBar()->addMenu(tr("&Tools"));
-    toolsMenu->addAction(loadTransXmlFile);
-
+    transcMenu = new QMenu(tr("Load Transcription"), this);
+    transcMenu->addAction(loadTransXmlFile);
+    //toolsMenu->addAction(loadTransXmlFile);
     subTitlesMenu = new QMenu(tr("Load Subtitles"), this);
     subTitlesMenu->addAction(loadSubtsXmlFile);
     subTitlesMenu->addAction(loadSRTXmlFile);
+
+    toolsMenu->addMenu(transcMenu);
     toolsMenu->addMenu(subTitlesMenu);
     toolsMenu->addSeparator();
     toolsMenu->addAction(computerNerStats);

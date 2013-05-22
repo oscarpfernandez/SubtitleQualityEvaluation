@@ -80,6 +80,8 @@ void About::createElements()
     credits.append("\nSoftware developed by:\n\n");
     credits.append("Oscar Lopes <oscar.pino.lopes@gmail.com>\n");
     credits.append("CaiaC Research - http://caiac.uab.cat\n");
+    credits.append("\nJuan Martinez <juan.martinez@speedchill.com>\n");
+    credits.append("SwissTXT - http://www.swisstxt.ch");
 
 
     creditsLabel = new QLabel;
@@ -90,7 +92,7 @@ void About::createElements()
     creditsTextEdit->setReadOnly(true);
     creditsTextEdit->setPalette(pal);
     creditsTextEdit->setCurrentFont(QFont("Courier",16, QFont::Bold));
-    creditsTextEdit->setMaximumHeight(110);
+    creditsTextEdit->setMaximumHeight(150);
 
     creditsLayout = new QVBoxLayout;
     creditsLayout->addWidget(creditsLabel);
