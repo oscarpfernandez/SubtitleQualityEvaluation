@@ -30,12 +30,31 @@ bool XMLHandler::readTranscriberXML(QString &xmlFilePath,
         QFile *xmlFile = new QFile(xmlFilePath);
         if(xmlFile->open(QIODevice::ReadOnly | QIODevice::Text))
         {
-            return loadTranscriberXML(xmlFile, trsBlocks, speakerList);
+            bool isOk = loadTranscriberXML(xmlFile, trsBlocks, speakerList);
+            xmlFile->close();
+            delete xmlFile;
+            return isOk;
         }
     }
 
     return false;
+}
 
+bool XMLHandler::readSRTTranscription(QString &xmlFilePath,
+                                    QList<BlockTRS> *trsBlocks)
+{
+    if(QFile::exists(xmlFilePath)){
+        QFile *xmlFile = new QFile(xmlFilePath);
+        if(xmlFile->open(QIODevice::ReadOnly | QIODevice::Text))
+        {
+            bool isOk = loadSRTTranscription(xmlFile, trsBlocks);
+            xmlFile->close();
+            delete xmlFile;
+            return isOk;
+        }
+    }
+
+    return false;
 }
 
 bool XMLHandler::readSubtitleXML(QString &xmlFilePath,
@@ -45,7 +64,11 @@ bool XMLHandler::readSubtitleXML(QString &xmlFilePath,
         QFile *xmlFile = new QFile(xmlFilePath);
         if(xmlFile->open(QIODevice::ReadOnly | QIODevice::Text))
         {
-            return loadSubtitleXML(xmlFile, trsBlocks);
+             bool isOk = loadSubtitleXML(xmlFile, trsBlocks);
+             xmlFile->close();
+             delete xmlFile;
+
+            return isOk;
         }
     }
 
@@ -181,6 +204,89 @@ bool XMLHandler::loadTranscriberXML(QFile *xmlFile,
     return true;
 }
 
+bool XMLHandler::loadSRTTranscription(QFile *srtFile, QList<BlockTRS> *trsBlocks)
+{
+
+    QTextStream *inTextStream = new QTextStream(srtFile);
+    //inTextStream->setAutoDetectUnicode(true);
+    inTextStream->setCodec("UTF-8");
+
+    int index=0;//index of the SRT
+    QString line;//current read line
+    QString text;//subtitle text obtained from several reads.
+    QString startTime;
+    QString endTime;
+
+    //Check if the file is a SRT...
+    QString line1 = inTextStream->readLine();
+    QString line2 = inTextStream->readLine();
+    bool isNumber;
+    line1.toInt(&isNumber);
+    bool hasArrow = line2.contains("-->");
+
+    if(!isNumber && !hasArrow){
+        //if first line does not contain a number and the second does not
+        //contain an "-->" its not a well formatted SRT file...
+        return false; //get out!
+    }
+
+    inTextStream->seek(0);
+
+    while(!inTextStream->atEnd()){
+        //read line from the stream
+        line = inTextStream->readLine();
+
+        //check if the line is a number
+        bool okIsNumber;
+        int valueIndex = line.toInt(&okIsNumber);
+
+        if(line.isEmpty() && index>0) {
+
+            bool isTimeSRTOk = true;
+            //Load TRS Block
+            QString timeF = startTime.simplified();
+            QString formatedTime = getFormatedTime(timeF, isTimeSRTOk);
+
+            if(!isTimeSRTOk){
+                return false; //Something's wrong with the SRT.
+            }
+
+            BlockTRS btr;
+            btr.setSyncTime(formatedTime).setText(text.simplified());
+
+            trsBlocks->append(btr);
+
+            //set start and stop time.
+            //clear the text to read a new subtitle line.
+            text.clear();
+
+            //no more verifications to do. skip to the next line...
+            continue;
+        }
+        else if(okIsNumber){
+            //is a number so clear the accumulated text buffer.
+            text.clear();
+            index = valueIndex;
+        }
+        else if(line.contains("-->"))
+        {
+            QStringList list = line.split("-->");
+            startTime = list.first();
+            endTime = list.last();
+        }
+        else{
+            //is simple text
+            text.append(line).append(" ");
+        }
+    }
+
+    inTextStream->flush();
+
+    delete(inTextStream);
+
+    return true;
+}
+
 /*******************************************************************************
  * Loads the subtitles represented in the transcriber format.
  ******************************************************************************/
@@ -270,6 +376,7 @@ bool XMLHandler::readSubtitleSRT(QString &srtFile, QList<BlockTRS> *trsBlocks)
     QFile *file = new QFile(srtFile);
     QTextStream *inTextStream = new QTextStream(file);
     inTextStream->setCodec("UTF-8");
+    //inTextStream->setAutoDetectUnicode(true);
 
     int index=0;//index of the SRT
     QString line;//current read line

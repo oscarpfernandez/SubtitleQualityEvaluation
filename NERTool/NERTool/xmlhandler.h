@@ -80,6 +80,8 @@ public:
     bool readTranscriberXML(QString &xmlFileName,
                             QList<BlockTRS> *trsBlocks,
                             QList<Speaker> *speakerList);
+    bool readSRTTranscription(QString &xmlFileName,
+                              QList<BlockTRS> *trsBlocks);
     bool readSubtitleXML(QString &xmlFileName,
                          QList<BlockTRS> *trsBlocks);
     bool readSubtitleSRT(QString &srtFile,
@@ -105,7 +107,8 @@ private:
     bool loadTranscriberXML(QFile *xmlFile,
                             QList<BlockTRS> *trsBlocks,
                             QList<Speaker> *speakerList);
-
+    bool loadSRTTranscription(QFile *srtFile,
+                              QList<BlockTRS> *trsBlocks);
     bool loadSubtitleXML(QFile *xmlFile,
                          QList<BlockTRS> *trsBlocks);
     QString getFormatedTime(QString &time, bool &isTimeSRTOk);

@@ -36,6 +36,25 @@ NERMainWindow::~NERMainWindow()
     delete xmlHandler;
 }
 
+bool NERMainWindow::event(QEvent *ev)
+{
+    bool isOk = false;
+    switch (ev->type())
+    {
+    case QEvent::Close:
+    {
+        closeProjectSlot();
+        closeApplicationSlot();
+        isOk = true;
+        break;
+    }
+    default:
+        isOk = QMainWindow::event(ev);
+        break;
+    }
+    return isOk;
+}
+
 
 /*******************************************************************************
  * Creates and initializes main application widgets.
@@ -121,7 +140,7 @@ void NERMainWindow::createActions()
             this, SLOT(aboutQTSlot()));
 
 	closeAppAction = new QAction(tr("&Exit"), this);
-    closeAppAction->setShortcut(QKeySequence("Alt+F4"));
+    closeAppAction->setShortcut(QKeySequence::Quit);
 	closeAppAction->setIcon(QIcon(":/resources/pics/closeApp.png"));
 	closeAppAction->setStatusTip("About this application");
     connect(closeAppAction, SIGNAL(triggered()),
@@ -139,6 +158,11 @@ void NERMainWindow::createActions()
     loadTransXmlFile->setStatusTip("Load transcription file...");
     connect(loadTransXmlFile, SIGNAL(triggered()),
             this, SLOT(loadTranscriptionFileSlot()));
+
+    loadTransSRTFile = new QAction(tr("Load SRT Transcription"), this);
+    loadTransSRTFile->setShortcut(QKeySequence("Ctrl+Y"));
+    loadTransSRTFile->setStatusTip(tr("Load SRT Trancription File..."));
+    connect(loadTransSRTFile, SIGNAL(triggered()), this, SLOT(loadSRTTranscriptionFileSlot()));
 
     loadSubtsXmlFile = new QAction(tr("Load TRS Subtitles"), this);
     loadSubtsXmlFile->setShortcut(QKeySequence("Ctrl+U"));
@@ -199,6 +223,7 @@ void NERMainWindow::enableActions(bool enable)
 {
     saveProjectAction->setEnabled(enable);
     loadTransXmlFile->setEnabled(enable);
+    loadTransSRTFile->setEnabled(enable);
     saveAsProjectAction->setEnabled(enable);
     closeProjectAction->setEnabled(enable);
     viewPropertiesDockAction->setEnabled(enable);
@@ -229,7 +254,8 @@ void NERMainWindow::createMenus()
     toolsMenu = menuBar()->addMenu(tr("&Tools"));
     transcMenu = new QMenu(tr("Load Transcription"), this);
     transcMenu->addAction(loadTransXmlFile);
-    //toolsMenu->addAction(loadTransXmlFile);
+    transcMenu->addAction(loadTransSRTFile);
+
     subTitlesMenu = new QMenu(tr("Load Subtitles"), this);
     subTitlesMenu->addAction(loadSubtsXmlFile);
     subTitlesMenu->addAction(loadSRTXmlFile);
@@ -625,6 +651,53 @@ void NERMainWindow::loadTranscriptionFileSlot()
 
 }
 
+void NERMainWindow::loadSRTTranscriptionFileSlot()
+{
+    if(isTranscriptionLoaded && isSubtitlesLoaded){
+        QMessageBox box;
+        box.setText("Do you wish to reload Transcription table ?");
+        box.setInformativeText("This will delete any Subtitle tables loaded and cannot be undone!\nProceed ?");
+        box.setBaseSize(150,60);
+        box.setIcon(QMessageBox::Warning);
+        box.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+        box.setDefaultButton(QMessageBox::No);
+        int ret = box.exec();
+        switch (ret) {
+        case QMessageBox::No:
+            return;//cancel all this...
+        case QMessageBox::Yes:
+            propertiesTreeWidget->removeAllSubNodes();
+            isSubtitlesLoaded = false;
+            break;
+        default:
+            // should never be reached
+            break;
+        }
+    }
+
+    QString fileName = QFileDialog::getOpenFileName(
+            this,
+            tr("Open Transcription File"),
+            QDir::currentPath(),
+            tr("TRS file (*.srt)") );
+
+    if(fileName.isEmpty()){
+        return; //Nothing to do...
+    }
+
+    transcriptionList->clear();
+    speakerList->clear();
+
+    isTranscriptionLoaded = xmlHandler->readSRTTranscription(fileName, transcriptionList);
+
+    QString s;
+    QFileInfo info(fileName);
+    QString baseName = info.baseName();
+    propertiesTreeWidget->insertNewTranslation(baseName, s, s);
+    loadSubtsXmlFile->setEnabled(true);
+    loadSRTXmlFile->setEnabled(true);
+}
+
 
 /*******************************************************************************
  * Loads a "transcriber" XML file containing "subtitle" content.
@@ -699,26 +772,12 @@ void NERMainWindow::computeWordDifferences(NERTableWidget* table)
     }
 
     QString transText = table->getAllTranslationText();
-    transText.remove(".");
-    transText.remove(",");
-    transText.remove("!");
-    transText.remove("¡");
-    transText.remove("?");
-    transText.remove("¿");
-    transText.remove(";");
-    transText.remove(":");
-    transText = transText.toLower();
+    transText.remove(".").remove(",").remove("!").remove("¡").remove("?").remove("¿").remove(";").remove(":");
+    transText = transText.toLower().simplified();
 
     QString subsText = table->getAllSubtableText();
-    subsText.remove(".");
-    subsText.remove(",");
-    subsText.remove("!");
-    subsText.remove("¡");
-    subsText.remove("?");
-    subsText.remove("¿");
-    subsText.remove(";");
-    subsText.remove(":");
-    subsText = subsText.toLower();
+    subsText.remove(".").remove(",").remove("!").remove("¡").remove("?").remove("¿").remove(";").remove(":");
+    subsText = subsText.toLower().simplified();
 
     //Computes the diff...
     QList<Diff> diffList = table->computeDifferences(transText, subsText);
@@ -867,8 +926,8 @@ void NERMainWindow::loadSRTSubtitlesFileSlot()
 
         addTableInMdiArea(table, title);
 
-        QString transText = table->getAllTranslationText();
-        QString subsText = table->getAllSubtableText();
+        QString transText = table->getAllTranslationText().simplified();
+        QString subsText = table->getAllSubtableText().simplified();
 
         QList<Diff> diffList = table->computeDifferences(transText, subsText);
         QList<Diff> noDelsList = table->removeDeletions(diffList);

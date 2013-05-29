@@ -42,8 +42,10 @@ public:
     void displayErrorMessage(LIC_ERROR_TYPE errorType);
     ~NERMainWindow();
 
+protected:
+    bool event(QEvent *event);
+
 private:
-//    void checkLicence();
     void createGuiElements();
     void createActions();
     void enableActions(bool enable);
@@ -84,6 +86,7 @@ private:
 	QAction *aboutAction;
     QAction *viewPropertiesTree;
     QAction *loadTransXmlFile;
+    QAction *loadTransSRTFile;
     QAction *loadSubtsXmlFile;
     QAction *loadSRTXmlFile;
     QAction *cascadeSubWindowsAction;
@@ -132,6 +135,7 @@ private slots:
 	void aboutQTSlot();
 	void aboutSlot();
     void loadTranscriptionFileSlot();
+    void loadSRTTranscriptionFileSlot();
     void loadSubtitlesFileSlot();
     void loadSRTSubtitlesFileSlot();
     void cascadeWindowsSlot();

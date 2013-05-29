@@ -61,3 +61,4 @@ RESOURCES += \
 OTHER_FILES += \
     app.rc \
     app.rc
+

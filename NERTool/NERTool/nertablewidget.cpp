@@ -171,7 +171,7 @@ void NERTableWidget::loadSubtitlesXMLData(QList<BlockTRS> *transcription, QList<
             }
         }
         //Insert the rest of the subtitles in the last transcription line
-        else if(j == transcription->count()-1){
+        if(j == transcription->count()-1){
 
             for( ; i< subsTrsBlocks->count(); i++){
                 BlockTRS subBtr = subsTrsBlocks->at(i);
@@ -385,13 +385,13 @@ NERStatsData NERTableWidget::computeNERStats_NerValue(){
             .setTransWordCount(transWords);
 
     ENGINE_DEBUG << "NER -> " << "\n\tN = " << N
-                 << "\n\tEdition Errors = "<< er
-                 << "\n\tRecog Errors = " << re
-                 << "\n\tNER = " << ner
-                 << "\n\tAvg Delay = " << delay
-                 << "\n\tInsertions = " << ins
-                 << "\n\tDeletions = " << del
-                 << "\n\tSubstitutions = " << subs;
+                 << "\n\tEdition Errors = " << er
+                 << "\n\tRecog Errors = "   << re
+                 << "\n\tNER = "            << ner
+                 << "\n\tAvg Delay = "      << delay
+                 << "\n\tInsertions = "     << ins
+                 << "\n\tDeletions = "      << del
+                 << "\n\tSubstitutions = "  << subs;
 
 
     return nerStatsDataValues;
@@ -547,7 +547,7 @@ double NERTableWidget::computeWordReduction()
         return 0;
     }
 
-    return subtsWords/transWords;
+    return 1.0 - subtsWords/transWords;
 }
 
 void NERTableWidget::getNumSubsWordsChars(int &numWords, int &numChars)
