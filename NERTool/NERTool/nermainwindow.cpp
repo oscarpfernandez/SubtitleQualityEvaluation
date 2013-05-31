@@ -948,7 +948,6 @@ void NERMainWindow::loadSRTSubtitlesFileSlot()
     }
 }
 
-
 void NERMainWindow::addTableInMdiArea(NERTableWidget* table, QString title)
 {
     //Add a new subwindow

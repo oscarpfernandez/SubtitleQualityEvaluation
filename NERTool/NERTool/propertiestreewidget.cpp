@@ -279,7 +279,7 @@ void PropertiesTreeWidget::removeSubNodeSlot()
         mainItemSubs->removeChild(item);
     }
 
-    subWindowsMap->clear();//just in case...
+    subWindowsMap->remove(item);
 }
 
 void PropertiesTreeWidget::removeAllSubNodes()

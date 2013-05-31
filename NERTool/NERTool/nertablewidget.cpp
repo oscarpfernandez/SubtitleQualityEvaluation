@@ -333,7 +333,9 @@ int NERTableWidget::computeNERStats_N()
 
             numPontuation += str.count(".");
             numPontuation += str.count("!");
+            numPontuation += str.count("¡");
             numPontuation += str.count("?");
+            numPontuation += str.count("¿");
             numPontuation += str.count(";");
             numPontuation += str.count(",");
         }

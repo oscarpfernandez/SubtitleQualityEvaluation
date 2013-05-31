@@ -35,6 +35,8 @@ public:
                         QDate &startDate,
                         QDate &finishdate);
     static QList<QString> getMachinesMACAddresses();
+    static QString removeBlanksBeforePonctuation(QString &text);
+    static bool containsPonctuation(QString &text);
     
 };
 

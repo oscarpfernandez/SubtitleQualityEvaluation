@@ -153,3 +153,49 @@ QList<QString> Utils::getMachinesMACAddresses()
     }
     return ret;
 }
+
+QString Utils::removeBlanksBeforePonctuation(QString &text)
+{
+    if(!containsPonctuation(text))
+    {
+        return text;
+    }
+
+    QStringList list = text.simplified().split(" ");
+    int cardinal = list.count();
+
+    for(int i=0; i<cardinal; i++)
+    {
+        QString elem = QString(list.at(i));
+        if(containsPonctuation(elem) && i>0)
+        {
+            QString prev = list.at(i-1);
+            QString joint = prev.append(elem);
+            list.insert(i-1, joint);
+            list.removeAt(i);
+            list.removeAt(i);
+            cardinal--;
+        }
+    }
+
+    return list.join(" ");
+
+}
+
+bool Utils::containsPonctuation(QString &text)
+{
+    if(!text.contains("?")
+            && !text.contains("!")
+            && !text.contains(":")
+            && !text.contains(",")
+            && !text.contains(";")
+            && !text.contains("-")
+            && !text.contains(".")
+            && !text.contains("¿")
+            && !text.contains("¡") )
+    {
+        return false;
+    }
+
+    return true;
+}
