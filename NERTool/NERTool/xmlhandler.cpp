@@ -630,9 +630,12 @@ bool XMLHandler::writeProjectExportXML(QString &xmlFileName,
         const QString resp = treeItem->text(1);
         const QString desc = treeItem->text(2);
 
+        const QString assessment = tableWidget->getAssessment();
+
         xmlWriter->writeAttribute(STR_TABLE_PROP_NAME, name);
         xmlWriter->writeAttribute(STR_TABLE_PROP_RESPONSIBLE, resp);
         xmlWriter->writeAttribute(STR_TABLE_PROP_DESCRIPTION, desc);
+        xmlWriter->writeAttribute(STR_TABLE_PROP_ASSESSMENT, assessment);
 
         for(int row=0; row<tableWidget->rowCount(); row++)
         {
@@ -838,10 +841,12 @@ bool XMLHandler::readProjectExportXML(QString &xmlFileName,
                 QString tableName = attribs.value(STR_TABLE_PROP_NAME).toString();
                 QString responsible = attribs.value(STR_TABLE_PROP_RESPONSIBLE).toString();
                 QString description = attribs.value(STR_TABLE_PROP_DESCRIPTION).toString();
+                QString assessment = attribs.value(STR_TABLE_PROP_ASSESSMENT).toString();
 
                 currentTable->setTableName(tableName);
                 currentTable->setResponsible(responsible);
                 currentTable->setDescription(description);
+                currentTable->setAssessment(assessment);
 
                 ENGINE_DEBUG << ">>> Table props:\n\t" << tableName
                              << "\n\t" << responsible

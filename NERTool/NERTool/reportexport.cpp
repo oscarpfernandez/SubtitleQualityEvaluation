@@ -4,12 +4,7 @@ ReportExport::ReportExport()
 {
 }
 
-void ReportExport::generateExportFile(QString &filePath,
-                                      QString &imgResName,
-                                      NERStatsData nerData,
-                                      QString name,
-                                      QString resp,
-                                      QString desc)
+void ReportExport::writeHeader(QString &filePath)
 {
     if(filePath.isEmpty()){
         //nothing to do...
@@ -17,7 +12,7 @@ void ReportExport::generateExportFile(QString &filePath,
     }
 
     QFile file(filePath);
-    file.open(QIODevice::WriteOnly);
+    file.open(QIODevice::WriteOnly );
     QTextStream out(&file);
 
     out << "<!doctype html>" << endl;
@@ -28,7 +23,8 @@ void ReportExport::generateExportFile(QString &filePath,
     out << "<STYLE type=\"text/css\">" << endl;
     out << "html, body{  margin:0;  padding:0;  text-align:center; }  " << endl;
     out << "#pagewidth{  width:72%;  text-align:left;  margin:0 auto; } " << endl;
-    out << "#header{ position:relative;  height:80px;  background-color:#99CCFF;  width:100%; display:block; overflow:auto;} " << endl;
+    out << "#header{ position:relative;  height:198px;  background-color:#99CCFF;  width:100%; display:block; overflow:auto;} " << endl;
+    out << "#footer{ position:relative;  height:80px;  background-color:#99CCFF;  width:100%; display:block; overflow:auto;} " << endl;
     out << "#maincol{  background-color: #DFFFD3;   position: relative;  }"  << endl;
 
     //Table CSS
@@ -44,8 +40,10 @@ void ReportExport::generateExportFile(QString &filePath,
     out << ".psdg-bottom-cell {float:left;padding: 15px 0 0 0;text-align:center;width:105px;height: 33px;border-right: 1px solid #ced9ec;color:#070707;font: 13px Arial, Helvetica, sans-serif;}" << endl;
     out << "#psdg-footer {font-size: 10px;color:#8a8a8a;margin:0;padding: 8px 0 8px 12px;width: 566px;background: #f6f6f6 url(images/center-bcg.png) repeat-y right top;}" << endl;
 
+    out << "#psdg-comment-header {margin:0;padding: 14px 0 0 24px;width: 350px;height: 55px;color:#FFF;font-size:13px;background: #0c2c65 no-repeat right top;}" << endl;
+    out << ".psdg-comment-bold {font: bold 22px Arial, Helvetica, sans-serif;}" << endl;
     out << ".psdg-comment-left {float:left;margin:0;padding: 10px 0 0 24px;width: 50px;text-align: left;height: 25px;border-right: 1px solid #ced9ec;border-bottom: 1px solid #b3c1db;color:#1f3d71;font: 13px Arial, Helvetica, sans-serif;background: #e4ebf8 url(images/center-blue.png) repeat-y left top;}" << endl;
-    out << "#psdg-comment-middle {margin:0;padding: 0;width: 200px;background: #f6f6f6 url(images/center-bcg.png) repeat-y right top;}" << endl;
+    out << ".psdg-comment-middle {margin:0;padding: 0;width: 200px;background: #f6f6f6 url(images/center-bcg.png) repeat-y right top;}" << endl;
     out << ".psdg-comment-right {float:left;margin:0;padding: 11px 0 0 0;width: 140px;text-align:center;height: 24px;border-right: 1px solid #ced9ec;border-bottom: 1px solid #b3c1db;}" << endl;
 
 
@@ -53,13 +51,40 @@ void ReportExport::generateExportFile(QString &filePath,
 
     out << "</head>" << endl;
 
+    out.flush();
+    file.close();
+}
+
+void ReportExport::generateExportFile(QString &filePath,
+                                      QString &imgResName,
+                                      NERStatsData nerData,
+                                      QString name,
+                                      QString resp,
+                                      QString desc)
+{
+    if(filePath.isEmpty()){
+        //nothing to do...
+        return;
+    }
+
+    QFile file(filePath);
+    file.open(QIODevice::WriteOnly | QIODevice::Append);
+    QTextStream out(&file);
+
     out << "<body>" << endl;
     out << "<div id=\"pagewidth\" >" << endl;
-    out << "<div id=\"header\"><h1>NER Report</h1></div>" << endl;
-    out << "<div id=\wrapper\" class=\"clearfix\">" << endl;
-    out << "<div id=\"maincol\"><h2>Evaluation Results</h2><p>Table: <b>"<< name << "</b> </p>"
-        << endl;
+    out << "<div id=\"header\">" << endl;
 
+    out << "<div id\=\"box\"><table width=\"100%\" border=\"0\"> <tr> <td>" << endl;
+
+    QString logoBase64Encoded = Utils::getBase64ImageEncode(":/resources/pics/reportLogo.png");
+
+    out << "<img src=\"" << "data:image/jpg;base64," << logoBase64Encoded << "\">" << endl;
+
+    out << "</td> <td> <h1>NER Project Report</h1> </td> </tr> </table> </div> </div>" << endl;
+
+    out << "<div id=\wrapper\" class=\"clearfix\">" << endl;
+    out << "<div id=\"maincol\"><h2><br>Evaluation Results | Table: <b>"<< name << "</b> </p> <br></h2>" << endl;
     out << "</div>"  << endl;
 
     //Ner Properties...
@@ -77,6 +102,9 @@ void ReportExport::generateExportFile(QString &filePath,
     out << "</div>" << endl;
 
     //NER Comments of table...
+    out << "<div align=\"center\" id=\"psdg-comment-header\" style=\"float:left\">" << endl;
+    out << "<span class=\"psdg-comment-bold\">Detailed Results</span> </div>" << endl;
+
     out << "<div id=\"psdg-comment-middle\">" << endl;
     out << "    <div class=\"psdg-comment-left\">NER (&#37;)</div>" << endl;
     out << "    <div class=\"psdg-comment-right\">" << QString::number(nerData.getNerValue()) << "</div>" << endl;
@@ -88,9 +116,7 @@ void ReportExport::generateExportFile(QString &filePath,
 
     out << "<p align=\"left\"><img src=\"" << "data:image/jpg;base64," << imgResName << "\" ></p>" << endl;
     out << "</div>"  << endl;
-    out << "<div id=\"header\"><p align=\"left\"><h4> Generated in "
-        << QDate::currentDate().toString() << " - "<< QTime::currentTime().toString()
-        <<"</h4></p></div>" << endl;
+
     out << "</div>"  << endl;    
     out << "</div>"  << endl;
 
@@ -101,4 +127,25 @@ void ReportExport::generateExportFile(QString &filePath,
     file.close();
 }
 
+void ReportExport::writeFooter(QString &filePath)
+{
+    if(filePath.isEmpty()){
+        //nothing to do...
+        return;
+    }
+
+    QFile file(filePath);
+    file.open(QIODevice::WriteOnly | QIODevice::Append);
+    QTextStream out(&file);
+
+    out << "<footer>"
+        << "<div id=\"pagewidth\" >" << endl
+        << "<div id=\"footer\"><p align=\"left\"><h4> Generated in "
+        << QDate::currentDate().toString() << " - "<< QTime::currentTime().toString()
+        << "</h4></p></div></div>" << endl
+        << "</footer>" << endl;
+
+    out.flush();
+    file.close();
+}
 

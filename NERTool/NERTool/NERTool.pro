@@ -28,7 +28,8 @@ SOURCES += main.cpp\
     licencemanager.cpp \
     simplecrypt.cpp \
     nersummarywidget.cpp \
-    reportexport.cpp
+    reportexport.cpp \
+    nertableassessment.cpp
 
 HEADERS  += nermainwindow.h \
     dragwidget.h \
@@ -50,7 +51,8 @@ HEADERS  += nermainwindow.h \
     config.h \
     simplecrypt.h \
     nersummarywidget.h \
-    reportexport.h
+    reportexport.h \
+    nertableassessment.h
 
 RC_FILE = app.rc
 

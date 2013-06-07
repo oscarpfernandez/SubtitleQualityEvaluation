@@ -23,5 +23,6 @@
         <file>resources/pics/video_display.png</file>
         <file>resources/pics/caiac_uab.png</file>
         <file>resources/pics/splash3.png</file>
+        <file>resources/pics/reportLogo.png</file>
     </qresource>
 </RCC>

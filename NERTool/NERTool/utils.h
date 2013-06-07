@@ -9,6 +9,8 @@
 #include <QDir>
 #include <QDesktopServices>
 #include <QNetworkInterface>
+#include <QPainter>
+#include <QBuffer>
 #include "nercommon.h"
 #include <qxmlstream.h>
 #include "simplecrypt.h"
@@ -37,6 +39,7 @@ public:
     static QList<QString> getMachinesMACAddresses();
     static QString removeBlanksBeforePonctuation(QString &text);
     static bool containsPonctuation(QString &text);
+    static QString getBase64ImageEncode(QString resource);
     
 };
 

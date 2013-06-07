@@ -199,3 +199,14 @@ bool Utils::containsPonctuation(QString &text)
 
     return true;
 }
+
+QString Utils::getBase64ImageEncode(QString resource)
+{
+    QImage img(resource);
+    QByteArray byteArray;
+    QBuffer buffer(&byteArray);
+    img.save(&buffer, "PNG");
+    QString base64Encoded = QString::fromLatin1(byteArray.toBase64().data());
+
+    return base64Encoded;
+}

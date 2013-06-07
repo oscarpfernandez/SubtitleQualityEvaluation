@@ -28,7 +28,6 @@ public:
     void insertNewTranslation(QString &fileName,
                               QString &responsible,
                               QString &description);
-    void insertNewSpeaker(QString &speaker);
     void clearAllTreeData();
     void removeAllSubNodes();
     QMap<QTreeWidgetItem*, QMdiSubWindow *> *getTreeSubWindowsMap();
@@ -72,6 +71,7 @@ private:
 
     QAction* openSubtitleAction;
     QAction* removeFileAction;
+    QAction* addAssessmentAction;
 
     void initTrees();
     void createActions();
@@ -88,6 +88,7 @@ private slots:
     void renameDocumentNodeSlot(QTreeWidgetItem*item, int column);
     void computeNERValuesSlot();
     void viewStatsSlot();
+    void addAssessmentSlot();
 
 public slots:
     void setNERStatistics(double &delay, double &ner);

@@ -36,23 +36,24 @@ NERMainWindow::~NERMainWindow()
     delete xmlHandler;
 }
 
-bool NERMainWindow::event(QEvent *ev)
+void NERMainWindow::closeEvent(QCloseEvent *event)
 {
-    bool isOk = false;
-    switch (ev->type())
-    {
-    case QEvent::Close:
-    {
-        closeProjectSlot();
-        closeApplicationSlot();
-        isOk = true;
+    event->ignore();
+
+    QMessageBox box;
+    box.setInformativeText("Exit Application ?\nAll unsaved modifications will be lost!");
+    box.setText("Close Application                                      ");
+    box.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    box.setIcon(QMessageBox::Question);
+    box.setStandardButtons(QMessageBox::No | QMessageBox::Yes);
+    int result = box.exec();
+    switch (result){
+    case QMessageBox::No :
+        break;
+    case QMessageBox::Yes :
+        event->accept();
         break;
     }
-    default:
-        isOk = QMainWindow::event(ev);
-        break;
-    }
-    return isOk;
 }
 
 
@@ -462,7 +463,19 @@ void NERMainWindow::saveAsProjectSlot()
 void NERMainWindow::openProjectSlot()
 {
     if(isProjectloaded){
-        closeProjectSlot();
+        QMessageBox box;
+        box.setInformativeText("Close current project?\nAll unsaved modifications will be lost!");
+        box.setText("Close project                                           ");
+        box.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+        box.setIcon(QMessageBox::Question);
+        box.setStandardButtons(QMessageBox::No | QMessageBox::Yes);
+        int result = box.exec();
+        switch (result){
+        case QMessageBox::No :
+            return;
+        case QMessageBox::Yes :
+            closeProjectSlot();
+        }
     }
 
     QString xmlFileName = QFileDialog::getOpenFileName(
@@ -861,14 +874,14 @@ void NERMainWindow::generateNERReport()
 
     QString base64Img = nerStatsViewer->saveWidgetToImg(imgfilePath);
 
-    QFile::remove(imgfilePath);
-
+    ReportExport::writeHeader(reportFileName);
     ReportExport::generateExportFile(reportFileName,
                                      base64Img,
                                      table->getNERStatsValues(),
                                      table->getTableName(),
                                      table->getResponsible(),
                                      table->getDescription());
+    ReportExport::writeFooter(reportFileName);
 }
 
 /*******************************************************************************

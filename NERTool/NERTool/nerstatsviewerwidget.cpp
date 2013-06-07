@@ -725,13 +725,18 @@ QString NERStatsViewerWidget::saveWidgetToImg(QString &filePath)
     QImage img(imgSize, QImage::Format_RGB32);
     QPainter painter(&img);
     render(&painter);
-    img.save(filePath);
+//    img.save(filePath);
 
-    QFile sourceFile(filePath);
-    sourceFile.open(QIODevice::ReadOnly);
+    QByteArray byteArray;
+    QBuffer buffer(&byteArray);
+    img.save(&buffer, "PNG"); // writes the image in PNG format inside the buffer
+    QString base64Encoded = QString::fromLatin1(byteArray.toBase64().data());
 
-    QByteArray srcRawData = sourceFile.readAll();
-    QByteArray base64Encoded = srcRawData.toBase64();
+//    QFile sourceFile(filePath);
+//    sourceFile.open(QIODevice::ReadOnly);
+
+//    QByteArray srcRawData = sourceFile.readAll();
+//    QByteArray base64Encoded = srcRawData.toBase64();
 
     return base64Encoded;
 

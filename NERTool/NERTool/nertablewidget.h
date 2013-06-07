@@ -12,7 +12,7 @@
 #include "mediamngwidget.h"
 #include "utils.h"
 #include "diff.h"
-
+#include "nertableassessment.h"
 
 const int SPEAKER_ID_COLUMN_WIDTH = 100;
 const int SPEAKER_ID_COLUMN_INDEX = 0;
@@ -31,6 +31,7 @@ const int SUB_SUBTITLES_COLUMN_INDEX = 1;
 class MediaMngWidget;
 class NERSubTableWidget;
 class Diff;
+class NERTableAssessment;
 
 class NERTableWidget : public QTableWidget
 {
@@ -88,6 +89,9 @@ public:
 
     void applyEditionProperties(QList<Diff> &diffList);
     void applyEditionPropertiesToTranscription(QList<Diff> &diffList);
+    void showAssessment();
+    QString getAssessment() const;
+    void setAssessment(QString &a);
 
 private:
     MediaMngWidget *mediaMngWidget;
@@ -99,7 +103,7 @@ private:
     QString tableName;
     QString responsible;
     QString description;
-
+    NERTableAssessment *nerAssessment;
     NERStatsData nerStatsDataValues;
     void getNumSubsWordsChars(int &numWords, int &numChars);
     int getTotalSubsTimeInSeconds();

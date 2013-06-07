@@ -21,7 +21,7 @@ About::About(QWidget *parent) : QDialog(parent)
     createElements();
 
     setLayout(mainVBoxLayout);
-    setFixedSize(sizeHint().width(),500);
+    setFixedSize(sizeHint().width(),520);
 }
 
 About::~About()
@@ -81,7 +81,9 @@ void About::createElements()
     credits.append("Oscar Lopes <oscar.pino.lopes@gmail.com>\n");
     credits.append("CaiaC Research - http://caiac.uab.cat\n");
     credits.append("\nJuan Martinez <juan.martinez@speedchill.com>\n");
-    credits.append("SwissTXT - http://www.swisstxt.ch");
+    credits.append("SwissTXT - http://www.swisstxt.ch\n");
+    credits.append("\nJavier Serrano <javier.serrano@uab.cat>\n");
+    credits.append("CaiaC Research - http://caiac.uab.cat\n");
 
 
     creditsLabel = new QLabel;
@@ -92,7 +94,7 @@ void About::createElements()
     creditsTextEdit->setReadOnly(true);
     creditsTextEdit->setPalette(pal);
     creditsTextEdit->setCurrentFont(QFont("Courier",16, QFont::Bold));
-    creditsTextEdit->setMaximumHeight(150);
+    creditsTextEdit->setMaximumHeight(250);
 
     creditsLayout = new QVBoxLayout;
     creditsLayout->addWidget(creditsLabel);

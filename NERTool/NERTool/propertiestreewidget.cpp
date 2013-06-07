@@ -81,6 +81,9 @@ void PropertiesTreeWidget::createActions()
 
     removeFileAction = new QAction(tr("Remove..."), this);
     connect(removeFileAction, SIGNAL(triggered()), this, SLOT(removeSubNodeSlot()));
+
+    addAssessmentAction = new QAction(tr("E dit Assessment"), this);
+    connect(addAssessmentAction, SIGNAL(triggered()), this, SLOT(addAssessmentSlot()));
 }
 
 
@@ -136,11 +139,6 @@ void PropertiesTreeWidget::insertNewTranslation(QString &fileName,
 
 }
 
-void PropertiesTreeWidget::insertNewSpeaker(QString &speaker)
-{
-
-}
-
 /*******************************************************************************
  * Remove all the tree data.
  ******************************************************************************/
@@ -182,6 +180,8 @@ bool PropertiesTreeWidget::eventFilter(QObject *obj, QEvent *event)
         menu->addAction(openSubtitleAction);
         menu->addSeparator();
         menu->addAction(removeFileAction);
+        menu->addSeparator();
+        menu->addAction(addAssessmentAction);
         menu->exec(mouseEvent->globalPos());
 
         return false;
@@ -280,6 +280,24 @@ void PropertiesTreeWidget::removeSubNodeSlot()
     }
 
     subWindowsMap->remove(item);
+}
+
+/*******************************************************************************
+ * Adds an assessment evaluation to the selected subtitle evaluation
+ ******************************************************************************/
+void PropertiesTreeWidget::addAssessmentSlot()
+{
+    QList<QTreeWidgetItem*> itemList = mainTreeWidget->selectedItems();
+    QTreeWidgetItem* item = itemList.at(0);
+
+    if(item!=NULL && subWindowsMap->contains(item)){
+        QMdiSubWindow *subwindow = subWindowsMap->value(item);
+        NERTableWidget *table = static_cast<NERTableWidget*>(subwindow->widget());
+
+        if(table != 0){
+            table->showAssessment();
+        }
+    }
 }
 
 void PropertiesTreeWidget::removeAllSubNodes()

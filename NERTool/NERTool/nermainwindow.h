@@ -43,7 +43,7 @@ public:
     ~NERMainWindow();
 
 protected:
-    bool event(QEvent *event);
+    void closeEvent(QCloseEvent *event);
 
 private:
     void createGuiElements();

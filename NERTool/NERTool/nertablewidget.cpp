@@ -50,10 +50,10 @@ NERTableWidget::NERTableWidget(QWidget *parent) : QTableWidget(parent)
 
     subtileDataHashedByTimestamp = new QHash<qlonglong,QString>();
 
+    nerAssessment = new NERTableAssessment(this);
+
     nerStatsDataValues.resetDataToZero();
-
 }
-
 
 NERTableWidget::~NERTableWidget()
 {
@@ -74,8 +74,10 @@ void NERTableWidget::setMainDataList(QList<BlockTRS> *transList, QList<BlockTRS>
     subtitleTableData = new QList<BlockTRS>(subsList);;
 }
 
-void NERTableWidget::loadXMLData(QList<BlockTRS> *trsBlocks){
-    if(trsBlocks==0 || trsBlocks->count()==0){
+void NERTableWidget::loadXMLData(QList<BlockTRS> *trsBlocks)
+{
+    if(trsBlocks==0 || trsBlocks->count()==0)
+    {
         //Nothing to do...
         return;
     }
@@ -92,7 +94,8 @@ void NERTableWidget::loadXMLData(QList<BlockTRS> *trsBlocks){
     }
 }
 
-void NERTableWidget::loadSubtitlesXMLData(QList<BlockTRS> *transcription, QList<BlockTRS> *subsTrsBlocks){
+void NERTableWidget::loadSubtitlesXMLData(QList<BlockTRS> *transcription, QList<BlockTRS> *subsTrsBlocks)
+{
     if(subsTrsBlocks==0 || subsTrsBlocks->count()==0 || transcription==0 || transcription->count()==0){
         //Nothing to do...
         return;
@@ -215,7 +218,8 @@ void NERTableWidget::insertTimeStampsHashedMap(QString &timeStamp, QString &text
  * of the dragwidget. This slot then passes the event to the table
  *
  */
-void NERTableWidget::columnTableResized(int column, int oldWidth, int newWidth){
+void NERTableWidget::columnTableResized(int column, int oldWidth, int newWidth)
+{
     QString d = QString::number(column).append("-").append(QString::number(oldWidth)).append("-").append(QString::number(newWidth));
 
     //TODO prpagate this resize to the subtables...
@@ -302,7 +306,8 @@ void NERTableWidget::insertNewSubtableInLastEntry(NERSubTableWidget *subtable)
     setCellWidget(rowCount()-1, SUBTITLES_COLUMN_INDEX, subtable);
 }
 
-void NERTableWidget::deleteTablesContents(){
+void NERTableWidget::deleteTablesContents()
+{
     clearContents();
     for(int i=0; i< rowCount(); i++){
         removeRow(i);
@@ -356,8 +361,8 @@ int NERTableWidget::computeNERStats_N()
     return numWords + numPontuation + transitions;
 }
 
-NERStatsData NERTableWidget::computeNERStats_NerValue(){
-
+NERStatsData NERTableWidget::computeNERStats_NerValue()
+{
     nerStatsDataValues.resetDataToZero();
 
     int N = computeNERStats_N();
@@ -424,7 +429,8 @@ double NERTableWidget::computeNERStats_EditionErrors()
     return editionError;
 }
 
-double NERTableWidget::computeNERStats_RecognitionErrors(){
+double NERTableWidget::computeNERStats_RecognitionErrors()
+{
     double recogError = 0;
     for(int i=0; i<rowCount(); i++){
 
@@ -500,7 +506,8 @@ double NERTableWidget::computeSubstitutions()
     return substitutions;
 }
 
-double NERTableWidget::computeNERStats_Delay(){
+double NERTableWidget::computeNERStats_Delay()
+{
     double acumulatedDelay=0.0;
     int numDelayCounts = 0;
 
@@ -823,6 +830,21 @@ void NERTableWidget::applyEditionPropertiesToTranscription(QList<Diff> &diffList
         QString s("");
         label->setComment(s);
     }
+}
+
+void NERTableWidget::showAssessment()
+{
+    nerAssessment->show();
+}
+
+QString NERTableWidget::getAssessment() const
+{
+    return nerAssessment->getEditComment();
+}
+
+void NERTableWidget::setAssessment(QString &a)
+{
+    nerAssessment->setEditComment(a);
 }
 
 /*******************************************************************************

@@ -59,6 +59,7 @@ const QString STR_TABLE_TAG = "Table";
 const QString STR_TABLE_PROP_NAME = "tableName";
 const QString STR_TABLE_PROP_RESPONSIBLE = "responsible";
 const QString STR_TABLE_PROP_DESCRIPTION = "description";
+const QString STR_TABLE_PROP_ASSESSMENT = "assessment";
 const QString STR_TABLELINE_TAG = "TableLine";
 const QString STR_TABLELINE_PROP_SID = "sID";
 const QString STR_TABLELINE_PROP_TIMESTAMP = "timestamp";
