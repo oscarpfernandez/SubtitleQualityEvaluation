@@ -141,7 +141,9 @@ private slots:
     void cascadeWindowsSlot();
     void tileWindowsSlot();
     void computerNERStatistics();
+    void computeAllNERStatistics();
     void showNerStatsWindow();
+    void showNerStatsWindow(NERTableWidget *table);
     void recomputeTableDiff();
     void generateNERReport();
 

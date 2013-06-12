@@ -40,36 +40,21 @@ void ReportExport::writeHeader(QString &filePath)
     out << ".psdg-bottom-cell {float:left;padding: 15px 0 0 0;text-align:center;width:105px;height: 33px;border-right: 1px solid #ced9ec;color:#070707;font: 13px Arial, Helvetica, sans-serif;}" << endl;
     out << "#psdg-footer {font-size: 10px;color:#8a8a8a;margin:0;padding: 8px 0 8px 12px;width: 566px;background: #f6f6f6 url(images/center-bcg.png) repeat-y right top;}" << endl;
 
-    out << "#psdg-comment-header {margin:0;padding: 14px 0 0 24px;width: 350px;height: 55px;color:#FFF;font-size:13px;background: #0c2c65 no-repeat right top;}" << endl;
-    out << ".psdg-comment-bold {font: bold 22px Arial, Helvetica, sans-serif;}" << endl;
-    out << ".psdg-comment-left {float:left;margin:0;padding: 10px 0 0 24px;width: 50px;text-align: left;height: 25px;border-right: 1px solid #ced9ec;border-bottom: 1px solid #b3c1db;color:#1f3d71;font: 13px Arial, Helvetica, sans-serif;background: #e4ebf8 url(images/center-blue.png) repeat-y left top;}" << endl;
-    out << ".psdg-comment-middle {margin:0;padding: 0;width: 200px;background: #f6f6f6 url(images/center-bcg.png) repeat-y right top;}" << endl;
-    out << ".psdg-comment-right {float:left;margin:0;padding: 11px 0 0 0;width: 140px;text-align:center;height: 24px;border-right: 1px solid #ced9ec;border-bottom: 1px solid #b3c1db;}" << endl;
-
+    out << ".datagrid table { border-collapse: collapse; text-align: left; width: 100%; }" << endl;
+    out << ".datagrid {padding: 10px; font: normal 12px/150% Arial, Helvetica, sans-serif; background: #fff; overflow: hidden; border: 1px solid #006699; -webkit-border-radius: 3px; -moz-border-radius: 3px; border-radius: 3px; }" << endl;
+    out << ".datagrid table td, .datagrid table th { padding: 3px 10px; }" << endl;
+    out << ".datagrid table thead th {background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #006699), color-stop(1, #00557F) );background:-moz-linear-gradient( center top, #006699 5%, #00557F 100% );filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#006699', endColorstr='#00557F');background-color:#006699; color:#FFFFFF; font-size: 14px; font-weight: bold; border-left: 1px solid #0070A8; } " << endl;
+    out << ".datagrid table thead th:first-child { border: none;}" << endl;
+    out << ".datagrid table tbody td { color: #00496B; font-size: 14px;border-bottom: 2px solid #E1EEF4;font-weight: normal; width:20%;}" << endl;
+    out << ".datagrid table tbody .alt td { background: #E1EEF4; color: #00496B;}" << endl;
+    out << ".datagrid table tbody td:first-child { border-left: none; }" << endl;
+    out << ".datagrid table tbody tr:last-child td { border-bottom: none; }" << endl;
+    out << "table.fixed { table-layout:fixed; }" << endl;
+    out << "table.fixed td { overflow: hidden; }" << endl;
 
     out << "</STYLE>"  << endl;
 
     out << "</head>" << endl;
-
-    out.flush();
-    file.close();
-}
-
-void ReportExport::generateExportFile(QString &filePath,
-                                      QString &imgResName,
-                                      NERStatsData nerData,
-                                      QString name,
-                                      QString resp,
-                                      QString desc)
-{
-    if(filePath.isEmpty()){
-        //nothing to do...
-        return;
-    }
-
-    QFile file(filePath);
-    file.open(QIODevice::WriteOnly | QIODevice::Append);
-    QTextStream out(&file);
 
     out << "<body>" << endl;
     out << "<div id=\"pagewidth\" >" << endl;
@@ -83,48 +68,113 @@ void ReportExport::generateExportFile(QString &filePath,
 
     out << "</td> <td> <h1>NER Project Report</h1> </td> </tr> </table> </div> </div>" << endl;
 
+    out.flush();
+    file.close();
+}
+
+void ReportExport::generateExportFile(QString &filePath,
+                                      QString &imgResName,
+                                      NERTableWidget *table)
+{
+    if(filePath.isEmpty() || table==0){
+        //nothing to do...
+        return;
+    }
+
+    QFile file(filePath);
+    file.open(QIODevice::WriteOnly | QIODevice::Append);
+    QTextStream out(&file);
+
+    NERStatsData nerData = table->getNERStatsValues();
+
     out << "<div id=\wrapper\" class=\"clearfix\">" << endl;
-    out << "<div id=\"maincol\"><h2><br>Evaluation Results | Table: <b>"<< name << "</b> </p> <br></h2>" << endl;
+    out << "<div class=\"datagrid\">  <div id=\"box\">" << endl;
+    out << "<div id=\"maincol\"><h2><br>Evaluation Results | Table: <b>"<< table->getTableName() << "</b> </p> <br></h2>" << endl;
     out << "</div>"  << endl;
 
-    //Ner Properties...
-    out << "<div align=\"center\" id=\"psdg-header\" style=\"float:left\">" << endl;
-    out << "<span class=\"psdg-bold\">NER Global Stats</span>" << endl;
-    out << "</div>" << endl;
+//    //Ner Properties...
+//    out << "<div align=\"center\" id=\"psdg-header\" style=\"float:left\">" << endl;
+//    out << "<span class=\"psdg-bold\">NER Global Stats</span>" << endl;
+//    out << "</div>" << endl;
 
-    out << "<div id=\"psdg-middle\">" << endl;
-    out << "    <div class=\"psdg-left\">NER (&#37;)</div>" << endl;
-    out << "    <div class=\"psdg-right\">" << QString::number(nerData.getNerValue()) << "</div>" << endl;
-    out << "    <div class=\"psdg-left\">Average Delay (s)</div>" << endl;
-    out << "    <div class=\"psdg-right\">" << QString::number(nerData.getAvgDelay())  << "</div>" << endl;
-    out << "    <div class=\"psdg-left\">Text Reduction (&#37;)</div>" << endl;
-    out << "    <div class=\"psdg-right\">" << QString::number(nerData.getReduction())  << "</div>" << endl;
-    out << "</div>" << endl;
+    out << "<div class=\"datagrid\">" << endl;
+    out << "<div id=\"maincol\"><h2>Assessment</h2></div>" <<  table->getAssessment() << "</div>" << endl;
+    out << "</div> <br>" << endl;
 
-    //NER Comments of table...
-    out << "<div align=\"center\" id=\"psdg-comment-header\" style=\"float:left\">" << endl;
-    out << "<span class=\"psdg-comment-bold\">Detailed Results</span> </div>" << endl;
+//    out << "<div id=\"psdg-middle\">" << endl;
+//    out << "    <div class=\"psdg-left\">NER (&#37;)</div>" << endl;
+//    out << "    <div class=\"psdg-right\">" << QString::number(nerData.getNerValue()) << "</div>" << endl;
+//    out << "    <div class=\"psdg-left\">Average Delay (s)</div>" << endl;
+//    out << "    <div class=\"psdg-right\">" << QString::number(nerData.getAvgDelay())  << "</div>" << endl;
+//    out << "    <div class=\"psdg-left\">Text Reduction (&#37;)</div>" << endl;
+//    out << "    <div class=\"psdg-right\">" << QString::number(nerData.getReduction())  << "</div>" << endl;
+//    out << "</div>" << endl;
 
-    out << "<div id=\"psdg-comment-middle\">" << endl;
-    out << "    <div class=\"psdg-comment-left\">NER (&#37;)</div>" << endl;
-    out << "    <div class=\"psdg-comment-right\">" << QString::number(nerData.getNerValue()) << "</div>" << endl;
-    out << "    <div class=\"psdg-comment-left\">Average Delay (s)</div>" << endl;
-    out << "    <div class=\"psdg-comment-right\">" << QString::number(nerData.getAvgDelay())  << "</div>" << endl;
-    out << "    <div class=\"psdg-comment-left\">Text Reduction (&#37;)</div>" << endl;
-    out << "    <div class=\"psdg-comment-right\">" << QString::number(nerData.getReduction())  << "</div>" << endl;
-    out << "</div>" << endl;
+
+    out << "<div class=\"datagrid\">" << endl;
+    out << "<div class=\"datagrid\"><table class=\"fixed\">" << endl;
+    out << "<col width=\"5%\" /> <col width=\"15%\" /> <col width=\"30%\" />" << endl;
+    out << "<thead><tr><th>Line #</th><th>Error Type</th><th>Phrase</th><th>Comment</th></tr></thead>" << endl;
+    out << "<tbody>" << endl;
+    ReportExport::appendTableComments(table, out);
+    out << "<tr><td>data</td><td>data</td><td>data</td><td>data</td></tr>" << endl;
+    out << "</tbody>" << endl;
+    out << "</table></div></div>" << endl;
+
 
     out << "<p align=\"left\"><img src=\"" << "data:image/jpg;base64," << imgResName << "\" ></p>" << endl;
     out << "</div>"  << endl;
 
     out << "</div>"  << endl;    
-    out << "</div>"  << endl;
 
-    out << "</body>" << endl;
-    out << "</html>" << endl;
 
     out.flush();
     file.close();
+}
+
+void ReportExport::appendTableComments(NERTableWidget *table, QTextStream &out)
+{
+    for(int i=0; i<table->rowCount(); i++)
+    {
+        //First get the comments of the transcription...
+        DragWidget *dw = static_cast<DragWidget*>(table->cellWidget(i, TRANSCRIPTION_COLUMN_INDEX));
+        if(dw==0){
+            continue;
+        }
+
+        QString comment;
+        QString words;
+        EditionTypeEnum lastError = NotDefinedYet;
+        QList<DragLabel*> labels = dw->getLabels();
+
+        for(int j=0; j<labels.count(); j++)
+        {
+            DragLabel* lab = labels.at(j);
+            if(lab->getErrorType() == CorrectEdition
+                    || lab->getErrorType() == EditionError
+                    || lab->getErrorType() == RecognitionError)
+            {
+                if(lastError==lab->getErrorType() && !lab->getComment().isEmpty())
+                {
+                    comment.append("\n").append(lab->getComment());
+                    words.append(" ").append(lab->labelText());
+                }
+                else if(lastError!=lab->getErrorType() && !lab->getComment().isEmpty())
+                {
+                    if(!comment.simplified().isEmpty()){
+                        //Include a new table line with the comments...
+                        out << "<tr><td>"  << i
+                            << "</td><td>"<< lab->editionEnumToString(lab->getErrorType())
+                            << "</td><td>" << words.simplified()
+                            << "</td><td>" <<  comment << "</td></tr>" << endl;
+                    }
+                    words.clear();
+                    comment.clear();
+                    comment.append(lab->getComment());
+                }
+            }
+        }
+    }
 }
 
 void ReportExport::writeFooter(QString &filePath)
@@ -137,6 +187,11 @@ void ReportExport::writeFooter(QString &filePath)
     QFile file(filePath);
     file.open(QIODevice::WriteOnly | QIODevice::Append);
     QTextStream out(&file);
+
+    out << "</div>"  << endl;
+    out << "</div>"  << endl;
+    out << "</body>" << endl;
+    out << "</html>" << endl;
 
     out << "<footer>"
         << "<div id=\"pagewidth\" >" << endl

@@ -840,18 +840,8 @@ void NERMainWindow::recomputeTableDiff()
 
 void NERMainWindow::generateNERReport()
 {
-    computerNERStatistics();
-    showNerStatsWindow();
-    nerStatsViewer->hide();
 
     if(mainMdiArea->subWindowList().count()==0){
-        return;
-    }
-
-    QMdiSubWindow* subWindow = mainMdiArea->activeSubWindow();
-    NERTableWidget* table = static_cast<NERTableWidget*>(subWindow->widget());
-
-    if(table==0){
         return;
     }
 
@@ -865,22 +855,39 @@ void NERMainWindow::generateNERReport()
         reportFileName.append(".htm");
     }
 
-    QFileInfo file(reportFileName);
-    QString imgfilePath = file.path();
-    QString name = QString::number(QTime::currentTime().second()*1000 + QTime::currentTime().msec());
-    name.append(name).append(".jpg");
+    if(reportFileName.isEmpty()){
+        return;
+    }
 
-    imgfilePath.append("/").append(name);
+    computeAllNERStatistics();
 
-    QString base64Img = nerStatsViewer->saveWidgetToImg(imgfilePath);
+    QList<QMdiSubWindow*> subWindowList = mainMdiArea->subWindowList();
 
     ReportExport::writeHeader(reportFileName);
-    ReportExport::generateExportFile(reportFileName,
-                                     base64Img,
-                                     table->getNERStatsValues(),
-                                     table->getTableName(),
-                                     table->getResponsible(),
-                                     table->getDescription());
+
+    for(int i=0; i<subWindowList.count(); i++)
+    {
+        QMdiSubWindow* subWindow = subWindowList.at(i);
+        NERTableWidget* table = static_cast<NERTableWidget*>(subWindow->widget());
+
+        if(table==0){
+            continue;
+        }
+
+        QFileInfo file(reportFileName);
+        QString imgfilePath = file.path();
+        QString name = QString::number(QTime::currentTime().second()*1000 + QTime::currentTime().msec());
+        name.append(name).append(".jpg");
+
+        imgfilePath.append("/").append(name);
+
+        showNerStatsWindow(table);
+        nerStatsViewer->hide();
+        QString base64Img = nerStatsViewer->saveWidgetToImg(imgfilePath);
+
+        ReportExport::generateExportFile(reportFileName, base64Img, table);
+
+    }
     ReportExport::writeFooter(reportFileName);
 }
 
@@ -1008,7 +1015,21 @@ void NERMainWindow::showNerStatsWindow()
     nerStatsViewer->replotGraphs();
     nerStatsViewer->setWindowFlags(nerStatsViewer->windowFlags() | Qt::Tool);
     nerStatsViewer->show();
+}
 
+void NERMainWindow::showNerStatsWindow(NERTableWidget *table)
+{
+    if(table==0){
+        return;
+    }
+
+    NERStatsData ner = table->computeNERStats_NerValue();
+
+    nerStatsViewer->clearGraphsData();
+    nerStatsViewer->loadGraphsData(ner);
+    nerStatsViewer->replotGraphs();
+    nerStatsViewer->setWindowFlags(nerStatsViewer->windowFlags() | Qt::Tool);
+    nerStatsViewer->show();
 }
 
 void NERMainWindow::computerNERStatistics()
@@ -1041,6 +1062,18 @@ void NERMainWindow::computerNERStatistics()
                  << "N_words = "            << ner.getN_words() << "\n\t"
                  << "N_ponct = "            << ner.getN_ponctuation() << "\n\t"
                  << "N_trans = "            << ner.getN_transitions();
+}
+
+void NERMainWindow::computeAllNERStatistics()
+{
+    QList<QMdiSubWindow*> subWindowList = mainMdiArea->subWindowList();
+
+    for(int i=0; i<subWindowList.count(); i++)
+    {
+        QMdiSubWindow* subWindow = subWindowList.at(i);
+        NERTableWidget* table = static_cast<NERTableWidget*>(subWindow->widget());
+        table->computeNERStats_NerValue();
+    }
 }
 
 LIC_ERROR_TYPE NERMainWindow::checkLicence()

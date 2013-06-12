@@ -4,6 +4,7 @@
 #include "nercommon.h"
 #include <QDir>
 #include "utils.h"
+#include "nertablewidget.h"
 
 class ReportExport
 {
@@ -12,11 +13,9 @@ public:
     static void writeHeader(QString &filePath);
     static void generateExportFile(QString &filePath,
                                    QString &imgResName,
-                                   NERStatsData nerData,
-                                   QString name,
-                                   QString resp,
-                                   QString desc);
+                                   NERTableWidget *table);
     static void writeFooter(QString &filePath);
+    static void appendTableComments(NERTableWidget *table, QTextStream &out);
 };
 
 #endif // REPORTEXPORT_H

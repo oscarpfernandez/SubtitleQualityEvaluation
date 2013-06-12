@@ -44,7 +44,7 @@ void NERTableAssessment::setEditComment(QString &text)
 
 QString NERTableAssessment::getEditComment()
 {
-    return editText->toPlainText();
+    return editText->toHtml();
 }
 
 

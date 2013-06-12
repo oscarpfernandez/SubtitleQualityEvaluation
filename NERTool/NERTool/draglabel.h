@@ -40,6 +40,7 @@ public:
     void setErrorClass(ModificationType modType);
     ModificationType getErrorClass();
     EditionTypeEnum editionEnumFromOrdinal(int value);
+    QString editionEnumToString(EditionTypeEnum value);
     ModificationType modificationTypeFromOrdinal(int value);
     void markAsDeleted();
 

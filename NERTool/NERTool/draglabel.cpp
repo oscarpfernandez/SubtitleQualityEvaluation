@@ -223,6 +223,25 @@ EditionTypeEnum DragLabel::editionEnumFromOrdinal(int value)
     }
 }
 
+QString DragLabel::editionEnumToString(EditionTypeEnum value)
+{
+    switch(value)
+    {
+    case NotDefinedYet:
+        return "NotDefinedYet";
+    case CorrectEdition:
+        return "Correct Edition";
+    case EditionError:
+        return "Edition Error";
+    case RecognitionError:
+        return "Recognition Error";
+    case TrancriptionDeletion:
+        return "Trancription Deletion";
+    default:
+        break;
+    }
+}
+
 ModificationType DragLabel::modificationTypeFromOrdinal(int value)
 {
     switch(value)
