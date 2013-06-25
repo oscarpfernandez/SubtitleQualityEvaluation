@@ -60,7 +60,7 @@ void ReportExport::writeHeader(QString &filePath)
     out << "<div id=\"pagewidth\" >" << endl;
     out << "<div id=\"header\">" << endl;
 
-    out << "<div id\=\"box\"><table width=\"100%\" border=\"0\"> <tr> <td>" << endl;
+    out << "<div id=\"box\"><table width=\"100%\" border=\"0\"> <tr> <td>" << endl;
 
     QString logoBase64Encoded = Utils::getBase64ImageEncode(":/resources/pics/reportLogo.png");
 
@@ -144,33 +144,72 @@ void ReportExport::appendTableComments(NERTableWidget *table, QTextStream &out)
 
         QString comment;
         QString words;
-        EditionTypeEnum lastError = NotDefinedYet;
+//        EditionTypeEnum lastError = NotDefinedYet;
         QList<DragLabel*> labels = dw->getLabels();
 
-        for(int j=0; j<labels.count(); j++)
+        //Only one word
+        if(labels.count()==1){
+            DragLabel* lab = labels.first();
+
+            if(!lab->getComment().simplified().isEmpty()){
+                //Include a new table line with the comments...
+                out << "<tr><td>"  << i+1
+                    << "</td><td>"<< lab->editionEnumToString(lab->getErrorType())
+                    << "</td><td>" << lab->labelText()
+                    << "</td><td>" <<  lab->getComment() << "</td></tr>" << endl;
+            }
+
+            continue; //to the next block
+        }
+
+
+        for(int j=0; j<labels.count()-1; j++)
         {
-            DragLabel* lab = labels.at(j);
-            if(lab->getErrorType() == CorrectEdition
-                    || lab->getErrorType() == EditionError
-                    || lab->getErrorType() == RecognitionError)
+            DragLabel* labLeft = labels.at(j);
+            DragLabel* labRight = labels.at(j+1);
+
+            if(labLeft->getErrorType() == CorrectEdition || labLeft->getErrorType() == EditionError || labLeft->getErrorType() == RecognitionError)
             {
-                if(lastError==lab->getErrorType() && !lab->getComment().isEmpty())
+                if(labLeft->getErrorType()==labRight->getErrorType() )
                 {
-                    comment.append("\n").append(lab->getComment());
-                    words.append(" ").append(lab->labelText());
+                    if(!labLeft->getComment().isEmpty()){
+                        comment.append(labLeft->getComment()).append("<br>");
+                    }
+                    words.append(" ").append(labLeft->labelText().toAscii());
                 }
-                else if(lastError!=lab->getErrorType() && !lab->getComment().isEmpty())
+
+                else if(labLeft->getErrorType()!=labRight->getErrorType())
                 {
+                    if(!labRight->getComment().isEmpty()){
+                        comment.append(labRight->getComment()).append("<br>");
+                    }
+                    words.append(" ").append(labRight->labelText().toAscii());
+
                     if(!comment.simplified().isEmpty()){
                         //Include a new table line with the comments...
-                        out << "<tr><td>"  << i
-                            << "</td><td>"<< lab->editionEnumToString(lab->getErrorType())
+                        out << "<tr><td>"  << i+1
+                            << "</td><td>"<< labLeft->editionEnumToString(labLeft->getErrorType())
                             << "</td><td>" << words.simplified()
                             << "</td><td>" <<  comment << "</td></tr>" << endl;
                     }
                     words.clear();
                     comment.clear();
-                    comment.append(lab->getComment());
+                    comment.append(labLeft->getComment());
+                }
+
+                else if(j == labels.count()-2){
+                    if(!labRight->getComment().isEmpty()){
+                        comment.append(labRight->getComment()).append("<br>");
+                    }
+                    words.append(" ").append(labRight->labelText());
+
+                    if(!comment.simplified().isEmpty()){
+                        //Include a new table line with the comments...
+                        out << "<tr><td>"  << i+1
+                            << "</td><td>"<< labRight->editionEnumToString(labRight->getErrorType())
+                            << "</td><td>" << words.simplified()
+                            << "</td><td>" <<  comment << "</td></tr>" << endl;
+                    }
                 }
             }
         }
