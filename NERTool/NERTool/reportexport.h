@@ -16,6 +16,8 @@ public:
                                    NERTableWidget *table);
     static void writeFooter(QString &filePath);
     static void appendTableComments(NERTableWidget *table, QTextStream &out);
+    static QString ampersand_encode(const QString& str);
+    static int getIndexForSameError(int i, QList<DragLabel*> labels);
 };
 
 #endif // REPORTEXPORT_H

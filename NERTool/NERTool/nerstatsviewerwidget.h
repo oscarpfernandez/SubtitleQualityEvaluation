@@ -56,6 +56,17 @@ private:
     QLabel *N_words_Label;
     QLabel *N_words_value_Label;
 
+    //
+    QHBoxLayout *nerPropos_NLayout;
+    QLabel      *nerPropos_NLabel;
+    QLabel      *nerPropos_N_value_Label;
+    QGroupBox   *wordReductionGroupBox;
+    QVBoxLayout *wordReductionLayout;
+    QHBoxLayout *reduct_percentLayout;
+    QLabel      *reduct_percentLabel;
+    QLabel      *reduct_percent_valueLabel;
+
+
     QGroupBox *recogErrorPropGroupbox;
     QVBoxLayout *recogMainLayout;
     QHBoxLayout *reLayout;

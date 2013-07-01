@@ -29,6 +29,27 @@ void NERStatsViewerWidget::createElements()
     nerValueLabel->setMaximumWidth(200);
     nerValueLabel->setText("0");
 
+
+    nerPropos_NLayout = new QHBoxLayout();
+    nerPropos_NLabel = new QLabel("Delay (s): ");
+    nerPropos_NLabel->setMaximumWidth(70);
+    nerPropos_N_value_Label = new QLabel;
+    nerPropos_N_value_Label->setText("0");
+    nerPropos_NLayout->addWidget(nerPropos_NLabel, Qt::AlignRight);
+    nerPropos_NLayout->addWidget(nerPropos_N_value_Label, Qt::AlignLeft);
+
+//    wordReductionGroupBox = new QGroupBox(QString("Word Reduction"), this);
+    wordReductionLayout = new QVBoxLayout;
+//    wordReductionGroupBox->setLayout(wordReductionLayout);
+    reduct_percentLayout = new QHBoxLayout;
+    reduct_percentLabel = new QLabel();
+    reduct_percentLabel->setText("Reduction(%): ");
+    reduct_percentLabel->setMinimumWidth(85);
+    reduct_percentLabel->setMaximumWidth(100);
+    reduct_percent_valueLabel = new QLabel;
+    reduct_percentLayout->addWidget(reduct_percentLabel, Qt::AlignRight);
+    reduct_percentLayout->addWidget(reduct_percent_valueLabel, Qt::AlignLeft);
+
     subBoxesLayout = new QHBoxLayout;
 
     // N properties
@@ -161,6 +182,10 @@ void NERStatsViewerWidget::createElements()
     nerValuesLayout->setAlignment(Qt::AlignLeft);
     nerValuesLayout->addWidget(nerLabel, Qt::AlignRight);
     nerValuesLayout->addWidget(nerValueLabel, Qt::AlignLeft);
+    nerValuesLayout->addWidget(nerPropos_NLabel, Qt::AlignRight);
+    nerValuesLayout->addWidget(nerPropos_N_value_Label, Qt::AlignLeft);
+    nerValuesLayout->addWidget(reduct_percentLabel, Qt::AlignRight);
+    nerValuesLayout->addWidget(reduct_percent_valueLabel, Qt::AlignLeft);
 
     //Boxes Layout
     subBoxesLayout->addWidget(NPropsGroup);
@@ -257,6 +282,9 @@ void NERStatsViewerWidget::loadGraphsData(NERStatsData &nerStatsData)
 void NERStatsViewerWidget::setPropertiesData(NERStatsData &nerStatsData)
 {
     nerValueLabel->setText(QString::number(nerStatsData.getNerValue()*100));
+    nerPropos_N_value_Label->setText(QString::number(nerStatsData.getAvgDelay()));
+    reduct_percent_valueLabel->setText(QString::number(nerStatsData.getReduction()*100));
+
     N_value_Label->setText(QString::number(nerStatsData.getNCount()));
     N_ponctuation_value_Label->setText(QString::number(nerStatsData.getN_ponctuation()));
     N_transition_value_Label->setText(QString::number(nerStatsData.getN_transitions()));

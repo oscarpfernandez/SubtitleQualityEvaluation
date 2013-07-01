@@ -16,6 +16,7 @@ void ReportExport::writeHeader(QString &filePath)
     QTextStream out(&file);
 
     out << "<!doctype html>" << endl;
+    out << "<META HTTP-EQUIV=\"content-type\" CONTENT=\"text/html; charset=utf-8\">" << endl;
     out << "<html>" << endl;
     out << "<head>" << endl;
     out << "<title>NER Project Report</title>" << endl;
@@ -42,13 +43,13 @@ void ReportExport::writeHeader(QString &filePath)
 
     out << ".datagrid table { border-collapse: collapse; text-align: left; width: 100%; }" << endl;
     out << ".datagrid {padding: 10px; font: normal 12px/150% Arial, Helvetica, sans-serif; background: #fff; overflow: hidden; border: 1px solid #006699; -webkit-border-radius: 3px; -moz-border-radius: 3px; border-radius: 3px; }" << endl;
-    out << ".datagrid table td, .datagrid table th { padding: 3px 10px; }" << endl;
+    out << ".datagrid table td, .datagrid table th { padding: 3px 10px; border:1px solid black;}" << endl;
     out << ".datagrid table thead th {background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #006699), color-stop(1, #00557F) );background:-moz-linear-gradient( center top, #006699 5%, #00557F 100% );filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#006699', endColorstr='#00557F');background-color:#006699; color:#FFFFFF; font-size: 14px; font-weight: bold; border-left: 1px solid #0070A8; } " << endl;
     out << ".datagrid table thead th:first-child { border: none;}" << endl;
-    out << ".datagrid table tbody td { color: #00496B; font-size: 14px;border-bottom: 2px solid #E1EEF4;font-weight: normal; width:20%;}" << endl;
+    out << ".datagrid table tbody td {  color: #00496B; font-size: 14px;border-bottom: 2px solid #E1EEF4;font-weight: normal; width:20%; border:1px solid black; }" << endl;
     out << ".datagrid table tbody .alt td { background: #E1EEF4; color: #00496B;}" << endl;
     out << ".datagrid table tbody td:first-child { border-left: none; }" << endl;
-    out << ".datagrid table tbody tr:last-child td { border-bottom: none; }" << endl;
+    out << ".datagrid table tbody tr:last-child td { border-bottom: 2px solid #E1EEF4; }" << endl;
     out << "table.fixed { table-layout:fixed; }" << endl;
     out << "table.fixed td { overflow: hidden; }" << endl;
 
@@ -89,7 +90,7 @@ void ReportExport::generateExportFile(QString &filePath,
 
     out << "<div id=\wrapper\" class=\"clearfix\">" << endl;
     out << "<div class=\"datagrid\">  <div id=\"box\">" << endl;
-    out << "<div id=\"maincol\"><h2><br>Evaluation Results | Table: <b>"<< table->getTableName() << "</b> </p> <br></h2>" << endl;
+    out << "<div id=\"maincol\"><h2><br>Evaluation Results | Table: <b>"<< table->getTableName() << "</b>  <br><br></h2>" << endl;
     out << "</div>"  << endl;
 
 //    //Ner Properties...
@@ -98,7 +99,8 @@ void ReportExport::generateExportFile(QString &filePath,
 //    out << "</div>" << endl;
 
     out << "<div class=\"datagrid\">" << endl;
-    out << "<div id=\"maincol\"><h2>Assessment</h2></div>" <<  table->getAssessment() << "</div>" << endl;
+    out << "<div id=\"maincol\"><h2><br>Assessment<br><br></h2></div>" <<  table->getAssessment() << endl;
+    out << "</div>" << endl;
     out << "</div> <br>" << endl;
 
 //    out << "<div id=\"psdg-middle\">" << endl;
@@ -112,20 +114,20 @@ void ReportExport::generateExportFile(QString &filePath,
 
 
     out << "<div class=\"datagrid\">" << endl;
+    out << "<div id=\"maincol\"><h2><br> <b> Evaluation Comments </b>  <br><br></h2>" << "</div>" << endl;
     out << "<div class=\"datagrid\"><table class=\"fixed\">" << endl;
-    out << "<col width=\"5%\" /> <col width=\"15%\" /> <col width=\"30%\" />" << endl;
+    out << "<col width=\"9%\" /> <col width=\"15%\" /> <col width=\"30%\" />" << endl;
     out << "<thead><tr><th>Line #</th><th>Error Type</th><th>Phrase</th><th>Comment</th></tr></thead>" << endl;
     out << "<tbody>" << endl;
     ReportExport::appendTableComments(table, out);
-    out << "<tr><td>data</td><td>data</td><td>data</td><td>data</td></tr>" << endl;
     out << "</tbody>" << endl;
-    out << "</table></div></div>" << endl;
+    out << "</table></div></div><br>" << endl;
 
 
     out << "<p align=\"left\"><img src=\"" << "data:image/jpg;base64," << imgResName << "\" ></p>" << endl;
     out << "</div>"  << endl;
 
-    out << "</div>"  << endl;    
+    out << "</div><br>"  << endl;
 
 
     out.flush();
@@ -144,7 +146,6 @@ void ReportExport::appendTableComments(NERTableWidget *table, QTextStream &out)
 
         QString comment;
         QString words;
-//        EditionTypeEnum lastError = NotDefinedYet;
         QList<DragLabel*> labels = dw->getLabels();
 
         //Only one word
@@ -163,57 +164,146 @@ void ReportExport::appendTableComments(NERTableWidget *table, QTextStream &out)
         }
 
 
-        for(int j=0; j<labels.count()-1; j++)
+        for(int j=0; j<labels.count(); j++)
         {
-            DragLabel* labLeft = labels.at(j);
-            DragLabel* labRight = labels.at(j+1);
 
-            if(labLeft->getErrorType() == CorrectEdition || labLeft->getErrorType() == EditionError || labLeft->getErrorType() == RecognitionError)
-            {
-                if(labLeft->getErrorType()==labRight->getErrorType() )
-                {
-                    if(!labLeft->getComment().isEmpty()){
-                        comment.append(labLeft->getComment()).append("<br>");
+            DragLabel* labLeft = labels.at(j);
+            if(labLeft->getErrorType() == CorrectEdition
+                    || labLeft->getErrorType() == EditionError
+                    || labLeft->getErrorType() == RecognitionError){
+
+                int nextIndex = ReportExport::getIndexForSameError(j, labels);
+
+                for(int k=j; k<=nextIndex; k++){
+                    DragLabel* lab = labels.at(k);
+                    if(!lab->getComment().isEmpty()){
+                        comment.append(lab->getComment()).append("<br>");
                     }
-                    words.append(" ").append(labLeft->labelText().toAscii());
+                    words.append(" ").append(lab->labelText());
                 }
 
-                else if(labLeft->getErrorType()!=labRight->getErrorType())
-                {
-                    if(!labRight->getComment().isEmpty()){
-                        comment.append(labRight->getComment()).append("<br>");
-                    }
-                    words.append(" ").append(labRight->labelText().toAscii());
+                //Write to table...
+                if(!comment.simplified().isEmpty()){
+                    //Include a new table line with the comments...
+                    out << "<tr><td> T-"  << i+1
+                        << "</td><td>"<< labLeft->editionEnumToString(labLeft->getErrorType())
+                        << "</td><td>" << words.simplified()
+                        << "</td><td>" <<  comment << "</td></tr>" << endl;
+                }
+                words.clear();
+                comment.clear();
 
-                    if(!comment.simplified().isEmpty()){
+                j=nextIndex;
+            }
+        }
+
+        //***********************************************
+        //Process the corresponding subtable entries...
+        //***********************************************
+        NERSubTableWidget *subTable = static_cast<NERSubTableWidget*>(table->cellWidget(i, SUBTITLES_COLUMN_INDEX));
+        if(subTable==0){
+            continue;
+        }
+
+
+        for(int s=0; s<subTable->rowCount(); s++)
+        {
+            QString commentSub;
+            QString words;
+
+            DragWidget *dw = static_cast<DragWidget*>(subTable->cellWidget(s, SUB_SUBTITLES_COLUMN_INDEX));
+            if(dw==0){
+                continue;
+            }
+
+            QList<DragLabel*> labels = dw->getLabels();
+
+            //Only one word
+            if(labels.count()==1){
+                DragLabel* lab = labels.first();
+
+                if(!lab->getComment().simplified().isEmpty()){
+                    //Include a new table line with the comments...
+                    out << "<tr><td>"  << i+1
+                        << "</td><td bgcolor=#FF00FF>"<< lab->editionEnumToString(lab->getErrorType())
+                        << "</td><td>" << lab->labelText()
+                        << "</td><td>" <<  lab->getComment() << "</td></tr>" << endl;
+                }
+
+                continue; //to the next block
+            }
+
+
+            for(int m=0; m<labels.count(); m++)
+            {
+
+                DragLabel* labLeft = labels.at(m);
+                if(labLeft->getErrorType() == CorrectEdition
+                        || labLeft->getErrorType() == EditionError
+                        || labLeft->getErrorType() == RecognitionError){
+
+                    int nextIndexSub = ReportExport::getIndexForSameError(m, labels);
+
+                    for(int k=m; k<=nextIndexSub; k++){
+                        DragLabel* lab = labels.at(k);
+                        if(!lab->getComment().isEmpty()){
+                            commentSub.append(lab->getComment()).append("<br>");
+                        }
+                        words.append(" ").append(lab->labelText());
+                    }
+
+                    //Write to table...
+                    if(!commentSub.simplified().isEmpty()){
                         //Include a new table line with the comments...
-                        out << "<tr><td>"  << i+1
+                        out << "<tr><td> T-"  << i+1 << " | S-" << s+1
                             << "</td><td>"<< labLeft->editionEnumToString(labLeft->getErrorType())
                             << "</td><td>" << words.simplified()
-                            << "</td><td>" <<  comment << "</td></tr>" << endl;
+                            << "</td><td>" <<  commentSub << "</td></tr>" << endl;
                     }
                     words.clear();
-                    comment.clear();
-                    comment.append(labLeft->getComment());
-                }
+                    commentSub.clear();
 
-                else if(j == labels.count()-2){
-                    if(!labRight->getComment().isEmpty()){
-                        comment.append(labRight->getComment()).append("<br>");
-                    }
-                    words.append(" ").append(labRight->labelText());
-
-                    if(!comment.simplified().isEmpty()){
-                        //Include a new table line with the comments...
-                        out << "<tr><td>"  << i+1
-                            << "</td><td>"<< labRight->editionEnumToString(labRight->getErrorType())
-                            << "</td><td>" << words.simplified()
-                            << "</td><td>" <<  comment << "</td></tr>" << endl;
-                    }
+                    m=nextIndexSub;
                 }
             }
         }
     }
+}
+
+int ReportExport::getIndexForSameError(int i, QList<DragLabel*> labels)
+{
+    if(i > labels.count()-1 || i<0){
+        return -1;
+    }
+
+    DragLabel* lab = labels.at(i);
+
+    int finalIndex=i;
+
+    for(int k=i; k<labels.count(); k++)
+    {
+        DragLabel* nextLab = labels.at(k);
+        if(nextLab->getErrorType() == lab->getErrorType()){
+            finalIndex = k;
+        }
+        else{
+            return finalIndex;
+        }
+    }
+
+    return finalIndex;
+}
+
+QString ReportExport::ampersand_encode(const QString &string) {
+  QString encoded;
+  for(int i=0;i<string.size();++i) {
+    QChar ch = string.at(i);
+    if(ch.unicode() > 255)
+      encoded += QString("&#%1;").arg((int)ch.unicode());
+    else
+      encoded += ch;
+  }
+  return encoded;
 }
 
 void ReportExport::writeFooter(QString &filePath)
