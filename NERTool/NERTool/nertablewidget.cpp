@@ -173,6 +173,7 @@ void NERTableWidget::loadSubtitlesXMLData(QList<BlockTRS> *transcription, QList<
                 ////setCellWidget(line++, SUBTITLES_COLUMN_INDEX, subTable);
             }
         }
+
         //Insert the rest of the subtitles in the last transcription line
         if(j == transcription->count()-1){
 

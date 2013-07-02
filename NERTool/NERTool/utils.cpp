@@ -167,7 +167,7 @@ QString Utils::removeBlanksBeforePonctuation(QString &text)
     for(int i=0; i<cardinal; i++)
     {
         QString elem = QString(list.at(i));
-        if(containsPonctuation(elem) && i>0)
+        if(isPonctuation(elem) && i>0)
         {
             QString prev = list.at(i-1);
             QString joint = prev.append(elem);
@@ -193,6 +193,19 @@ bool Utils::containsPonctuation(QString &text)
             && !text.contains(".")
             && !text.contains("¿")
             && !text.contains("¡") )
+    {
+        return false;
+    }
+
+    return true;
+}
+
+bool Utils::isPonctuation(QString &text)
+{
+    if(text!="?" && text!="!"
+            && text!=":" && text!=","
+            && text!=";" && text!="-"
+            && text!="." && text!="¿" && text!="¡" )
     {
         return false;
     }

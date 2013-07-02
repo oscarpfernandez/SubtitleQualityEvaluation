@@ -241,7 +241,7 @@ bool XMLHandler::loadSRTTranscription(QFile *srtFile, QList<BlockTRS> *trsBlocks
         bool okIsNumber;
         int valueIndex = line.toInt(&okIsNumber);
 
-        if(line.isEmpty() && index>0 && !text.isEmpty()) {
+        if(line.isEmpty() && index>0 && !text.simplified().isEmpty() && valueIndex!=-1) {
 
             bool isTimeSRTOk = true;
             //Load TRS Block
@@ -277,18 +277,22 @@ bool XMLHandler::loadSRTTranscription(QFile *srtFile, QList<BlockTRS> *trsBlocks
         }
         else{
             //is simple text
-            text.append(line).append(" ");
+            text.append(" ").append(line).append(" ");
         }
     }
 
-    //Save last line...
-    bool isTimeSRTOk = true;
-    //Load TRS Block
-    QString timeF = startTime.simplified();
-    formatedTime = getFormatedTime(timeF, isTimeSRTOk);
-    BlockTRS btr;
-    btr.setSyncTime(formatedTime).setText(Utils::removeBlanksBeforePonctuation(text).simplified());
-    trsBlocks->append(btr);
+    //Ensure that we're not saving blanc lines...
+    if(!text.simplified().isEmpty())
+    {
+        //Save last line...
+        bool isTimeSRTOk = true;
+        //Load TRS Block
+        QString timeF = startTime.simplified();
+        formatedTime = getFormatedTime(timeF, isTimeSRTOk);
+        BlockTRS btr;
+        btr.setSyncTime(formatedTime).setText(Utils::removeBlanksBeforePonctuation(text).simplified());
+        trsBlocks->append(btr);
+    }
 
     inTextStream->flush();
 
@@ -425,7 +429,7 @@ bool XMLHandler::readSubtitleSRT(QString &srtFile, QList<BlockTRS> *trsBlocks)
 
 
 
-        if(line.isEmpty() && index>0 && !text.isEmpty()) {
+        if(line.isEmpty() && index>0 && !text.simplified().isEmpty() && valueIndex!=-1) {
 
             bool isTimeSRTOk = true;
             //Load TRS Block
@@ -463,18 +467,23 @@ bool XMLHandler::readSubtitleSRT(QString &srtFile, QList<BlockTRS> *trsBlocks)
         }
         else{
             //is simple text
-            text.append(line).append(" ");
+            text.append(" ").append(line).append(" ");
         }
     }
 
-    //Save last line...
-    bool isTimeSRTOk = true;
-    //Load TRS Block
-    QString timeF = startTime.simplified();
-    formatedTime = getFormatedTime(timeF, isTimeSRTOk);
-    BlockTRS btr;
-    btr.setSyncTime(formatedTime).setText(Utils::removeBlanksBeforePonctuation(text).simplified());
-    trsBlocks->append(btr);
+
+    //Ensure that we're not saving blanc lines...
+    if(!text.simplified().isEmpty())
+    {
+        //Save last line...
+        bool isTimeSRTOk = true;
+        //Load TRS Block
+        QString timeF = startTime.simplified();
+        formatedTime = getFormatedTime(timeF, isTimeSRTOk);
+        BlockTRS btr;
+        btr.setSyncTime(formatedTime).setText(Utils::removeBlanksBeforePonctuation(text).simplified());
+        trsBlocks->append(btr);
+    }
 
     file->close();
 

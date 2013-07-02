@@ -39,6 +39,7 @@ public:
     static QList<QString> getMachinesMACAddresses();
     static QString removeBlanksBeforePonctuation(QString &text);
     static bool containsPonctuation(QString &text);
+    static bool isPonctuation(QString &text);
     static QString getBase64ImageEncode(QString resource);
     
 };

@@ -749,9 +749,10 @@ void NERStatsViewerWidget::setupBarChartCrossModifTypes(QCustomPlot *customPlot,
 QString NERStatsViewerWidget::saveWidgetToImg(QString &filePath)
 {
 
-    const QSize imgSize(size().width(), size().height()-40);
+    const QSize imgSize(size().width(), size().height()-10);
     QImage img(imgSize, QImage::Format_RGB32);
     QPainter painter(&img);
+    refreshButton->hide();
     render(&painter);
 //    img.save(filePath);
 
@@ -759,6 +760,8 @@ QString NERStatsViewerWidget::saveWidgetToImg(QString &filePath)
     QBuffer buffer(&byteArray);
     img.save(&buffer, "PNG"); // writes the image in PNG format inside the buffer
     QString base64Encoded = QString::fromLatin1(byteArray.toBase64().data());
+
+    refreshButton->show();
 
 //    QFile sourceFile(filePath);
 //    sourceFile.open(QIODevice::ReadOnly);

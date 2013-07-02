@@ -116,7 +116,7 @@ void ReportExport::generateExportFile(QString &filePath,
     out << "<div class=\"datagrid\">" << endl;
     out << "<div id=\"maincol\"><h2><br> <b> Evaluation Comments </b>  <br><br></h2>" << "</div>" << endl;
     out << "<div class=\"datagrid\"><table class=\"fixed\">" << endl;
-    out << "<col width=\"9%\" /> <col width=\"15%\" /> <col width=\"30%\" />" << endl;
+    out << "<col width=\"12%\" /> <col width=\"15%\" /> <col width=\"30%\" />" << endl;
     out << "<thead><tr><th>Line #</th><th>Error Type</th><th>Phrase</th><th>Comment</th></tr></thead>" << endl;
     out << "<tbody>" << endl;
     ReportExport::appendTableComments(table, out);

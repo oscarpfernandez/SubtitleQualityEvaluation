@@ -82,7 +82,7 @@ void PropertiesTreeWidget::createActions()
     removeFileAction = new QAction(tr("Remove..."), this);
     connect(removeFileAction, SIGNAL(triggered()), this, SLOT(removeSubNodeSlot()));
 
-    addAssessmentAction = new QAction(tr("E dit Assessment"), this);
+    addAssessmentAction = new QAction(tr("Edit Assessment"), this);
     connect(addAssessmentAction, SIGNAL(triggered()), this, SLOT(addAssessmentSlot()));
 }
 
