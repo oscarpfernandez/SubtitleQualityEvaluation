@@ -14,6 +14,7 @@ void ReportExport::writeHeader(QString &filePath)
     QFile file(filePath);
     file.open(QIODevice::WriteOnly );
     QTextStream out(&file);
+    out.setCodec("UTF_8");
 
     out << "<!doctype html>" << endl;
     out << "<META HTTP-EQUIV=\"content-type\" CONTENT=\"text/html; charset=utf-8\">" << endl;
@@ -85,6 +86,7 @@ void ReportExport::generateExportFile(QString &filePath,
     QFile file(filePath);
     file.open(QIODevice::WriteOnly | QIODevice::Append);
     QTextStream out(&file);
+    out.setCodec("UTF_8");
 
     NERStatsData nerData = table->getNERStatsValues();
 
@@ -116,15 +118,15 @@ void ReportExport::generateExportFile(QString &filePath,
     out << "<div class=\"datagrid\">" << endl;
     out << "<div id=\"maincol\"><h2><br> <b> Evaluation Comments </b>  <br><br></h2>" << "</div>" << endl;
     out << "<div class=\"datagrid\"><table class=\"fixed\">" << endl;
-    out << "<col width=\"12%\" /> <col width=\"15%\" /> <col width=\"30%\" />" << endl;
-    out << "<thead><tr><th>Line #</th><th>Error Type</th><th>Phrase</th><th>Comment</th></tr></thead>" << endl;
+    out << "<col width=\"12%\" /> <col width=\"10%\" /> <col width=\"10%\" /><col width=\"10%\" /> <col width=\"30%\" />" << endl;
+    out << "<thead><tr><th>Line #</th><th>Error Type</th><th>Error Weight</th><th>Error Class</th><th>Phrase</th><th>Comment</th></tr></thead>" << endl;
     out << "<tbody>" << endl;
     ReportExport::appendTableComments(table, out);
     out << "</tbody>" << endl;
     out << "</table></div></div><br>" << endl;
 
 
-    out << "<p align=\"left\"><img src=\"" << "data:image/jpg;base64," << imgResName << "\" ></p>" << endl;
+    out << "<p align=\"center\"><img src=\"" << "data:image/jpg;base64," << imgResName << "\" ></p>" << endl;
     out << "</div>"  << endl;
 
     out << "</div><br>"  << endl;
@@ -156,6 +158,8 @@ void ReportExport::appendTableComments(NERTableWidget *table, QTextStream &out)
                 //Include a new table line with the comments...
                 out << "<tr><td>"  << i+1
                     << "</td><td>"<< lab->editionEnumToString(lab->getErrorType())
+                    << "</td><td>"<< lab->getErrorWeight()
+                    << "</td><td>"<< lab->modificationTypeToString(lab->getErrorClass())
                     << "</td><td>" << lab->labelText()
                     << "</td><td>" <<  lab->getComment() << "</td></tr>" << endl;
             }
@@ -183,10 +187,12 @@ void ReportExport::appendTableComments(NERTableWidget *table, QTextStream &out)
                 }
 
                 //Write to table...
-                if(!comment.simplified().isEmpty()){
+                if(!comment.simplified().isEmpty() || labLeft->getErrorType()!=CorrectEdition){
                     //Include a new table line with the comments...
                     out << "<tr><td> T-"  << i+1
                         << "</td><td>"<< labLeft->editionEnumToString(labLeft->getErrorType())
+                        << "</td><td>"<< labLeft->getErrorWeight()
+                        << "</td><td>"<< labLeft->modificationTypeToString(labLeft->getErrorClass())
                         << "</td><td>" << words.simplified()
                         << "</td><td>" <<  comment << "</td></tr>" << endl;
                 }
@@ -222,10 +228,12 @@ void ReportExport::appendTableComments(NERTableWidget *table, QTextStream &out)
             if(labels.count()==1){
                 DragLabel* lab = labels.first();
 
-                if(!lab->getComment().simplified().isEmpty()){
+                if(!lab->getComment().simplified().isEmpty() || lab->getErrorType()!=CorrectEdition){
                     //Include a new table line with the comments...
                     out << "<tr><td>"  << i+1
-                        << "</td><td bgcolor=#FF00FF>"<< lab->editionEnumToString(lab->getErrorType())
+                        << "</td><td>"<< lab->editionEnumToString(lab->getErrorType())
+                        << "</td><td>"<< lab->getErrorWeight()
+                        << "</td><td>"<< lab->modificationTypeToString(lab->getErrorClass())
                         << "</td><td>" << lab->labelText()
                         << "</td><td>" <<  lab->getComment() << "</td></tr>" << endl;
                 }
@@ -253,10 +261,12 @@ void ReportExport::appendTableComments(NERTableWidget *table, QTextStream &out)
                     }
 
                     //Write to table...
-                    if(!commentSub.simplified().isEmpty()){
+                    if(!commentSub.simplified().isEmpty() || labLeft->getErrorType()!=CorrectEdition){
                         //Include a new table line with the comments...
                         out << "<tr><td> T-"  << i+1 << " | S-" << s+1
                             << "</td><td>"<< labLeft->editionEnumToString(labLeft->getErrorType())
+                            << "</td><td>"<< labLeft->getErrorWeight()
+                            << "</td><td>"<< labLeft->modificationTypeToString(labLeft->getErrorClass())
                             << "</td><td>" << words.simplified()
                             << "</td><td>" <<  commentSub << "</td></tr>" << endl;
                     }
@@ -294,17 +304,17 @@ int ReportExport::getIndexForSameError(int i, QList<DragLabel*> labels)
     return finalIndex;
 }
 
-QString ReportExport::ampersand_encode(const QString &string) {
-  QString encoded;
-  for(int i=0;i<string.size();++i) {
-    QChar ch = string.at(i);
-    if(ch.unicode() > 255)
-      encoded += QString("&#%1;").arg((int)ch.unicode());
-    else
-      encoded += ch;
-  }
-  return encoded;
-}
+//QString ReportExport::ampersand_encode(const QString &string) {
+//  QString encoded;
+//  for(int i=0;i<string.size();++i) {
+//    QChar ch = string.at(i);
+//    if(ch.unicode() > 255)
+//      encoded += QString("&#%1;").arg((int)ch.unicode());
+//    else
+//      encoded += ch;
+//  }
+//  return encoded;
+//}
 
 void ReportExport::writeFooter(QString &filePath)
 {
@@ -316,6 +326,7 @@ void ReportExport::writeFooter(QString &filePath)
     QFile file(filePath);
     file.open(QIODevice::WriteOnly | QIODevice::Append);
     QTextStream out(&file);
+    out.setCodec("UTF_8");
 
     out << "</div>"  << endl;
     out << "</div>"  << endl;

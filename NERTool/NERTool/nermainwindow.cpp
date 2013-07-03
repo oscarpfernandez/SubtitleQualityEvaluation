@@ -393,8 +393,8 @@ void NERMainWindow::showDockableWidgets(bool enable)
  ******************************************************************************/
 void NERMainWindow::newProjectSlot()
 {
-    enableActions(true);
     closeProjectSlot();
+    enableActions(true);
     isProjectloaded = true;
     showDockableWidgets(true);
 }
@@ -462,7 +462,9 @@ void NERMainWindow::saveAsProjectSlot()
  ******************************************************************************/
 void NERMainWindow::openProjectSlot()
 {
-    if(isProjectloaded){
+    int numOfWindows = mainMdiArea->subWindowList().count();
+
+    if(isProjectloaded && numOfWindows>0){
         QMessageBox box;
         box.setInformativeText("Close current project?\nAll unsaved modifications will be lost!");
         box.setText("Close project                                           ");
@@ -488,6 +490,49 @@ void NERMainWindow::openProjectSlot()
         return; //Nothing to do.
     }
 
+    openProjectSetup(xmlFileName);
+
+//    ENGINE_DEBUG << "open project";
+
+//    *projectSaveFilePath = xmlFileName;
+
+//    xmlHandler->readProjectExportXML(xmlFileName,
+//                                     speakerList,
+//                                     transcriptionList,
+//                                     nerTablesList,
+//                                     mediaMngWidget,
+//                                     propertiesTreeWidget);
+
+
+//     for(int i=0; i<nerTablesList->count(); i++){
+//        ENGINE_DEBUG << "Table insertion";
+
+//        NERTableWidget* table = nerTablesList->at(i);
+
+////        //Reapply differences in the translation side, since this is not saved
+////        //because it can be recalculated on-the-fly.
+////        QString transText = table->getAllTranslationText();
+////        QString subsText = table->getAllSubtableText();
+////        QList<Diff> diffList = table->computeDifferences(transText, subsText);
+////        QList<Diff> noInsertionsList = table->removeInsertions(diffList);
+////        table->applyEditionPropertiesToTranscription(noInsertionsList);
+
+//        addTableInMdiArea(table, table->getTableName());
+//    }
+
+
+//    loadSubtsXmlFile->setEnabled(true);
+//    loadSRTXmlFile->setEnabled(true);
+//    recomputeTableDifferences->setEnabled(true);
+
+//    enableActions(true);
+//    showDockableWidgets(true);
+//    isProjectloaded=true;
+
+}
+
+void NERMainWindow::openProjectSetup(QString &xmlFileName)
+{
     ENGINE_DEBUG << "open project";
 
     *projectSaveFilePath = xmlFileName;
@@ -524,7 +569,6 @@ void NERMainWindow::openProjectSlot()
     enableActions(true);
     showDockableWidgets(true);
     isProjectloaded=true;
-
 }
 
 /*******************************************************************************
@@ -536,16 +580,20 @@ void NERMainWindow::closeProjectSlot()
         return;
     }
 
-    QMessageBox box;
-    box.setInformativeText("Are you sure ?\nAll unsaved modifications will be lost!");
-    box.setText("Close project                                           ");
-    box.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    box.setIcon(QMessageBox::Question);
-    box.setStandardButtons(QMessageBox::No | QMessageBox::Yes);
-    int result = box.exec();
-    switch (result){
-    case QMessageBox::No :
-        return;
+    int numOfWindows = mainMdiArea->subWindowList().count();
+
+    if(numOfWindows>0){
+        QMessageBox box;
+        box.setInformativeText("Are you sure ?\nAll unsaved modifications will be lost!");
+        box.setText("Close project                                           ");
+        box.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+        box.setIcon(QMessageBox::Question);
+        box.setStandardButtons(QMessageBox::No | QMessageBox::Yes);
+        int result = box.exec();
+        switch (result){
+        case QMessageBox::No :
+            return;
+        }
     }
 
     speakerList->clear();

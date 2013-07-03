@@ -131,6 +131,10 @@ void DragWidget::createActions()
     m_delectionAction = new QAction(DELETION_STR, this);
     m_delectionAction->setCheckable(true);
 
+    m_commentAction = new QAction(EDITION_COMMENT_STR, this);
+    m_commentAction->setCheckable(true);
+    m_commentAction->setChecked(false);
+
 }
 
 void DragWidget::uncheckAllErrorActions()
@@ -294,6 +298,8 @@ void DragWidget::setActionsEnabledForLabel(DragLabel* label)
     m_delectionAction->setChecked(modType==Deletion);
     m_substitutionAction->setChecked(modType==Substitution);
 
+    m_commentAction->setChecked(!label->getComment().isEmpty());
+
 }
 
 /*******************************************************************************
@@ -328,7 +334,7 @@ bool DragWidget::eventFilter(QObject *obj, QEvent *event)
         myMenu.addAction(m_editionErrorAction);
         myMenu.addAction(m_recognitionErrorAction);
         myMenu.addSeparator();
-        myMenu.addAction(EDITION_COMMENT_STR);
+        myMenu.addAction(m_commentAction);
         myMenu.addSeparator();
         //QMenu subMenu("Weight Error");
         myMenu.addAction(m_Error0Action);

@@ -66,6 +66,7 @@ private:
     QAction* m_insertionAction;
     QAction* m_substitutionAction;
     QAction* m_delectionAction;
+    QAction* m_commentAction;
 
     QList<DragLabel*> *m_labelsPointerList;
     bool m_isModifiable;

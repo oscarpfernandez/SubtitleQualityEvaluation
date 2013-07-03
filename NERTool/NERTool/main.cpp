@@ -12,7 +12,7 @@ int main(int argc, char *argv[])
     app.setApplicationName("NER Tool");
     app.setApplicationVersion("1.0");
     app.setWindowIcon(QIcon(":/resources/pics/icon.png"));
-    NERMainWindow mainWin;
+    NERMainWindow mainWin;    
 
     QSplashScreen *splash = new QSplashScreen;
     splash->setPixmap(QPixmap(":/resources/pics/splash3.png"));
@@ -31,6 +31,15 @@ int main(int argc, char *argv[])
     if(error != LIC_NO_ERROR){
         mainWin.displayErrorMessage(error);
         return 0;//No licence, no show!
+    }
+
+    QStringList arguments = QCoreApplication::arguments();
+    QString fileToLoad;
+    if(arguments.length()>1){
+        fileToLoad = arguments.at(1);
+        ENGINE_DEBUG << "XML File parameter = " << fileToLoad;
+        mainWin.openProjectSetup(fileToLoad);
+
     }
 
     return app.exec();

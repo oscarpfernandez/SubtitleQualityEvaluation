@@ -42,6 +42,7 @@ public:
     EditionTypeEnum editionEnumFromOrdinal(int value);
     QString editionEnumToString(EditionTypeEnum value);
     ModificationType modificationTypeFromOrdinal(int value);
+    QString modificationTypeToString(ModificationType value);
     void markAsDeleted();
 
 private:

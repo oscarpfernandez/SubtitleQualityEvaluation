@@ -259,6 +259,21 @@ ModificationType DragLabel::modificationTypeFromOrdinal(int value)
     }
 }
 
-
+QString DragLabel::modificationTypeToString(ModificationType value)
+{
+    switch(value)
+    {
+    case NotDefined:
+        return "Not Defined";
+    case Insertion:
+        return "Insertion";
+    case Deletion:
+        return "Deletion";
+    case Substitution:
+        return "Substitution";
+    default:
+        break;
+    }
+}
 
 
