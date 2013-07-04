@@ -11,6 +11,7 @@
 #include <qdockwidget.h>
 #include <QMap>
 #include <QDesktopWidget>
+#include <QProgressDialog>
 #include "about.h"
 #include "xmlhandler.h"
 #include "nertablewidget.h"

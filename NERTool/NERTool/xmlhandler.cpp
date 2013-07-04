@@ -207,9 +207,13 @@ bool XMLHandler::loadTranscriberXML(QFile *xmlFile,
 bool XMLHandler::loadSRTTranscription(QFile *srtFile, QList<BlockTRS> *trsBlocks)
 {
 
-    QTextStream *inTextStream = new QTextStream(srtFile);
+    QTextStream *inStream = new QTextStream(srtFile);
     //inTextStream->setAutoDetectUnicode(true);
-    inTextStream->setCodec("UTF-8");
+    inStream->setCodec("UTF-8");
+
+    QString *inputStr = new QString;
+    *inputStr = inStream->readAll();
+    QTextStream *inTextStream = new QTextStream(inputStr);
 
     int index=0;//index of the SRT
     QString line;//current read line
@@ -233,6 +237,7 @@ bool XMLHandler::loadSRTTranscription(QFile *srtFile, QList<BlockTRS> *trsBlocks
 
     inTextStream->seek(0);
 
+
     while(!inTextStream->atEnd()){
         //read line from the stream
         line = inTextStream->readLine();
@@ -241,7 +246,7 @@ bool XMLHandler::loadSRTTranscription(QFile *srtFile, QList<BlockTRS> *trsBlocks
         bool okIsNumber;
         int valueIndex = line.toInt(&okIsNumber);
 
-        if(line.isEmpty() && index>0 && !text.simplified().isEmpty() && valueIndex!=-1) {
+        if(line.isEmpty() && index>0 && !text.isEmpty() && valueIndex!=-1) {
 
             bool isTimeSRTOk = true;
             //Load TRS Block
@@ -254,8 +259,11 @@ bool XMLHandler::loadSRTTranscription(QFile *srtFile, QList<BlockTRS> *trsBlocks
 
             BlockTRS btr;
             btr.setSyncTime(formatedTime).setText(Utils::removeBlanksBeforePonctuation(text).simplified());
+            //btr.setSyncTime(formatedTime).setText(text);
 
-            trsBlocks->append(btr);
+            if(!text.simplified().isEmpty()){
+                trsBlocks->append(btr);
+            }
 
             //set start and stop time.
             //clear the text to read a new subtitle line.
@@ -277,7 +285,9 @@ bool XMLHandler::loadSRTTranscription(QFile *srtFile, QList<BlockTRS> *trsBlocks
         }
         else{
             //is simple text
-            text.append(" ").append(line).append(" ");
+            if(!line.isEmpty()){
+                text.append(" ").append(line).append(" ");
+            }
         }
     }
 
@@ -297,6 +307,7 @@ bool XMLHandler::loadSRTTranscription(QFile *srtFile, QList<BlockTRS> *trsBlocks
     inTextStream->flush();
 
     delete(inTextStream);
+    delete(inputStr);
 
     return true;
 }
@@ -388,8 +399,8 @@ bool XMLHandler::loadSubtitleXML(QFile *xmlFile, QList<BlockTRS> *trsBlocks)
 bool XMLHandler::readSubtitleSRT(QString &srtFile, QList<BlockTRS> *trsBlocks)
 {
     QFile *file = new QFile(srtFile);
-    QTextStream *inTextStream = new QTextStream(file);
-    inTextStream->setCodec("UTF-8");
+    QTextStream *inStream = new QTextStream(file);
+    inStream->setCodec("UTF-8");
     //inTextStream->setAutoDetectUnicode(true);
 
     int index=0;//index of the SRT
@@ -403,6 +414,10 @@ bool XMLHandler::readSubtitleSRT(QString &srtFile, QList<BlockTRS> *trsBlocks)
     {
         return false;
     }
+
+    QString *inputStr = new QString;
+    *inputStr = inStream->readAll();
+    QTextStream *inTextStream = new QTextStream(inputStr);
 
     //Check if the file is a SRT...
     QString line1 = inTextStream->readLine();
@@ -429,7 +444,7 @@ bool XMLHandler::readSubtitleSRT(QString &srtFile, QList<BlockTRS> *trsBlocks)
 
 
 
-        if(line.isEmpty() && index>0 && !text.simplified().isEmpty() && valueIndex!=-1) {
+        if(line.isEmpty() && index>0 && !text.isEmpty() && valueIndex!=-1) {
 
             bool isTimeSRTOk = true;
             //Load TRS Block
@@ -443,8 +458,12 @@ bool XMLHandler::readSubtitleSRT(QString &srtFile, QList<BlockTRS> *trsBlocks)
             BlockTRS btr;
 
             btr.setSyncTime(formatedTime).setText(Utils::removeBlanksBeforePonctuation(text).simplified());
+            //btr.setSyncTime(formatedTime).setText(text);
 
-            trsBlocks->append(btr);
+            if(!text.simplified().isEmpty()){
+                trsBlocks->append(btr);
+                QApplication::processEvents();
+            }
 
             //set start and stop time.
             //clear the text to read a new subtitle line.
@@ -467,7 +486,9 @@ bool XMLHandler::readSubtitleSRT(QString &srtFile, QList<BlockTRS> *trsBlocks)
         }
         else{
             //is simple text
-            text.append(" ").append(line).append(" ");
+            if(!line.isEmpty()){
+                text.append(" ").append(line).append(" ");
+            }
         }
     }
 
@@ -481,7 +502,9 @@ bool XMLHandler::readSubtitleSRT(QString &srtFile, QList<BlockTRS> *trsBlocks)
         QString timeF = startTime.simplified();
         formatedTime = getFormatedTime(timeF, isTimeSRTOk);
         BlockTRS btr;
-        btr.setSyncTime(formatedTime).setText(Utils::removeBlanksBeforePonctuation(text).simplified());
+        //btr.setSyncTime(formatedTime).setText(Utils::removeBlanksBeforePonctuation(text).simplified());
+        btr.setSyncTime(formatedTime).setText(text);
+
         trsBlocks->append(btr);
     }
 
@@ -776,6 +799,8 @@ bool XMLHandler::readProjectExportXML(QString &xmlFileName,
 
     while(!xmlReader->atEnd() && !xmlReader->hasError())
     {
+        QCoreApplication::processEvents();
+
         /* Read next element.*/
         xmlReader->readNext();
 

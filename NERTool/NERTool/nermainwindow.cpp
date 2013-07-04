@@ -490,44 +490,21 @@ void NERMainWindow::openProjectSlot()
         return; //Nothing to do.
     }
 
+    QApplication::processEvents();
+
+    QMessageBox box;
+    box.setWindowTitle("Importing NER Contents.                            ");
+    QString detail;
+    detail.append("The data is being loaded....")
+            .append("\n\nDepending on the size of the data\nthis can take several minutes.\n\nPlease wait...");
+    box.setInformativeText(detail);
+    box.setWindowFlags(box.windowFlags() & ~Qt::WindowCloseButtonHint);
+    box.setStandardButtons(QMessageBox::NoButton);
+    box.show();
+
     openProjectSetup(xmlFileName);
 
-//    ENGINE_DEBUG << "open project";
-
-//    *projectSaveFilePath = xmlFileName;
-
-//    xmlHandler->readProjectExportXML(xmlFileName,
-//                                     speakerList,
-//                                     transcriptionList,
-//                                     nerTablesList,
-//                                     mediaMngWidget,
-//                                     propertiesTreeWidget);
-
-
-//     for(int i=0; i<nerTablesList->count(); i++){
-//        ENGINE_DEBUG << "Table insertion";
-
-//        NERTableWidget* table = nerTablesList->at(i);
-
-////        //Reapply differences in the translation side, since this is not saved
-////        //because it can be recalculated on-the-fly.
-////        QString transText = table->getAllTranslationText();
-////        QString subsText = table->getAllSubtableText();
-////        QList<Diff> diffList = table->computeDifferences(transText, subsText);
-////        QList<Diff> noInsertionsList = table->removeInsertions(diffList);
-////        table->applyEditionPropertiesToTranscription(noInsertionsList);
-
-//        addTableInMdiArea(table, table->getTableName());
-//    }
-
-
-//    loadSubtsXmlFile->setEnabled(true);
-//    loadSRTXmlFile->setEnabled(true);
-//    recomputeTableDifferences->setEnabled(true);
-
-//    enableActions(true);
-//    showDockableWidgets(true);
-//    isProjectloaded=true;
+    box.close();
 
 }
 
@@ -614,6 +591,7 @@ void NERMainWindow::closeProjectSlot()
     //Remove tree child nodes...
     propertiesTreeWidget->clearAllTreeData();
     propertiesTreeWidget->getTreeSubWindowsMap()->clear();
+    qApp->processEvents();
 
     isTranscriptionLoaded = false;
     isSubtitlesLoaded = false;
@@ -954,6 +932,36 @@ void NERMainWindow::loadSRTSubtitlesFileSlot()
         return; //Nothing to do...
     }
 
+//    QMessageBox boxLoading;
+//    boxLoading.setWindowTitle("Content Loading and Comparison                                        ");
+//    QString detail;
+//    detail.append("The contents are being loaded...")
+//            .append("\n\nDepending on the size of the subtitles files\nthis can take several minutes\n\nPlease wait...");
+//    boxLoading.setInformativeText(detail);
+//    boxLoading.setModal(true);
+//    boxLoading.setWindowFlags(boxLoading.windowFlags() & ~Qt::WindowCloseButtonHint);
+//    boxLoading.setIcon(QMessageBox::Information);
+//    boxLoading.setStandardButtons(0);
+//    boxLoading.exec();
+
+//    QProgressDialog *progressBar = new QProgressDialog;
+//    progressBar->setWindowModality(Qt::WindowModal);
+//    progressBar->setRange( 0, 0 );
+//    progressBar->show();
+
+    QApplication::processEvents();
+
+    QMessageBox box;
+    box.setWindowTitle("Loading contents                                   ");
+    QString detail;
+    detail.append("The contents are being loaded....")
+            .append("\n\nDepending on the size of the data\nthis can take several minutes.\n\nPlease wait...");
+    box.setInformativeText(detail);
+    box.setWindowFlags(box.windowFlags() & ~Qt::WindowCloseButtonHint);
+    box.setStandardButtons(QMessageBox::NoButton);
+    box.show();
+
+    QApplication::processEvents();
 
     //Multiple file loading...
     for(int i=0; i<fileNames.count(); i++){
@@ -1010,6 +1018,7 @@ void NERMainWindow::loadSRTSubtitlesFileSlot()
         recomputeTableDifferences->setEnabled(true);
         isSubtitlesLoaded = true;
 
+        box.close();
 
         delete trsList;
         trsList = NULL;
