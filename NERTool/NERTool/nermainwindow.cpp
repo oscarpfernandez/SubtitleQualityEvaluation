@@ -45,6 +45,7 @@ void NERMainWindow::closeEvent(QCloseEvent *event)
     box.setText("Close Application                                      ");
     box.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     box.setIcon(QMessageBox::Question);
+    box.setModal(true);
     box.setStandardButtons(QMessageBox::No | QMessageBox::Yes);
     int result = box.exec();
     switch (result){
@@ -143,7 +144,7 @@ void NERMainWindow::createActions()
 	closeAppAction = new QAction(tr("&Exit"), this);
     closeAppAction->setShortcut(QKeySequence::Quit);
 	closeAppAction->setIcon(QIcon(":/resources/pics/closeApp.png"));
-	closeAppAction->setStatusTip("About this application");
+    closeAppAction->setStatusTip("Exit Application");
     connect(closeAppAction, SIGNAL(triggered()),
             this, SLOT(closeApplicationSlot()));
 

@@ -290,6 +290,9 @@ public:
 
 inline NullDebug nullDebug() { return NullDebug(); }
 
+
+#define QT_NO_DEBUG_OUTPUT //Comment this to enable debug information...
+
 #define DEBUG_ENABLED //Comment this to disable debug information...
 
 #ifdef DEBUG_ENABLED
