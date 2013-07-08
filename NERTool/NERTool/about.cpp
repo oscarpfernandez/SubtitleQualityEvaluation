@@ -67,7 +67,7 @@ void About::createElements()
     textToShow.append("</p>");
     textToShow.append("<p>Copyright 2013 - All rights reserved.</p>");
     textToShow.append("</p>");
-    textToShow.append("<p>Universidad Autònoma de Barcelona</p></DIV>");
+    textToShow.append("<p>Universitat Aut&ograve;noma de Barcelona</p></DIV>");
 
     textEdit = new QTextEdit(this);
     textEdit->setHtml(textToShow);

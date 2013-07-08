@@ -248,12 +248,11 @@ int NERTableWidget::insertNewTableEntry(QString &speaker, QString &timeStamp, QS
 
     //Insert the chopped text block with the widget...
     DragWidget *wordBox = new DragWidget(this, text, TRANSCRIPTION_COLUMN_WIDTH, true);
-    setRowHeight(line, wordBox->getBlockSize().height());
+    setRowHeight(line, /*wordBox->getBlockSize().height()*/50);
     setColumnWidth(2,wordBox->getBlockSize().width());
     setCellWidget(line, TRANSCRIPTION_COLUMN_INDEX, wordBox);
 
     return line;
-
 }
 
 int NERTableWidget::insertNewTableEntry(QString &speaker, QString &timeStamp)
@@ -578,7 +577,7 @@ void NERTableWidget::getNumSubsWordsChars(int &numWords, int &numChars)
 
 int NERTableWidget::getTotalSubsTimeInSeconds()
 {
-
+    return 0;
 }
 
 qlonglong NERTableWidget::getTimeInMilis(QString time)
